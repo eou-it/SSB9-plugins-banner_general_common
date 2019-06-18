@@ -5,7 +5,7 @@ package net.hedtech.banner.general.overall
 
 import groovy.sql.Sql
 import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
+import grails.gorm.transactions.Transactional
 
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 class SqlProcessCompositeService {

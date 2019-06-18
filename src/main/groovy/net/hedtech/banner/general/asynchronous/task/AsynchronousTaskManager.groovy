@@ -4,10 +4,10 @@
 package net.hedtech.banner.general.asynchronous.task
 
 import javax.annotation.security.DenyAll;
-
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.exceptions.ApplicationException;
 import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+
 
 /**
  * A manager of Jobs that should be executed asynchronously.  This manager performs
