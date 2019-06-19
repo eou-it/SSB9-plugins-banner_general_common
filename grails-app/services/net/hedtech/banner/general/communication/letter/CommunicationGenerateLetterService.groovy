@@ -26,6 +26,7 @@ class CommunicationGenerateLetterService {
     def sessionFactory
     def asynchronousBannerAuthenticationSpoofer
     def testTemplate = false
+    def communicationGurmailTrackingService
 
     /**
      * Sends a letter message (single) based on the contents of letter message passed.
@@ -88,37 +89,16 @@ class CommunicationGenerateLetterService {
 
         item = communicationLetterItemService.create( item )
 
-        try {
-            //get the letter code for the reference id
-            // insert into gurmail table
-            if (Holders?.config.communication.bannerMailTrackingEnabled) {
-                mailService.create(CommunicationCommonUtility.newBannerMailObject(recipientData, message.dateSent, retrieveLetterCode(recipientData.getReferenceId()), item.id))
-            }
-        } catch (Exception e) {
-            log.debug("Could not insert into gurmail: ${e.getMessage()}")
+        if(Holders?.config.communication.bacsEnabled || Holders?.config.communication.bannerMailTrackingEnabled) {
+            communicationGurmailTrackingService.trackGURMAIL(recipientData, item, message)
         }
+
         log.debug( "recorded letter item sent with item id = ${item.id}." )
         if (testTemplate)
             return item.id
     }
 
-    private LetterProcessLetter retrieveLetterCode (refId) {
-        Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
-        def letterid = ''
-        LetterProcessLetter letter
-        try {
-            sql.eachRow("""SELECT gcrlmap_letr_id letterID  FROM gcrlmap WHERE gcrlmap_reference_id = ?""", [refId]) { row ->
-                letterid = row.letterID
-            }
-        } catch (Exception le) {
-            log.debug("Could not retrieve letter code for the reference id: ${le.getMessage()}")
-        } finally {
-            if (letterid != null) {
-                letter = LetterProcessLetter.get(letterid)
-            }
-        }
-        return letter
-    }
+
 
     private boolean isEmpty(String s) {
         return (s == null) || s.trim().length() == 0

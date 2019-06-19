@@ -155,6 +155,9 @@ public abstract class CommunicationTemplate implements Serializable {
     @Enumerated(value = EnumType.STRING)
     CommunicationChannel communicationChannel
 
+    @Column(name = "GCBTMPL_TYPE")
+    String type
+
     /**
      * Indicates if the template was created through the seeded data set and should not be deleted or modified in any way.
      */
@@ -178,6 +181,7 @@ public abstract class CommunicationTemplate implements Serializable {
         communicationChannel(nullable: false)
         systemIndicator(nullable:false)
         communicationCode(nullable: true, maxSize: 15)
+        type(nullable:true)
     }
 
     CommunicationTemplate( CommunicationChannel communicationChannel ) {

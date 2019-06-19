@@ -4,14 +4,18 @@
 package net.hedtech.banner.general.communication.mobile
 
 import grails.gorm.transactions.Transactional
+import grails.util.Holders
+import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.job.CommunicationMessageGenerator
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.system.LetterProcessLetter
 
 /**
  * Provides a service for submitting a mobile notification.
@@ -26,7 +30,7 @@ class CommunicationSendMobileNotificationService {
     def asynchronousBannerAuthenticationSpoofer
     def testOverride
     def communicationInteractionCompositeService
-
+    def communicationGurmailTrackingService
 
     /**
      * Sends a mobile notification message (single) based on the contents of mobile notification message passed.
@@ -173,6 +177,11 @@ class CommunicationSendMobileNotificationService {
         item.serverResponse = serverResponse
 
         item = communicationMobileNotificationItemService.create( item )
+
+        if(Holders?.config.communication.bacsEnabled || Holders?.config.communication.bannerMailTrackingEnabled) {
+            communicationGurmailTrackingService.trackGURMAIL(recipientData, item, message)
+        }
+
         log.debug( "recorded mobile notification item sent with item id = ${item.id}." )
     }
 

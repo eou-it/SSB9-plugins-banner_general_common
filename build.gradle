@@ -112,16 +112,6 @@ bootRun {
 }
 
 
-//
-//task concurrentTest(type:Test) {
-//    description = 'Runs the concurrent tests.'
-//    group = 'verification'
-//    testClassesDirs = sourceSets.concurrentTest.output.classesDirs
-//    classpath = sourceSets.concurrentTest.runtimeClasspath
-//    outputs.upToDateWhen { false }
-//    shouldRunAfter integrationTest
-//}
-
 // enable if you wish to package this plugin as a standalone application
 bootRepackage.enabled = false
 grailsPublish {

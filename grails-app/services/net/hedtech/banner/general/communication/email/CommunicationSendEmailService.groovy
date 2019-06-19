@@ -5,12 +5,17 @@ package net.hedtech.banner.general.communication.email
 
 import com.sun.mail.smtp.SMTPAddressFailedException
 import grails.gorm.transactions.Transactional
+import grails.util.Holders
+import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.template.CommunicationTemplate
+import net.hedtech.banner.general.system.LetterProcessLetter
 import sun.security.provider.certpath.SunCertPathBuilderException
 
 import javax.mail.AuthenticationFailedException
@@ -26,6 +31,7 @@ class CommunicationSendEmailService {
     def communicationMailboxAccountService
     def sessionFactory
     def asynchronousBannerAuthenticationSpoofer
+    def communicationGurmailTrackingService
 
     /**
      * Sends an email message (single) based on the contents of EmailMessage passed.
@@ -242,9 +248,12 @@ class CommunicationSendEmailService {
         emailItem.setCreatedBy(recipientData.ownerId)
         emailItem.setSentDate(emailMessage.dateSent)
         emailItem = communicationEmailItemService.create(emailItem)
+
+        if(Holders?.config.communication.bacsEnabled || Holders?.config.communication.bannerMailTrackingEnabled) {
+            communicationGurmailTrackingService.trackGURMAIL(recipientData, emailItem, emailMessage)
+        }
+
         log.debug("recorded email item sent with item id = ${emailItem.id}.")
     }
-
-
 
 }
