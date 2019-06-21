@@ -19,6 +19,9 @@ import org.quartz.SimpleTrigger
 import org.quartz.Trigger
 import org.quartz.TriggerBuilder
 import org.quartz.TriggerKey
+import org.quartz.TriggerUtils
+import org.quartz.impl.calendar.BaseCalendar
+import org.quartz.spi.OperableTrigger
 import org.springframework.transaction.annotation.Propagation
 
 import static org.quartz.DateBuilder.evenMinuteDate
@@ -33,8 +36,8 @@ import grails.gorm.transactions.Transactional
  * the quartzScheduler bean being configured in the host grails app.
  */
 @Slf4j
+@Transactional
 class SchedulerJobService {
-  //  private Log log = LogFactory.getLog( this.getClass() )
     StdScheduler quartzScheduler
 
     /**
@@ -87,17 +90,23 @@ class SchedulerJobService {
                         .inTimeZone(TimeZone.getTimeZone(jobContext.cronScheduleTimezone))
                         .withMisfireHandlingInstructionFireAndProceed())
 
-            if (jobContext.endDate != null) {
-                builder.endTime = jobContext.endDate
-            }
             CronTrigger trigger = builder.build()
 
+            Date endDate
+            if (jobContext.endDate != null) {
+                endDate = jobContext.endDate
+            } else if(jobContext.noOfOccurrences) {
+                endDate = TriggerUtils.computeEndTimeToAllowParticularNumberOfFirings((OperableTrigger) trigger,
+                        new BaseCalendar(Calendar.getInstance().getTimeZone()), jobContext.noOfOccurrences.intValue())
+            }
+
+            trigger = trigger.getTriggerBuilder().endAt(endDate).build()
             scheduleJob(jobDetail, trigger)
         } catch(CommunicationApplicationException e) {
-            log.error(e)
+            log.error(e.getMessage())
             throw e
         } catch(Throwable t) {
-            log.error(t)
+            log.error(t.getMessage())
             throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
         }
         return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
@@ -143,17 +152,23 @@ class SchedulerJobService {
                     .inTimeZone(TimeZone.getTimeZone(jobContext.cronScheduleTimezone))
                     .withMisfireHandlingInstructionFireAndProceed())
 
+            CronTrigger newTrigger = builder.build()
+
+            Date endDate
             if (jobContext.endDate != null) {
-                builder.endTime = jobContext.endDate
+                endDate = jobContext.endDate
+            } else if(jobContext.noOfOccurrences) {
+                endDate = TriggerUtils.computeEndTimeToAllowParticularNumberOfFirings((OperableTrigger) newTrigger,
+                        new BaseCalendar(Calendar.getInstance().getTimeZone()), jobContext.noOfOccurrences.intValue())
             }
 
-            Trigger newTrigger = builder.build()
+            newTrigger = newTrigger.getTriggerBuilder().endAt(endDate).build()
             rescheduleJob(oldTrigger.getKey(), newTrigger)
         } catch(CommunicationApplicationException e) {
-            log.error(e)
+            log.error(e.getMessage())
             throw e
         } catch(Throwable t) {
-            log.error(t)
+            log.error(t.getMessage())
             throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
         }
     }
@@ -216,14 +231,14 @@ class SchedulerJobService {
         try {
             return quartzScheduler.scheduleJob(jobDetail, trigger)
         } catch (NoClassDefFoundError e) {
-            log.error( e )
+            log.error( e.getMessage() )
             if ("weblogic/jdbc/vendor/oracle/OracleThinBlob".equals( e.message ) && isConfiguredForWeblogic()) {
                 throw CommunicationExceptionFactory.createApplicationException( SchedulerJobService.class, "weblogicOracleDriverNotFound" )
             } else {
                 throw e
             }
         } catch(SchedulerException e) {
-            log.error(e)
+            log.error(e.getMessage())
             throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, e, CommunicationErrorCode.SCHEDULER_ERROR.name())
         }
     }
@@ -232,14 +247,14 @@ class SchedulerJobService {
         try {
             return quartzScheduler.rescheduleJob(triggerKey, newTrigger)
         } catch (NoClassDefFoundError e) {
-            log.error( e )
+            log.error( e.getMessage() )
             if ("weblogic/jdbc/vendor/oracle/OracleThinBlob".equals( e.message ) && isConfiguredForWeblogic()) {
                 throw CommunicationExceptionFactory.createApplicationException( SchedulerJobService.class, "weblogicOracleDriverNotFound" )
             } else {
                 throw e
             }
         } catch(SchedulerException e) {
-            log.error(e)
+            log.error(e.getMessage())
             throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, e, CommunicationErrorCode.SCHEDULER_ERROR.name())
         }
     }
@@ -274,6 +289,7 @@ class SchedulerJobService {
         jobDetail.getJobDataMap().put( "scheduledStartDate", jobContext.scheduledStartDate)
         jobDetail.getJobDataMap().put( "cronSchedule", jobContext.cronSchedule)
         jobDetail.getJobDataMap().put( "endDate", jobContext.endDate)
+        jobDetail.getJobDataMap().put( "noOfOccurrences", jobContext.noOfOccurrences)
         assignParameters( jobDetail, jobContext.parameters )
         return jobDetail
     }

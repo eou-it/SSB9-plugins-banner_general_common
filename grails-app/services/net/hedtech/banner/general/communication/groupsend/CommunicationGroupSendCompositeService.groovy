@@ -453,12 +453,12 @@ class CommunicationGroupSendCompositeService {
                 if(!organization.isAvailable) {
                     String message = organization.isAvailable?:"Inactive organization selected for job"
                     log.error(message)
-                    groupSend.markError( CommunicationErrorCode.UNKNOWN_ERROR, message )
+                    groupSend.markError( CommunicationErrorCode.INACTIVE_ORGANIZATION, message )
                     groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
                 } else if(!template.isActive()) {
                     String message = template.isActive()?:"Inactive template selected for job"
                     log.error(message)
-                    groupSend.markError( CommunicationErrorCode.UNKNOWN_ERROR, message )
+                    groupSend.markError( CommunicationErrorCode.INACTIVE_TEMPLATE, message )
                     groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
                 } else {
                     groupSend = generateGroupSendItemsImpl(groupSend)

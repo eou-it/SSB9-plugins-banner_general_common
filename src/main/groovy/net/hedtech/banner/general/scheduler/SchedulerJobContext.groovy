@@ -20,6 +20,7 @@ class SchedulerJobContext implements Serializable {
     private Date endDate
     private String cronSchedule
     private String cronScheduleTimezone
+    private Long noOfOccurrences
 
     public SchedulerJobContext( String jobId ) {
         this.jobId = jobId
@@ -90,6 +91,15 @@ class SchedulerJobContext implements Serializable {
 
     public String getCronScheduleTimezone() {
         return cronScheduleTimezone
+    }
+
+    public SchedulerJobContext setNoOfOccurrences(Long noOfOccurrences) {
+        this.noOfOccurrences = noOfOccurrences
+        return this
+    }
+
+    Long getNoOfOccurrences() {
+        return noOfOccurrences
     }
 
     public SchedulerJobContext setJobHandle( String service, String method ) {

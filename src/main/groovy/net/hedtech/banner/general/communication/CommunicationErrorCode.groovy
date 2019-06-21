@@ -40,6 +40,8 @@ enum CommunicationErrorCode implements Serializable {
     SERVER_PROPERTIES_NOT_FOUND,
     TEMPLATE_ERROR_UNKNOWN,
     FIELD_REQUIRED,
+    INACTIVE_ORGANIZATION,
+    INACTIVE_TEMPLATE,
 
     /** Mobile Notification error codes **/
     EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL,

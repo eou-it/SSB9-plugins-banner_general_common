@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.groupsend
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
@@ -107,6 +108,16 @@ class CommunicationGroupSendListView implements Serializable {
     @Column(name = "recalc_on_send")
     boolean recalculateOnSend
 
+    /**
+     * Error Code: The error code for the error scenario that failed
+     */
+    @Column(name = "error_code")
+    @Enumerated(EnumType.STRING)
+    CommunicationErrorCode errorCode
+
+    @Lob
+    @Column(name = "error_text")
+    String errorText
 
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 
