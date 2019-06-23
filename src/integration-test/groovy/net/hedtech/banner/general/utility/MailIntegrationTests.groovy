@@ -357,7 +357,7 @@ class MailIntegrationTests extends BaseIntegrationTestCase {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("update GURMAIL set GURMAIL_VERSION = 999 where GURMAIL_SURROGATE_ID = ?", [mail.id])
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+          //TODO grails3  sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         //Update the entity
