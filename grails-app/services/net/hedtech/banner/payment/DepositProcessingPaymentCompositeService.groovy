@@ -40,11 +40,10 @@ class DepositProcessingPaymentCompositeService extends CommonProcessPaymentCompo
                   sysi_code_in      : 'S',
                   retrieve_addr_in  : 'N',
                   cc_use_addr_in    : 'Y',
-                  use_main_term     : 'N',
                   pidm_in           : springSecurityService.getAuthentication().user.pidm,
                   term_code_in      : param.term,
                   amount_in         : param.amount,
-                  failure_url_in    : 'bwskwtrr.P_Failure_Page?transaction_id=',
+                  failure_url_in    : 'bwskpayg.P_DispFailure?transaction_id=',
                   success_url_in    : 'bwskpayg.P_DispSuccess?transaction_id=',
                   update_function_in: 'bwskpayg.f_update_payments']
     }
@@ -133,7 +132,7 @@ class DepositProcessingPaymentCompositeService extends CommonProcessPaymentCompo
             verifyTotalAmount = returnMessage
         } )
         if (verifyTotalAmount != param.amount) {
-            throw new ApplicationException( DepositProcessingPaymentCompositeService.class, 'Transaction total does not match.' )
+            throw new ApplicationException( DepositProcessingPaymentCompositeService.class,  MessageUtility.message( 'banner.payment.message.error.totals.not.match') )
         }
     }
 }

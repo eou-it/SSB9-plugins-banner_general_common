@@ -177,7 +177,7 @@ class CommunicationPopulationQueryExecutionService {
         }
         finally {
             try {
-                if (sql) sql.close()
+             //TODO grails3   if (sql) sql.close()
             }
             catch (SQLException af) {
                 // ignore

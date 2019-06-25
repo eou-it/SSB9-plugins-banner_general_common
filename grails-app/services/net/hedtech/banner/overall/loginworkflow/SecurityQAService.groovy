@@ -213,7 +213,7 @@ class SecurityQAService {
     private void createDropDownQuestionAndAnswer(pidm, questionId, question_num, answer) {
         def pinQuestion = PinQuestion.fetchQuestionOnId(questionId)
         GeneralForStoringResponsesAndPinQuestion generalForStoringResponsesAndPinQuestion = new GeneralForStoringResponsesAndPinQuestion(
-                pidm: pidm,
+                pidm: Integer.valueOf(pidm),
                 number: question_num,
                 questionDescription: null,
                 answerDescription: answer,
@@ -229,7 +229,7 @@ class SecurityQAService {
             throw new ApplicationException("", "securityQA.unique.question")
         }
         GeneralForStoringResponsesAndPinQuestion generalForStoringResponsesAndPinQuestion = new GeneralForStoringResponsesAndPinQuestion(
-                pidm: pidm,
+                pidm: Integer.valueOf(pidm),
                 number: question_num,
                 questionDescription: question,
                 answerDescription: answer,
