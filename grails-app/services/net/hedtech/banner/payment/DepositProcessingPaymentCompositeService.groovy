@@ -70,7 +70,7 @@ class DepositProcessingPaymentCompositeService extends CommonProcessPaymentCompo
         if (param.amount <= 0) {
             throw new ApplicationException( DepositProcessingPaymentCompositeService.class, MessageUtility.message( 'banner.payment.message.error.invalid.format.amount' ) )
         }
-        validatesTotals( param )
+        // validatesTotals( param )
     }
 
     /**
@@ -92,11 +92,12 @@ class DepositProcessingPaymentCompositeService extends CommonProcessPaymentCompo
      */
     def processCollectionOfTransactionRecords( param ) {
         def transId
-        Sql sql
+        Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
         try {
+            sql = new Sql( sessionFactory.getCurrentSession().connection() )
             transId = getTransactionId()
             def user = springSecurityService.getAuthentication().user
-            def userId = user.userName
+            def userId = user.username
             def dataOrigin = 'Banner'
             sql.eachRow( "select * FROM tbrpytr WHERE tbrpytr_pay_trans_id = ?", [user.pidm * -1] ) {i ->
                 sql.call( """{call tb_pay_trans.p_create(
@@ -132,7 +133,7 @@ class DepositProcessingPaymentCompositeService extends CommonProcessPaymentCompo
             verifyTotalAmount = returnMessage
         } )
         if (verifyTotalAmount != param.amount) {
-            throw new ApplicationException( DepositProcessingPaymentCompositeService.class,  MessageUtility.message( 'banner.payment.message.error.totals.not.match') )
+            throw new ApplicationException( DepositProcessingPaymentCompositeService.class, MessageUtility.message( 'banner.payment.message.error.totals.not.match' ) )
         }
     }
 }
