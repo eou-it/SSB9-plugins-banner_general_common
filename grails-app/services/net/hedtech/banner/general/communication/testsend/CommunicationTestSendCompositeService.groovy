@@ -117,6 +117,9 @@ class CommunicationTestSendCompositeService  {
             if (t instanceof ApplicationException)
                 throw t
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.testSendTemplate.email"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
+        } finally {
+            recipientData = CommunicationRecipientData.fetchByReferenceId(recipientData.referenceId)
+            communicationRecipientDataService.delete(recipientData)
         }
     }
 
@@ -142,6 +145,9 @@ class CommunicationTestSendCompositeService  {
             if (t instanceof ApplicationException)
                 throw t
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.testSendTemplate.mobile"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
+        } finally {
+            recipientData = CommunicationRecipientData.fetchByReferenceId(recipientData.referenceId)
+            communicationRecipientDataService.delete(recipientData)
         }
     }
 
@@ -159,6 +165,9 @@ class CommunicationTestSendCompositeService  {
             if (t instanceof ApplicationException)
                 throw t
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.testSendTemplate.letter"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
+        } finally {
+            recipientData = CommunicationRecipientData.fetchByReferenceId(recipientData.referenceId)
+            communicationRecipientDataService.delete(recipientData)
         }
     }
 
