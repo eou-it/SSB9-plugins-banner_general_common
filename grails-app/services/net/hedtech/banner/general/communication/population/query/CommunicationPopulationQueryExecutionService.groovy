@@ -84,13 +84,13 @@ class CommunicationPopulationQueryExecutionService {
             }
             return result
         }
-        catch (SQLException ae) {
-            log.error "SqlException in gckextr.p_create_popsel ${ae}"
-            log.error ae.stackTrace
-            throw ae
+        catch (SQLException sqle) {
+            log.error "SqlException in gckextr.p_execute_pop_queryVersion ${sqle}"
+            log.error sqle.stackTrace
+            throw sqle
         }
         catch (Exception ae) {
-            log.error "Exception in gckextr.p_create_popsel ${ae}"
+            log.error "Exception in gckextr.p_execute_pop_queryVersion ${ae}"
             log.error ae.stackTrace
             throw ae
         }
@@ -165,13 +165,13 @@ class CommunicationPopulationQueryExecutionService {
             }
             return result
         }
-        catch (SQLException ae) {
-            log.debug "SqlException in gckextr.p_create_popsel ${ae}"
-            log.debug ae.stackTrace
-            throw ae
+        catch (SQLException sqle) {
+            log.debug "SqlException in gckextr.p_execute_pop_query ${sqle}"
+            log.debug sqle.stackTrace
+            throw sqle
         }
         catch (Exception ae) {
-            log.debug "Exception in gckextr.p_create_popsel ${ae}"
+            log.debug "Exception in gckextr.p_execute_pop_query ${ae}"
             log.debug ae.stackTrace
             throw ae
         }
