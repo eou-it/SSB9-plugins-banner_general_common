@@ -379,43 +379,58 @@ class CommunicationGroupSendCompositeService {
 
         if(!groupSend.currentExecutionState.isTerminal()) {
             try {
-                boolean shouldUpdateGroupSend = false
-                CommunicationPopulationVersion populationVersion
-                if (!groupSend.populationVersionId) {
-                    populationVersion = assignPopulationVersion( groupSend )
-                    shouldUpdateGroupSend = true
+                //Check if organization is active
+                CommunicationOrganization organization = CommunicationOrganization.get(groupSend.organizationId)
+                CommunicationTemplate template = CommunicationTemplate.get(groupSend.templateId)
+                if(!organization.isAvailable) {
+                    String message = organization.isAvailable?:"Inactive organization selected for job"
+                    log.error(message)
+                    groupSend.markError( CommunicationErrorCode.INACTIVE_ORGANIZATION, message )
+                    groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
+                } else if(!template.isActive()) {
+                    String message = template.isActive()?:"Inactive template selected for job"
+                    log.error(message)
+                    groupSend.markError( CommunicationErrorCode.INACTIVE_TEMPLATE, message )
+                    groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
                 } else {
-                    populationVersion = CommunicationPopulationVersion.get( groupSend.populationVersionId )
-                }
-
-                if (!populationVersion) {
-                    throw new ApplicationException( "populationVersion", new NotFoundException() )
-                }
-
-                boolean hasQuery = (CommunicationPopulationVersionQueryAssociation.countByPopulationVersion( populationVersion ) > 0)
-                boolean populationCalculationSuccessful = true
-                CommunicationPopulationCalculation calculation
-                if (!groupSend.populationCalculationId && hasQuery) {
-                    groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
-                    groupSend.cumulativeExecutionState = CommunicationGroupSendExecutionState.Calculating
-
-                    calculation = communicationPopulationCompositeService.calculatePopulationVersionForGroupSend( populationVersion )
-                    groupSend.populationCalculationId = calculation.id
-                    if(calculation.errorCode || calculation.errorText) {
-                        populationCalculationSuccessful = false
-                        groupSend.markError(calculation.errorCode, calculation.errorText)
+                    boolean shouldUpdateGroupSend = false
+                    CommunicationPopulationVersion populationVersion
+                    if (!groupSend.populationVersionId) {
+                        populationVersion = assignPopulationVersion(groupSend)
+                        shouldUpdateGroupSend = true
+                    } else {
+                        populationVersion = CommunicationPopulationVersion.get(groupSend.populationVersionId)
                     }
-                    shouldUpdateGroupSend = true
-                }
-                if (shouldUpdateGroupSend) {
-                    groupSend = (CommunicationGroupSend) communicationGroupSendService.update( groupSend )
-                }
 
-                boolean inculdeListExists = populationVersion.includeList
-                if(populationCalculationSuccessful || inculdeListExists) {
-                    boolean calculationHasProfiles = calculation?.calculatedCount > 0;
-                    if(calculationHasProfiles || inculdeListExists) {
-                        groupSend = generateGroupSendItemsImpl(groupSend)
+                    if (!populationVersion) {
+                        throw new ApplicationException("populationVersion", new NotFoundException())
+                    }
+
+                    boolean hasQuery = (CommunicationPopulationVersionQueryAssociation.countByPopulationVersion(populationVersion) > 0)
+                    boolean populationCalculationSuccessful = true
+                    CommunicationPopulationCalculation calculation
+                    if (!groupSend.populationCalculationId && hasQuery) {
+                        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
+                        groupSend.cumulativeExecutionState = CommunicationGroupSendExecutionState.Calculating
+
+                        calculation = communicationPopulationCompositeService.calculatePopulationVersionForGroupSend(populationVersion)
+                        groupSend.populationCalculationId = calculation.id
+                        if (calculation.errorCode || calculation.errorText) {
+                            populationCalculationSuccessful = false
+                            groupSend.markError(calculation.errorCode, calculation.errorText)
+                        }
+                        shouldUpdateGroupSend = true
+                    }
+                    if (shouldUpdateGroupSend) {
+                        groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
+                    }
+
+                    boolean inculdeListExists = populationVersion.includeList
+                    if (populationCalculationSuccessful || inculdeListExists) {
+                        boolean calculationHasProfiles = calculation?.calculatedCount > 0;
+                        if (calculationHasProfiles || inculdeListExists) {
+                            groupSend = generateGroupSendItemsImpl(groupSend)
+                        }
                     }
                 }
             } catch (Throwable t) {

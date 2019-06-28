@@ -100,7 +100,11 @@ class SchedulerJobService {
                         new BaseCalendar(Calendar.getInstance().getTimeZone()), jobContext.noOfOccurrences.intValue())
             }
 
-            trigger = trigger.getTriggerBuilder().endAt(endDate).build()
+            if(endDate) {
+                trigger = trigger.getTriggerBuilder().endAt(endDate).build()
+            } else {
+                trigger = trigger.getTriggerBuilder().build()
+            }
             scheduleJob(jobDetail, trigger)
         } catch(CommunicationApplicationException e) {
             log.error(e.getMessage())
@@ -162,7 +166,11 @@ class SchedulerJobService {
                         new BaseCalendar(Calendar.getInstance().getTimeZone()), jobContext.noOfOccurrences.intValue())
             }
 
-            newTrigger = newTrigger.getTriggerBuilder().endAt(endDate).build()
+            if(endDate) {
+                newTrigger = newTrigger.getTriggerBuilder().endAt(endDate).build()
+            } else {
+                newTrigger = newTrigger.getTriggerBuilder().build()
+            }
             rescheduleJob(oldTrigger.getKey(), newTrigger)
         } catch(CommunicationApplicationException e) {
             log.error(e.getMessage())
