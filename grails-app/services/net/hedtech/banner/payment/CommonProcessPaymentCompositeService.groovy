@@ -140,13 +140,9 @@ abstract class CommonProcessPaymentCompositeService {
     def getTransactionId() {
         Sql sql
         def transId
-        try {
-            sql = new Sql( sessionFactory.getCurrentSession().connection() )
-            sql.eachRow( "SELECT ban_payment_sequence.nextval FROM dual" ) {
-                transId = it.NEXTVAL
-            }
-        } finally {
-            //sql?.close()
+        sql = new Sql( sessionFactory.getCurrentSession().connection() )
+        sql.eachRow( "SELECT ban_payment_sequence.nextval FROM dual" ) {
+            transId = it.NEXTVAL
         }
         String.valueOf( transId )
     }
@@ -210,7 +206,7 @@ abstract class CommonProcessPaymentCompositeService {
         callFunction( "{? = call goksels.f_get_gormerc_count(merchant_id_in =>?, proc_code_in =>?, sysi_code_in =>?,  status_ind_in => ?)}",
                       [Sql.NUMERIC, params.sub_code_in, params.proc_code_in, params.sysi_code_in, 'Y'], {ret ->
             retCount = ret
-                      } )
+        } )
         if (retCount == 0) {
             throw new ApplicationException( CommonProcessPaymentCompositeService.class, messageMap['payment.process.goamred.record.not.found'] )
         }
@@ -227,30 +223,25 @@ abstract class CommonProcessPaymentCompositeService {
      */
     def getAddress( param, addressHierarchy, sysInd ) {
         Sql sql
-        try {
-            sql = new Sql( sessionFactory.getCurrentSession().connection() )
-            sql.eachRow( """SELECT spraddr_house_number, spraddr_street_line1, spraddr_street_line2,  spraddr_street_line3,
+        sql = new Sql( sessionFactory.getCurrentSession().connection() )
+        sql.eachRow( """SELECT spraddr_house_number, spraddr_street_line1, spraddr_street_line2,  spraddr_street_line3,
                     spraddr_street_line4,spraddr_city,
                                spraddr_stat_code, spraddr_zip, spraddr_natn_code FROM   spraddr
                         WHERE  spraddr.rowid = f_get_address_rowid(?,
                                ?,'A',SYSDATE,1,?,'')""", [param.pidm, addressHierarchy, sysInd] ) {
-                param << [house_no_fetch: it.spraddr_house_number, address1_in: it.spraddr_street_line1,
-                          address2_in   : it.spraddr_street_line2, address3_in: it.spraddr_street_line3,
-                          address4_in   : it.spraddr_street_line4, city_in: it.spraddr_city,
-                          state_in      : it.spraddr_stat_code, zip_in: it.spraddr_zip,
-                          natn_in       : it.spraddr_natn_code]
-            }
-        } finally {
-            //sql?.close()
+            param << [house_no_fetch: it.spraddr_house_number, address1_in: it.spraddr_street_line1,
+                      address2_in   : it.spraddr_street_line2, address3_in: it.spraddr_street_line3,
+                      address4_in   : it.spraddr_street_line4, city_in: it.spraddr_city,
+                      state_in      : it.spraddr_stat_code, zip_in: it.spraddr_zip,
+                      natn_in       : it.spraddr_natn_code]
         }
     }
 
 
     def getPersonDetails( param ) {
         Sql sql
-        try {
-            sql = new Sql( sessionFactory.getCurrentSession().connection() )
-            sql.eachRow( """SELECT
+        sql = new Sql( sessionFactory.getCurrentSession().connection() )
+        sql.eachRow( """SELECT
                         spriden_first_name,
                         spriden_mi,
                         spriden_last_name,
@@ -261,11 +252,8 @@ abstract class CommonProcessPaymentCompositeService {
                       WHERE spriden_pidm = ?
                             AND spriden_change_ind IS NULL
                             AND spriden_pidm = spbpers_pidm (+)""", [param.pidm] ) {
-                param << [first_name_in    : it.spriden_first_name, last_name_in: it.spriden_last_name, middle_name_in: it.spriden_mi,
-                          surname_prefix_in: it.spriden_surname_prefix, name_prefix_in: it.spbpers_name_prefix, name_suffix_in: it.spbpers_name_suffix]
-            }
-        } finally {
-            //sql?.close()
+            param << [first_name_in    : it.spriden_first_name, last_name_in: it.spriden_last_name, middle_name_in: it.spriden_mi,
+                      surname_prefix_in: it.spriden_surname_prefix, name_prefix_in: it.spbpers_name_prefix, name_suffix_in: it.spbpers_name_suffix]
         }
     }
 
@@ -294,7 +282,7 @@ abstract class CommonProcessPaymentCompositeService {
         callFunction( "{? = call GOKBSSF.F_ENCODE( str => ?)}",
                       [Sql.VARCHAR, tnxId], {ret ->
             encodedTnxId = ret
-                      } )
+        } )
         encodedTnxId
     }
 
@@ -437,12 +425,8 @@ abstract class CommonProcessPaymentCompositeService {
     def callFunction( String callFunction, params, Closure resultClosure ) {
         Sql sql
         log.debug( "callFunction :: callFunction : $callFunction :: params : $params" )
-        try {
-            sql = new Sql( sessionFactory.getCurrentSession().connection() )
-            sql.call( callFunction, params, resultClosure )
-        } finally {
-            //sql?.close()
-        }
+        sql = new Sql( sessionFactory.getCurrentSession().connection() )
+        sql.call( callFunction, params, resultClosure )
     }
 
     /**

@@ -70,7 +70,7 @@ class DepositProcessingPaymentCompositeService extends CommonProcessPaymentCompo
         if (param.amount <= 0) {
             throw new ApplicationException( DepositProcessingPaymentCompositeService.class, MessageUtility.message( 'banner.payment.message.error.invalid.format.amount' ) )
         }
-        // validatesTotals( param )
+        validatesTotals( param )
     }
 
     /**
@@ -93,14 +93,12 @@ class DepositProcessingPaymentCompositeService extends CommonProcessPaymentCompo
     def processCollectionOfTransactionRecords( param ) {
         def transId
         Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
-        try {
-            sql = new Sql( sessionFactory.getCurrentSession().connection() )
-            transId = getTransactionId()
-            def user = springSecurityService.getAuthentication().user
-            def userId = user.username
-            def dataOrigin = 'Banner'
-            sql.eachRow( "select * FROM tbrpytr WHERE tbrpytr_pay_trans_id = ?", [user.pidm * -1] ) {i ->
-                sql.call( """{call tb_pay_trans.p_create(
+        sql = new Sql( sessionFactory.getCurrentSession().connection() )
+        transId = getTransactionId()
+        def user = springSecurityService.getAuthentication().user
+        def dataOrigin = 'Banner'
+        sql.eachRow( "select * FROM tbrpytr WHERE tbrpytr_pay_trans_id = ?", [user.pidm * -1] ) {it ->
+            sql.call( """{call tb_pay_trans.p_create(
                          p_pay_trans_id => ?,
                          p_data_origin => ?,
                          p_ptyp_code    => ?,
@@ -113,12 +111,10 @@ class DepositProcessingPaymentCompositeService extends CommonProcessPaymentCompo
                          p_dep_min_amount  => ?,
                          p_rowid_out => ?
                         )
-                    }""", [transId, dataOrigin, i.tbrpytr_ptyp_code, i.tbrpytr_process, i.tbrpytr_code, i.tbrpytr_amount, i.tbrpytr_dep_release_ind, i.tbrpytr_dep_rel_date, i.tbrpytr_dep_exp_date, i.tbrpytr_dep_min_amount, Sql.VARCHAR] )
-            }
-            sql.call( """{call tb_pay_trans.p_delete_all( p_pay_trans_id => ?)}""", [transId] )
-        } finally {
-            //sql?.close()
+                    }""", [transId, dataOrigin, it.tbrpytr_ptyp_code, it.tbrpytr_process, it.tbrpytr_code, it.tbrpytr_amount,
+                           it.tbrpytr_dep_release_ind, it.tbrpytr_dep_rel_date, it.tbrpytr_dep_exp_date, it.tbrpytr_dep_min_amount, Sql.VARCHAR] )
         }
+        sql.call( """{call tb_pay_trans.p_delete_all( p_pay_trans_id => ?)}""", [transId] )
         param << [pay_trans_in: transId]
     }
 
