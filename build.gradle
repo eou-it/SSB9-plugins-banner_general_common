@@ -92,7 +92,10 @@ dependencies {
 //        excludes 'itext', 'itext-rtf'
 //    }
 //    compile 'org.xhtmlrenderer:flying-saucer-pdf:9.0.8'
-    compile 'com.lowagie:itext:2.1.7'
+    compile ('com.lowagie:itext:2.1.7'){
+        exclude group:"org.bouncycastle", module:"bcprov-jdk14"
+        exclude group:"bouncycastle", module:"bcprov-jdk14"
+    }
     compile 'org.antlr:ST4:4.0.8'
     compile "javax.mail:javax.mail-api:1.5.5"
     runtime "com.sun.mail:javax.mail:1.5.5"

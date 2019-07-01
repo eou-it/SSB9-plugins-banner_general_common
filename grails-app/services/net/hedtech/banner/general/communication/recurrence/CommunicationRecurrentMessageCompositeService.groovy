@@ -380,6 +380,13 @@ class CommunicationRecurrentMessageCompositeService {
             }
         }
 
+        if(recurrentMessage.noOfOccurrences) {
+            if(!oldRecurrentMessage.noOfOccurrences) {
+                rescheduleNeeded = true;
+            } else if(oldRecurrentMessage.noOfOccurrences != recurrentMessage.noOfOccurrences) {
+                rescheduleNeeded = true
+            }
+        }
         recurrentMessage.createdBy = oldRecurrentMessage.createdBy
         recurrentMessage.creationDateTime = oldRecurrentMessage.creationDateTime
         recurrentMessage.parameterNameValueMap = oldRecurrentMessage.parameterNameValueMap

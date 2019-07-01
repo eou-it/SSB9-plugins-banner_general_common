@@ -114,6 +114,9 @@ class CommunicationCommonUtility {
         return creatorId?.toUpperCase()
     }
 
+    def static getAssociatedOracleUserName() {
+        return SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName()
+    }
 
     public static getCommunicationUserRoleMap() {
         def map = [:]
