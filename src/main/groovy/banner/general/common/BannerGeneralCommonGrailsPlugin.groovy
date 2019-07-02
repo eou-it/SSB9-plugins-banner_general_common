@@ -26,6 +26,8 @@ class BannerGeneralCommonGrailsPlugin extends Plugin {
 This plugin is BannerGeneralCommon.
 '''
     def profiles = ['web']
+    def loadAfter = ["bannerCore"]
+    def loadBefore = ["quartz"]
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/banner-general-common"
