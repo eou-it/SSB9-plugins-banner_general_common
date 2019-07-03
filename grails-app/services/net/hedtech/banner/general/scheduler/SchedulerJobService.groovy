@@ -36,7 +36,7 @@ import grails.gorm.transactions.Transactional
  * the quartzScheduler bean being configured in the host grails app.
  */
 @Slf4j
-@Transactional
+//@Transactional
 class SchedulerJobService {
     StdScheduler quartzScheduler
 

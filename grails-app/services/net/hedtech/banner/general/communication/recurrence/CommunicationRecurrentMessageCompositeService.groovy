@@ -387,16 +387,16 @@ class CommunicationRecurrentMessageCompositeService {
                 rescheduleNeeded = true
             }
         }
-        recurrentMessage.createdBy = oldRecurrentMessage.createdBy
-        recurrentMessage.creationDateTime = oldRecurrentMessage.creationDateTime
-        recurrentMessage.parameterNameValueMap = oldRecurrentMessage.parameterNameValueMap
-        recurrentMessage.jobId = oldRecurrentMessage.jobId
-        recurrentMessage.groupId = oldRecurrentMessage.groupId
-        recurrentMessage.mepCode = oldRecurrentMessage.mepCode
-        recurrentMessage.dataOrigin = oldRecurrentMessage.dataOrigin
-        recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update( recurrentMessage )
-
         if(rescheduleNeeded) {
+            recurrentMessage.createdBy = oldRecurrentMessage.createdBy
+            recurrentMessage.creationDateTime = oldRecurrentMessage.creationDateTime
+            recurrentMessage.parameterNameValueMap = oldRecurrentMessage.parameterNameValueMap
+            recurrentMessage.jobId = oldRecurrentMessage.jobId
+            recurrentMessage.groupId = oldRecurrentMessage.groupId
+            recurrentMessage.mepCode = oldRecurrentMessage.mepCode
+            recurrentMessage.dataOrigin = oldRecurrentMessage.dataOrigin
+            recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update( recurrentMessage )
+
             String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
 
             reScheduleRecurrentMessage(recurrentMessage, bannerUser)
