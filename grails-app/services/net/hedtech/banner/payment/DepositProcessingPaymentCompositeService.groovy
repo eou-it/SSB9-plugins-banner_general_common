@@ -82,6 +82,7 @@ class DepositProcessingPaymentCompositeService extends CommonProcessPaymentCompo
         callFunction( "{ ? = call gokfunc.f_get_default_subcode(group_in =>  ?, default_label_in => ?, default_group_in => ? )}", [Sql.VARCHAR, 'WEBPAYGCCID', 'DEFAULT', defaultGroup], {returnMessage ->
             subCode = returnMessage
         } )
+        println('subCode'+ subCode)
         subCode
     }
 
@@ -114,7 +115,7 @@ class DepositProcessingPaymentCompositeService extends CommonProcessPaymentCompo
                     }""", [transId, dataOrigin, it.tbrpytr_ptyp_code, it.tbrpytr_process, it.tbrpytr_code, it.tbrpytr_amount,
                            it.tbrpytr_dep_release_ind, it.tbrpytr_dep_rel_date, it.tbrpytr_dep_exp_date, it.tbrpytr_dep_min_amount, Sql.VARCHAR] )
         }
-        sql.call( """{call tb_pay_trans.p_delete_all( p_pay_trans_id => ?)}""", [transId] )
+        sql.call( """{call tb_pay_trans.p_delete_all( p_pay_trans_id => ?)}""", [user.pidm * -1] )
         param << [pay_trans_in: transId]
     }
 
