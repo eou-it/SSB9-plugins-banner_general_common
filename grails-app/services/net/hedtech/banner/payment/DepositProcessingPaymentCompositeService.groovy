@@ -18,6 +18,8 @@ class DepositProcessingPaymentCompositeService extends CommonProcessPaymentCompo
 
     @Override
     def preValidation( param, messageMap ) {
+        def pidm = springSecurityService.getAuthentication().user.pidm
+        param.pidm = pidm
         validateInputs( param )
         param.moduleName = 'BWSKPAYG'
     }
@@ -82,7 +84,7 @@ class DepositProcessingPaymentCompositeService extends CommonProcessPaymentCompo
         callFunction( "{ ? = call gokfunc.f_get_default_subcode(group_in =>  ?, default_label_in => ?, default_group_in => ? )}", [Sql.VARCHAR, 'WEBPAYGCCID', 'DEFAULT', defaultGroup], {returnMessage ->
             subCode = returnMessage
         } )
-        println('subCode'+ subCode)
+        println( 'subCode' + subCode )
         subCode
     }
 
