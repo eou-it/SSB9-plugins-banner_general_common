@@ -152,7 +152,7 @@ abstract class CommonProcessPaymentCompositeService {
      * @param procedureParam
      */
     def checkIfReadyToGetPaymentURL( procedureParam ) {
-        if (!procedureParam.pidm_in || !procedureParam.aidm_in) {
+        if (!procedureParam.pidm_in && !procedureParam.aidm_in) {
             throw new ApplicationException( CommonProcessPaymentCompositeService.class, MessageUtility.message( 'banner.payment.message.error.pdmoraidm.not.available' ) )
         }
         if (!procedureParam.id_in) {
