@@ -49,6 +49,9 @@ import net.hedtech.banner.general.communication.recurrence.CommunicationRecurren
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.security.FormContext
 import org.grails.plugins.web.taglib.ValidationTagLib
+import org.grails.test.support.GrailsTestInterceptor
+import org.grails.test.support.GrailsTestMode
+import org.grails.test.support.GrailsTestTransactionInterceptor
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -118,6 +121,8 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     CommunicationParameterService communicationParameterService
     CommunicationEventMappingService communicationEventMappingService
 
+    GrailsTestInterceptor interceptor
+
     protected CommunicationOrganization defaultOrganization
     protected CommunicationFolder defaultFolder
     protected CommunicationEmailTemplate defaultEmailTemplate
@@ -160,6 +165,13 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         }
 
         GrailsWebMockUtil.bindMockWebRequest(webAppCtx)
+        interceptor = new GrailsTestInterceptor(this, new GrailsTestMode( autowire: true,
+                wrapInRequestEnvironment: true,
+                wrapInTransaction: true),
+                grails.util.Holders.grailsApplication.mainContext,
+                ['ConcurrentTests'] as String[] )
+
+        interceptor?.init()
 //        def webRequest = GrailsWebMockUtil.bindMockWebRequest(webAppCtx,new GrailsMockHttpServletRequest(), new GrailsMockHttpServletResponse())
 
         if (controller) {
@@ -199,6 +211,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     @After
     public void tearDown() {
         FormContext.clear()
+        interceptor?.destroy()
     }
 
     public void assertTrueWithRetry( Closure booleanClosure, Object arguments, long maxAttempts, int pauseBetweenAttemptsInSeconds = 5 ) {
@@ -255,7 +268,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         try {
             sessionFactory.currentSession.with { session ->
                 sql = new Sql(session.connection())
-//                def tx = session.beginTransaction()
+                def tx = session.beginTransaction()
 
                 System.err.println(session);
                 sql.executeUpdate("Delete from GCRQRTZ_SIMPLE_TRIGGERS")

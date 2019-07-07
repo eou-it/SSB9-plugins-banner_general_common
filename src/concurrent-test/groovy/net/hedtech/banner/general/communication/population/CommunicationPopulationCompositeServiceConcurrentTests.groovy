@@ -8,7 +8,6 @@ import grails.gorm.transactions.Transactional
 import grails.testing.mixin.integration.Integration
 import grails.util.GrailsWebMockUtil
 import grails.web.servlet.context.GrailsWebApplicationContext
-import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExtractStatement
@@ -32,7 +31,7 @@ import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
 @Integration
-//@Rollback
+@Rollback
 class CommunicationPopulationCompositeServiceConcurrentTests extends CommunicationBaseConcurrentTestCase {
     def selfServiceBannerAuthenticationProvider
     def quartzScheduler
@@ -74,13 +73,13 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
 
         deleteAll()
         super.tearDown()
-        sessionFactory.currentSession?.close()
+//        sessionFactory.currentSession?.close()
         logout()
     }
 
     public void setUpData() {
         deleteAll()
-//        setUpDefaultOrganization()
+        setUpDefaultOrganization()
         setUpDefaultFolder()
     }
 
@@ -96,6 +95,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
 
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        populationQuery.refresh()
         assertFalse( populationQuery.changesPending )
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testAllSpridenPopulationFromQuery" )
