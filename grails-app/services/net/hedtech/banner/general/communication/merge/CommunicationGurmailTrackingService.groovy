@@ -10,10 +10,14 @@ import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.item.CommunicationItem
+import net.hedtech.banner.general.communication.item.CommunicationItemGurmailCodeAssociation
+import net.hedtech.banner.general.communication.item.CommunicationItemGurmailCodeAssociationService
 import net.hedtech.banner.general.communication.template.CommunicationMessage
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.system.LetterProcessLetter
 import net.hedtech.banner.service.ServiceBase
+
+import java.sql.SQLException
 
 /**
  * Manages insert/update into GURMAIL for bacs and/or mil tracking enabled communications.
@@ -23,22 +27,38 @@ import net.hedtech.banner.service.ServiceBase
 class CommunicationGurmailTrackingService extends ServiceBase {
 
     def mailService
+    def communicationItemGurmailCodeAssociationService
 
     public trackGURMAIL(CommunicationRecipientData recipientData, CommunicationItem item, CommunicationMessage message) {
         try {
+            String actionIndicator
+            String errorCode
+            String errorText
             //get the letter code for the reference id
             CommunicationTemplate template = CommunicationTemplate.fetchByIdAndMepCode(recipientData.templateId, recipientData.mepCode)
             if(Holders?.config.communication.bacsEnabled && template?.type?.equalsIgnoreCase('B')) {
                 //update gurmail as the template is a BACS template
-                 doGurmailAndBacsUpdate(recipientData, item, retrieveLetterCode(recipientData.getReferenceId()))
+                try {
+                    actionIndicator = template.type
+                    doGurmailAndBacsUpdate(recipientData, item, retrieveLetterCode(recipientData.getReferenceId()))
+                } catch(Exception e) {
+                    errorCode = 'UNKNOWN_ERROR'
+                    errorText = e.getMessage()
+                }
             } else {
                 // insert into gurmail table
                 if (Holders?.config.communication.bannerMailTrackingEnabled) {
+                    actionIndicator = 'I'
                     mailService.create(CommunicationCommonUtility.newBannerMailObject(recipientData, message.dateSent, retrieveLetterCode(recipientData.getReferenceId()), item.id))
                 }
             }
+            CommunicationItemGurmailCodeAssociation lmap = CommunicationItemGurmailCodeAssociation.findByReferenceId(recipientData.referenceId)
+            lmap.gurmailAction = actionIndicator
+            lmap.errorCode = errorCode
+            lmap.errorText = errorText
+            lmap = communicationItemGurmailCodeAssociationService.update(lmap)
         } catch (Exception e) {
-            log.debug("Could not insert into gurmail: ${e.getMessage()}")
+            log.debug("Could not insert/update into gurmail: ${e.getMessage()}")
         }
     }
 

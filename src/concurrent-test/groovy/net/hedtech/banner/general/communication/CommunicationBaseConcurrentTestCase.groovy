@@ -71,8 +71,8 @@ import static org.junit.Assert.*
  */
 class CommunicationBaseConcurrentTestCase extends Assert {
 
-    def transactional = false         // this turns off 'Grails' test framework management of transactions
-    def useTransactions = true        // and this enables our own management of transactions, which is what most tests will want
+//    def transactional = false         // this turns off 'Grails' test framework management of transactions
+//    def useTransactions = true        // and this enables our own management of transactions, which is what most tests will want
 //    def exposeTransactionAwareSessionFactory = false
 
     def formContext = null              // This may be set within the subclass, prior to calling super.setUp(). If it isn't,

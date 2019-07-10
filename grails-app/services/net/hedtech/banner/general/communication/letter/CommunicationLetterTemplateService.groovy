@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.letter
 
 import grails.gorm.transactions.Transactional
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
@@ -26,17 +27,21 @@ class CommunicationLetterTemplateService extends CommunicationTemplateService {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterTemplate.class, "contentRequiredToPublish" )
         }
 
-        List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(letterTemplate)
-        if (fieldNameList) {
-            fieldNameList.each { String fieldName ->
-                CommunicationField field = CommunicationField.fetchByName( fieldName )
-                if (!field) {
-                    throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
-                }
-                if (field.status == CommunicationFieldStatus.DEVELOPMENT) {
-                    throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
+        try {
+            List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(letterTemplate)
+            if (fieldNameList) {
+                fieldNameList.each { String fieldName ->
+                    CommunicationField field = CommunicationField.fetchByName( fieldName )
+                    if (!field) {
+                        throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
+                    }
+                    if (field.status == CommunicationFieldStatus.DEVELOPMENT) {
+                        throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
+                    }
                 }
             }
+        } catch(Exception e) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationTemplateService.class, "parseSyntaxError" )
         }
     }
 
