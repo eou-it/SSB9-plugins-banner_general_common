@@ -16,6 +16,7 @@ import org.apache.commons.mail.HtmlEmail
 
 import javax.mail.AuthenticationFailedException
 import javax.mail.MessagingException
+import javax.mail.SendFailedException
 import javax.mail.internet.InternetAddress
 
 /**
@@ -99,11 +100,11 @@ class CommunicationSendEmailMethod {
             String replyToList = email.getReplyToAddresses().toListString()
             if(e.getCause() instanceof AuthenticationFailedException) {
                  throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, new RuntimeException("communication.error.message.certification.authenticationFailedUserPass"), CommunicationErrorCode.EMAIL_SERVER_AUTHENTICATION_FAILED.name())
-            }
-            else if(e.getCause() instanceof MessagingException) {
+            } else if(e.getCause() instanceof SendFailedException) {
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, new RuntimeException("communication.error.message.invalidEmailGeneral"), CommunicationErrorCode.INVALID_EMAIL_ADDRESS.name())
+            }  else if(e.getCause() instanceof MessagingException) {
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, new RuntimeException("communication.error.message.server.failed"), CommunicationErrorCode.EMAIL_SERVER_CONNECTION_FAILED.name())
-            }
-            else
+            } else
             {
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, e, CommunicationErrorCode.UNKNOWN_ERROR.name())
             }

@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.email
 
 import grails.gorm.transactions.Transactional
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
@@ -25,17 +26,21 @@ class CommunicationEmailTemplateService extends CommunicationTemplateService {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationEmailTemplate.class, "subjectFieldRequiredToPublish" )
         }
 
-        List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template)
-        if (fieldNameList) {
-            fieldNameList.each { String fieldName ->
-                CommunicationField field = CommunicationField.fetchByName( fieldName )
-                if (!field) {
-                    throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
-                }
-                if (field.status == CommunicationFieldStatus.DEVELOPMENT) {
-                    throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
+        try {
+            List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template)
+            if (fieldNameList) {
+                fieldNameList.each { String fieldName ->
+                    CommunicationField field = CommunicationField.fetchByName(fieldName)
+                    if (!field) {
+                        throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
+                    }
+                    if (field.status == CommunicationFieldStatus.DEVELOPMENT) {
+                        throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
+                    }
                 }
             }
+        } catch(Exception e) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationTemplateService.class, "parseSyntaxError" )
         }
     }
 
@@ -48,17 +53,21 @@ class CommunicationEmailTemplateService extends CommunicationTemplateService {
             throw CommunicationExceptionFactory.createApplicationException( this.class, new RuntimeException("communication.error.message.testTemplate.subjectFieldRequired"), CommunicationErrorCode.SUBJECT_FIELD_EMPTY.name() )
         }
 
-        List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template)
-        if (fieldNameList) {
-            fieldNameList.each { String fieldName ->
-                CommunicationField field = CommunicationField.fetchByName( fieldName )
-                if (!field) {
-                    throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
-                }
-                if (field.status == CommunicationFieldStatus.DEVELOPMENT) {
-                    throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
+        try {
+            List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template)
+            if (fieldNameList) {
+                fieldNameList.each { String fieldName ->
+                    CommunicationField field = CommunicationField.fetchByName( fieldName )
+                    if (!field) {
+                        throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
+                    }
+                    if (field.status == CommunicationFieldStatus.DEVELOPMENT) {
+                        throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
+                    }
                 }
             }
+        } catch(Exception e) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationTemplateService.class, "parseSyntaxError" )
         }
     }
 

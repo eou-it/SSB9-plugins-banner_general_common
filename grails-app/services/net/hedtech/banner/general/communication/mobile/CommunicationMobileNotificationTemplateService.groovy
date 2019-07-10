@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.mobile
 
 import grails.gorm.transactions.Transactional
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
@@ -51,17 +52,21 @@ class CommunicationMobileNotificationTemplateService extends CommunicationTempla
                 break
         }
 
-        List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables( mobileNotificationTemplate )
-        if (fieldNameList) {
-            fieldNameList.each { String fieldName ->
-                CommunicationField field = CommunicationField.fetchByName( fieldName )
-                if (!field) {
-                    throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
-                }
-                if (field.status == CommunicationFieldStatus.DEVELOPMENT) {
-                    throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
+        try {
+            List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables( mobileNotificationTemplate )
+            if (fieldNameList) {
+                fieldNameList.each { String fieldName ->
+                    CommunicationField field = CommunicationField.fetchByName( fieldName )
+                    if (!field) {
+                        throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
+                    }
+                    if (field.status == CommunicationFieldStatus.DEVELOPMENT) {
+                        throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
+                    }
                 }
             }
+        } catch(Exception e) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationTemplateService.class, "parseSyntaxError" )
         }
     }
 

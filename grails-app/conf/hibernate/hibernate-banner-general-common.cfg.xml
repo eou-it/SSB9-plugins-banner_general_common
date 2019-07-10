@@ -79,6 +79,7 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.communication.CommunicationErrorCode"/>
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationErrorItemView"/>
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationErrorItem"/>
+        <mapping class="net.hedtech.banner.general.communication.item.CommunicationItemGurmailCodeAssociation"/>
         <mapping class="net.hedtech.banner.general.communication.interaction.CommunicationInteractionType"/>
         <mapping class="net.hedtech.banner.general.communication.interaction.CommunicationManualInteraction"/>
         <mapping class="net.hedtech.banner.general.communication.interaction.CommunicationInteractionView"/>
