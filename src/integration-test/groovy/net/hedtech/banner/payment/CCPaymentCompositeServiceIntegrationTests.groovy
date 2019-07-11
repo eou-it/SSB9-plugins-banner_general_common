@@ -90,10 +90,10 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
                 assert val == 'Registration Fees'
             }
             if (key == 'payment.process.process.code.DEFAULTDESCRIPTION') {
-                assert val == 'Sungard HE University'
+                assert val == 'Ellucian University'
             }
             if (key == 'payment.process.process.code.WEBCCARGATEWAY') {
-                assert val == 'DO NOT KNOW'
+                assert val == 'Ellucian University'
             }
         }
     }
