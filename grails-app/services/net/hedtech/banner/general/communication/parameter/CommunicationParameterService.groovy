@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.parameter
 
 import grails.gorm.transactions.Transactional
+import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.service.ServiceBase
@@ -91,5 +92,20 @@ class CommunicationParameterService extends ServiceBase {
         if (!CommunicationCommonUtility.userCanUpdateDeleteContent(oldfield.lastModifiedBy)) {
             throw new ApplicationException(CommunicationParameter, "@@r1:operation.not.authorized@@")
         }
+    }
+
+    def boolean checkParameterUsedInField (parameterId) {
+        Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def count
+        try {
+            sql.eachRow("""select count(*) as totalCount from gcrflpm 
+                         where GCRFLPM_PARAMETER_ID = ?""", [parameterId]) { row ->
+                count = row.totalCount
+            }
+        } catch (Exception le) {
+            log.debug("Could not retrieve feild parameter association for parameter id: ${le.getMessage()}")
+        }
+
+        return count > 0 ? true : false
     }
 }
