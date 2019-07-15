@@ -124,7 +124,7 @@ class CommunicationRecurrentMessageCompositeService {
         return recurrentMessage
     }
 
-    private void reScheduleRecurrentMessage( CommunicationRecurrentMessage recurrentMessage, String bannerUser ) {
+    private void reScheduleRecurrentMessage( CommunicationRecurrentMessage recurrentMessage, String bannerUser, boolean recurrencesUpdated ) {
 
         Date now = new Date()
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
@@ -143,14 +143,19 @@ class CommunicationRecurrentMessageCompositeService {
             }
         }
 
+        //Just refresh the object right before setting the final number of occurences to the Qartz job, this would help jobs of lesser fire frequency to have the correct count
+        recurrentMessage.refresh()
+        Long noOfOccurrences = recurrencesUpdated && recurrentMessage.noOfOccurrences ? recurrentMessage.noOfOccurrences - recurrentMessage.totalCount : recurrentMessage.noOfOccurrences
+        Date scheduledStartDate = recurrencesUpdated? Calendar.getInstance().getTime() : recurrentMessage.startDate
+
         SchedulerJobContext jobContext = new SchedulerJobContext( recurrentMessage.jobId )
                 .setBannerUser( bannerUser )
                 .setMepCode( recurrentMessage.mepCode )
                 .setCronSchedule( recurrentMessage.cronExpression )
                 .setCronScheduleTimezone(recurrentMessage.cronTimezone)
-                .setScheduledStartDate(recurrentMessage.startDate)
+                .setScheduledStartDate(scheduledStartDate)
                 .setEndDate(recurrentMessage.endDate)
-                .setNoOfOccurrences(recurrentMessage.noOfOccurrences)
+                .setNoOfOccurrences(noOfOccurrences)
                 .setParameter( "recurrentMessageId", recurrentMessage.id )
 
         jobContext.setJobHandle( "communicationRecurrentMessageCompositeService", "generateGroupSendFired" )
@@ -341,9 +346,12 @@ class CommunicationRecurrentMessageCompositeService {
         if (log.isDebugEnabled()) log.debug( "Method updateRecurrentMessageCommunication reached." );
 
         boolean rescheduleNeeded = false;
+        boolean recurrencesUpdated = false;
+
         CommunicationRecurrentMessage oldRecurrentMessage = CommunicationRecurrentMessage.get(recurrentMessage.id)
         if(recurrentMessage.cronExpression != null && !oldRecurrentMessage.cronExpression.equalsIgnoreCase(recurrentMessage.cronExpression)) {
             rescheduleNeeded = true;
+            recurrencesUpdated = true;
         }
 
         Date now = new Date()
@@ -357,6 +365,7 @@ class CommunicationRecurrentMessageCompositeService {
             if(today.compareTo(oldScheduledDate) == 0) {
                 //no change to start date as it the scheduled date is for today
                 recurrentMessage.startDate = oldRecurrentMessage.startDate
+                recurrencesUpdated = true
             } else {
                 recurrentMessage.startDate = now
                 rescheduleNeeded = true;
@@ -399,7 +408,7 @@ class CommunicationRecurrentMessageCompositeService {
 
             String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
 
-            reScheduleRecurrentMessage(recurrentMessage, bannerUser)
+            reScheduleRecurrentMessage(recurrentMessage, bannerUser, recurrencesUpdated)
         }
 
 
