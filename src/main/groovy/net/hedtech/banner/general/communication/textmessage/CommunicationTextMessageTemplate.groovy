@@ -13,6 +13,7 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.PrimaryKeyJoinColumn
 import javax.persistence.Table
+import javax.persistence.Transient
 
 @Entity
 @Table(name = "GCBTMTL")
@@ -36,6 +37,9 @@ class CommunicationTextMessageTemplate extends CommunicationTemplate implements 
     @Column(name = "GCBTMTL_DESTINATION_LABEL", nullable = true)
     String destinationLabel
 
+    @Transient
+    Long parentVersion
+
     public CommunicationTextMessageTemplate() {
         super( CommunicationChannel.TEXT_MESSAGE )
     }
@@ -46,6 +50,10 @@ class CommunicationTextMessageTemplate extends CommunicationTemplate implements 
         message(nullable: true)
         destinationLink(nullable: true)
         destinationLabel(nullable: true)
+    }
+
+    Long getParentVersion() {
+        return super.getVersion()
     }
 
     @Override

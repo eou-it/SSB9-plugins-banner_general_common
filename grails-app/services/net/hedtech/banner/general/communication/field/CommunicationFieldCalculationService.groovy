@@ -24,6 +24,7 @@ import net.hedtech.banner.general.communication.parameter.CommunicationParameter
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.exceptions.ApplicationException
 import org.apache.commons.lang.StringUtils
+import org.springframework.orm.hibernate5.HibernateObjectRetrievalFailureException
 import org.springframework.transaction.annotation.Propagation
 import grails.gorm.transactions.Transactional
 import org.stringtemplate.v4.AttributeRenderer
@@ -111,7 +112,13 @@ class CommunicationFieldCalculationService extends ServiceBase {
         this.testTemplate = testTemplate
         Map fieldNameValueMap = [:]
         for (String fieldName :fieldNames) {
-            CommunicationField communicationField = CommunicationField.fetchByName( fieldName )
+            CommunicationField communicationField
+            try {
+                communicationField = CommunicationField.fetchByName(fieldName)
+            } catch(HibernateObjectRetrievalFailureException e) {
+            	//If a data field cannot be found due to FGAC restrictions, ignore the exception and skip.
+                log.error(e)
+            }
             if (communicationField) {
                 String value = calculateSingleFieldByPidm(communicationField, parameterNameValueMap, pidm, mepCode, escapeFieldValue)
                 CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue( value: value, renderAsHtml: communicationField.renderAsHtml )
