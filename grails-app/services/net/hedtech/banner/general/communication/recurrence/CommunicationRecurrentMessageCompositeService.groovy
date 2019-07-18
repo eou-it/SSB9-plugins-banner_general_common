@@ -194,6 +194,8 @@ class CommunicationRecurrentMessageCompositeService {
                 recurrentMessage = generateGroupSendImpl(recurrentMessage)
             } catch (Throwable t) {
                 log.error(t.getMessage())
+                //Re-read the recurrent message if the throwable is of OptimisticLockException to avoid getting into a loop
+                recurrentMessage.refresh()
                 recurrentMessage.setCurrentExecutionState(CommunicationGroupSendExecutionState.Error)
                 recurrentMessage.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
                 recurrentMessage.errorText = t.printStackTrace()
@@ -227,6 +229,8 @@ class CommunicationRecurrentMessageCompositeService {
 
             CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
 
+            //Re-read the recurrent message if the throwable is of OptimisticLockException to avoid getting into a loop
+            recurrentMessage.refresh()
             if (!recurrentMessage.currentExecutionState.isTerminalWithoutErrors()) {
                 recurrentMessage.setCurrentExecutionState(CommunicationGroupSendExecutionState.Scheduled)
             }
@@ -394,6 +398,7 @@ class CommunicationRecurrentMessageCompositeService {
                 rescheduleNeeded = true;
             } else if(oldRecurrentMessage.noOfOccurrences != recurrentMessage.noOfOccurrences) {
                 rescheduleNeeded = true
+                recurrencesUpdated = true
             }
         }
         if(rescheduleNeeded) {
