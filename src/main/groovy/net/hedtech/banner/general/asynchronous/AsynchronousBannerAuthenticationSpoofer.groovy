@@ -55,7 +55,9 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
             if (log.isDebugEnabled()) log.debug("Authenticated as ${monitorOracleUserName} for async task process monitor thread.")
         } else {
             //adding this here for grails 3 as the form context value was getting blanked out at some point
-            FormContext.set(['CMQUERYEXECUTE'])
+            if(CommunicationCommonUtility.getUserOracleUserName().equals(monitorOracleUserName)) {
+                FormContext.set(['CMQUERYEXECUTE'])
+            }
             log.debug("Already authenticated as ${SecurityContextHolder.getContext().getAuthentication().principal.toString()}.")
         }
     }
