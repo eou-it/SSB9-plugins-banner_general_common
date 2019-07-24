@@ -28,10 +28,11 @@ import org.springframework.security.core.context.SecurityContextHolder
 /**
  * Test sending email using No Security settings
  */
-@Integration
-@Rollback
+//@Integration
+//@Rollback
 class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseIntegrationTestCase {
 
+/*
     def log = LogFactory.getLog(this.class)
     def selfServiceBannerAuthenticationProvider
     CommunicationOrganization emailTestOrganization
@@ -60,7 +61,7 @@ class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseInte
     public void tearDown() {
         super.tearDown()
 
-//        if (mailServer) mailServer.stop()
+        if (mailServer) mailServer.stop()
 //        sessionFactory.currentSession?.close()
         logout()
     }
@@ -72,10 +73,11 @@ class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseInte
     }
 
     void setUpData() {
-//        setUpEmailTestOrganization()
-//        mailServer.start()
+        setUpEmailTestOrganization()
+        mailServer.start()
     }
-//    @Test
+
+    @Test
     public void testSendEmail() {
         setUpData()
         def EMAIL_SUBJECT = "Test Subject SMTP"
@@ -134,5 +136,6 @@ class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseInte
         )
         emailTestOrganization.senderMailboxAccount = cma
     }
+*/
 
 }

@@ -154,10 +154,11 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
             def notPublished = communicationEmailTemplateService.publishTemplate([id:template1.id])
         }
 
+        template1.refresh()
         template1.toList = "TOLIST"
-        def template2 = communicationEmailTemplateService.update([domainModel:newTemplate])
+        def template2 = communicationEmailTemplateService.update([domainModel:template1])
 
-        def pubtemp = communicationEmailTemplateService.publishTemplate(["id":newTemplate.id])
+        def pubtemp = communicationEmailTemplateService.publishTemplate(["id":template1.id])
         assertTrue("Should be published",pubtemp.published)
 
         // Now test findall

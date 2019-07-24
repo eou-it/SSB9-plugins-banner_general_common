@@ -35,7 +35,7 @@ class CommunicationTextMessageTemplateIntegrationTests extends BaseIntegrationTe
     }
 
     void setUpData() {
-        defaultFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave("default folder")
+        defaultFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
     }
 
     @Test

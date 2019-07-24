@@ -57,10 +57,6 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
         GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
     }
 
-    void setUpData() {
-        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolder()
-    }
-
     @Test
     void testList() {
         def expList = communicationPopulationService.list( sort: "name", order: "asc" )
@@ -227,7 +223,7 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
 
 
     private def newPopulation(String populationName) {
-        setUpData()
+        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
         def population = new CommunicationPopulation(
                 // Required fields
                 folder: testFolder,

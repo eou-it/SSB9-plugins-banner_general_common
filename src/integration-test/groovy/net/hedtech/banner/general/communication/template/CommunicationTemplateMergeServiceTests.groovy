@@ -348,7 +348,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
                 renderAsHtml: true,
                 ruleUri: null,
                 status: CommunicationFieldStatus.DEVELOPMENT,
-                statmentType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
+                statementType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
                 ruleContent: ruleContent
         )
 

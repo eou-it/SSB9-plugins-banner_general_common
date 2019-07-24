@@ -55,7 +55,7 @@ class CommunicationSendMobileNotificationService {
         try {
             track( senderOrganization, message, recipientData, notificationMethod.serverResponse )
         } catch (Throwable t) {
-            log.error( t )
+            log.error( t.message )
             throw t;
         } finally {
         }
@@ -71,14 +71,14 @@ class CommunicationSendMobileNotificationService {
         try {
             sendTestImpl(senderOrganization, recipientData, messageData)
         } catch (ApplicationException e) {
-            log.error(e)
+            log.error(e.message)
             // re-wrap unknown error with better message
             if (e.type == 'UNKNOWN_ERROR')
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.unknownMobile"), CommunicationErrorCode.UNKNOWN_ERROR_MOBILE.name())
             throw e
         } catch (Throwable e) {
             // catch any additional / unexpected exceptions
-            log.error(e)
+            log.error(e.message)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.unknownMobile"), CommunicationErrorCode.UNKNOWN_ERROR_MOBILE.name())
         }
     }
@@ -113,13 +113,13 @@ class CommunicationSendMobileNotificationService {
         try {
             notificationMethod.execute( message, senderOrganization )
         } catch (ApplicationException e) {
-            log.error(e)
+            log.error(e.message)
             if (e.type == 'UNKNOWN_ERROR')
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.unknownMobile"), CommunicationErrorCode.UNKNOWN_ERROR_MOBILE.name())
             throw e
         } catch (Throwable t) {
             // check for unexpected exceptions
-            log.error( t )
+            log.error( t.message )
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.unknownMobile"), CommunicationErrorCode.UNKNOWN_ERROR_MOBILE.name())
         }
     }
