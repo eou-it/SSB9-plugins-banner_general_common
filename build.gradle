@@ -142,7 +142,9 @@ assets {
 
 grails {
     plugins {
+        compile project(":banner-core")    
         compile project(":banner-general-person")
+        compile project(":banner-general-validation-common")
     }
 }
 
@@ -166,6 +168,7 @@ task concurrentTest (type: Test) {
     description 'Runs the concurrent tests.'
     testClassesDir = project.sourceSets.concurrentTest.output.classesDir
     classpath += project.sourceSets.concurrentTest.runtimeClasspath
+    ignoreFailures = true
 
     filter {
         includeTestsMatching "*ConcurrentTests*"
