@@ -105,7 +105,7 @@ class CommunicationTextMessageTemplateIntegrationTests extends BaseIntegrationTe
 
         assertEquals( templateCount + 1, CommunicationTextMessageTemplate.findAll().size() )
 
-        template.delete()
+        template.delete( failOnError: true, flush: true )
 
         assertEquals( templateCount, CommunicationTextMessageTemplate.findAll().size() )
     }

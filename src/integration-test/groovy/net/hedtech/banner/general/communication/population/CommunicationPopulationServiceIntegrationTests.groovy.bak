@@ -172,7 +172,7 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
         } catch (ApplicationException e) {
             assertEquals("@@r1:not.unique.message@@", e.message)
         }
-        
+
     }
 
 
