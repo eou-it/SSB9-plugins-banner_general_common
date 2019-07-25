@@ -31,7 +31,7 @@ class AipNotificationServiceIntegrationTest extends BaseIntegrationTestCase {
 
     @Before
     void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE','GUAGMNU']
         super.setUp()
 
     }
