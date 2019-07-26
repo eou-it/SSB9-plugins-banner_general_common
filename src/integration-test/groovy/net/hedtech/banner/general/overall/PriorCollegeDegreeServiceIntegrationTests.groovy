@@ -119,7 +119,7 @@ class PriorCollegeDegreeServiceIntegrationTests extends BaseIntegrationTestCase 
 
         // test the values
         priorCollegeDegree = PriorCollegeDegree.get(priorCollegeDegree.id)
-        assertEquals 1L, priorCollegeDegree?.version
+        assertEquals 2L, priorCollegeDegree?.version
         assertEquals 2, priorCollegeDegree.degreeSequenceNumber
         assertEquals 201.00, priorCollegeDegree.hoursTransferred, 0.001
         assertEquals 1001.00, priorCollegeDegree.gpaTransferred, 0.001
