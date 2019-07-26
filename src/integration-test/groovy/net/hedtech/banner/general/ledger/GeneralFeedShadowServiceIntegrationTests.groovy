@@ -3,8 +3,6 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.ledger
 
-import grails.gorm.transactions.Rollback
-import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 //import org.codehaus.groovy.grails.plugins.GrailsPluginUtils
@@ -12,8 +10,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-@Integration
-@Rollback
 class GeneralFeedShadowServiceIntegrationTests extends BaseIntegrationTestCase {
     GeneralFeedShadowService generalFeedShadowService;
 
@@ -29,7 +25,7 @@ class GeneralFeedShadowServiceIntegrationTests extends BaseIntegrationTestCase {
         super.tearDown()
     }
 
-/*    @Test
+    @Test
     public void testCreate() {
         GeneralFeedShadow generalFeedShadow = generalFeedShadowService.create(createNewGenerealFeed())
         assertNotNull(generalFeedShadow)
@@ -71,19 +67,19 @@ class GeneralFeedShadowServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     public void testFetchAllByGuidInListValidValues() {
-        runSeedData('general-ledger')
+//        runSeedData('general-ledger')
         String guid = GeneralFeedShadow.findAll().guid.unique()[0]
         assertNotNull(guid)
         assertEquals([guid], generalFeedShadowService.fetchAllByGuidInList([guid]).guid.unique())
         String guid1 = GeneralFeedShadow.findAll().guid.unique()[1]
         assertNotNull(guid1)
         assertEquals([guid, guid1].unique().sort(), generalFeedShadowService.fetchAllByGuidInList([guid, guid1]).guid.unique().sort())
-        runSeedData('general-ledger-clean')
+//        runSeedData('general-ledger-clean')
     }
 
     @Test
     public void testFetchByGuid() {
-        runSeedData('general-ledger')
+//        runSeedData('general-ledger')
         String guid = GeneralFeedShadow.findAll().guid.unique()[0]
         assertNotNull(guid)
         assertEquals([guid], generalFeedShadowService.fetchByGuid(guid).guid.unique())
@@ -120,7 +116,7 @@ class GeneralFeedShadowServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    def runSeedData(String seedTestTarget) {
+/*    def runSeedData(String seedTestTarget) {
         def clazzInputData = Thread.currentThread().contextClassLoader.loadClass("net.hedtech.banner.seeddata.InputData")
         def inputData = clazzInputData.newInstance([dataSource: dataSource])
 
