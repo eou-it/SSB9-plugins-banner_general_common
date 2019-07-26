@@ -176,18 +176,18 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         def organization = newValidForCreateOrganization()
         organization.senderMailboxAccount = newCommunicationMailBox( CommunicationMailboxAccountType.Sender )
         organization.save(failOnError: true, flush: true)
-        def organizationList = CommunicationOrganization.list()
-        assertNotNull( organizationList[0].senderMailboxAccount )
-        assertNull( organizationList[0].replyToMailboxAccount )
+        def communicationOrganization = CommunicationOrganization.findByName(i_valid_name)
+        assertNotNull( communicationOrganization.senderMailboxAccount )
+        assertNull( communicationOrganization.replyToMailboxAccount )
 
         /* Now add another */
         organization.replyToMailboxAccount = newCommunicationMailBox( CommunicationMailboxAccountType.ReplyTo )
         organization.save(failOnError: true, flush: true)
 
-        organizationList = CommunicationOrganization.list()
+        communicationOrganization = CommunicationOrganization.findByName(i_valid_name)
         assertNotNull(organization)
-        assertNotNull(organizationList[0]?.replyToMailboxAccount)
-        assertNotNull(organizationList[0]?.senderMailboxAccount)
+        assertNotNull(communicationOrganization?.replyToMailboxAccount)
+        assertNotNull(communicationOrganization?.senderMailboxAccount)
     }
 
 

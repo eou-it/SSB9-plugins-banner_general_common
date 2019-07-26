@@ -79,6 +79,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testCreate() {
 //        cleanUp()
+        def organizationList = CommunicationOrganization.list()
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
         organization.description = "description"
@@ -86,14 +87,16 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertNotNull(createdOrganization)
         assertEquals("test", createdOrganization.name)
         assertEquals("description", createdOrganization.description)
-        assertNull(createdOrganization.parent)
+        organizationList?.size >= 1 ? assertNotNull(createdOrganization.parent) : assertNull(createdOrganization.parent)
         assertFalse(createdOrganization.isAvailable)
 
         CommunicationOrganization foundOrganization = CommunicationOrganization.findByName("test")
         assertEquals(createdOrganization, foundOrganization)
 
-        CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
-        assertEquals(rootorg.id, createdOrganization.id)
+        if(organizationList?.size == 0) {
+            CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
+            assertEquals(rootorg.id, createdOrganization.id)
+        }
 
         CommunicationOrganization sameNameOrganization = new CommunicationOrganization()
         sameNameOrganization.name = "test"
@@ -111,6 +114,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testMobileSettings() {
 //        cleanUp()
+        def organizationList = CommunicationOrganization.list()
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "Root"
         organization.description = "description"
@@ -118,11 +122,13 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertNotNull(createdOrganization)
         assertEquals("Root", createdOrganization.name)
         assertEquals("description", createdOrganization.description)
-        assertNull(createdOrganization.parent)
+        organizationList?.size >= 1 ? assertNotNull(createdOrganization.parent) : assertNull(createdOrganization.parent)
         assertFalse(createdOrganization.isAvailable)
 
         CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
-        assertEquals(rootorg.id, createdOrganization.id)
+        if(organizationList?.size == 0) {
+            assertEquals(rootorg.id, createdOrganization.id)
+        }
 
         rootorg.setMobileApplicationName("BCM_GO_MOBILE");
         rootorg.setMobileEndPointUrl("BCM_GO.com")
@@ -144,6 +150,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testLargeInvalidPassword() {
 //        cleanUp()
+        def organizationList = CommunicationOrganization.list()
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "Root"
         organization.description = "description"
@@ -151,11 +158,13 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertNotNull(createdOrganization)
         assertEquals("Root", createdOrganization.name)
         assertEquals("description", createdOrganization.description)
-        assertNull(createdOrganization.parent)
+        organizationList?.size >= 1 ? assertNotNull(createdOrganization.parent) : assertNull(createdOrganization.parent)
         assertFalse(createdOrganization.isAvailable)
 
         CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
-        assertEquals(rootorg.id, createdOrganization.id)
+        if(organizationList?.size == 0) {
+            assertEquals(rootorg.id, createdOrganization.id)
+        }
 
         rootorg.setMobileApplicationName("BCM_GO_MOBILE");
         rootorg.setMobileEndPointUrl("BCM_GO.com")
@@ -174,6 +183,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testLargeValidPassword() {
 //        cleanUp()
+        def organizationList = CommunicationOrganization.list()
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "Root"
         organization.description = "description"
@@ -181,11 +191,13 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertNotNull(createdOrganization)
         assertEquals("Root", createdOrganization.name)
         assertEquals("description", createdOrganization.description)
-        assertNull(createdOrganization.parent)
+        organizationList?.size >= 1 ? assertNotNull(createdOrganization.parent) : assertNull(createdOrganization.parent)
         assertFalse(createdOrganization.isAvailable)
 
         CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
-        assertEquals(rootorg.id, createdOrganization.id)
+        if(organizationList?.size == 0) {
+            assertEquals(rootorg.id, createdOrganization.id)
+        }
 
         rootorg.setMobileApplicationName("BCM_GO_MOBILE");
         rootorg.setMobileEndPointUrl("BCM_GO.com")
@@ -202,6 +214,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testCreateMultiple() {
 //        cleanUp()
+        def organizationList = CommunicationOrganization.list()
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
         organization.description = "description"
@@ -209,20 +222,21 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertNotNull(createdOrganization)
         assertEquals("test", createdOrganization.name)
         assertEquals("description", createdOrganization.description)
-        assertNull(createdOrganization.parent)
+        organizationList?.size >= 1 ? assertNotNull(createdOrganization.parent) : assertNull(createdOrganization.parent)
 
         CommunicationOrganization foundOrganization = CommunicationOrganization.findByName("test")
         assertEquals(createdOrganization, foundOrganization)
+
+        CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
+        if(organizationList?.size == 0) {
+            assertEquals(rootorg.id, createdOrganization.id)
+        }
 
         CommunicationOrganization sameNameOrganization = new CommunicationOrganization()
         sameNameOrganization.name = "testAnother"
         sameNameOrganization.description = "another organization that shouldnt be created"
         sameNameOrganization = communicationOrganizationService.create(sameNameOrganization)
-        assertEquals(foundOrganization.id, sameNameOrganization.parent);
-
-
-        CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
-        assertEquals(rootorg.id, createdOrganization.id)
+        organizationList?.size == 0 ? assertEquals(foundOrganization.id, sameNameOrganization.parent) : assertEquals(rootorg.id, sameNameOrganization.parent);
 
         CommunicationOrganization anotherOrganization = new CommunicationOrganization()
         anotherOrganization.name = "testAnotherOne"
@@ -233,7 +247,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertNotNull(anotherCreatedOrg.parent)
 
         def orgCount = communicationOrganizationService.list()
-        assertEquals(3, orgCount.size())
+        assertEquals(organizationList.size + 3, orgCount.size())
 
 
     }

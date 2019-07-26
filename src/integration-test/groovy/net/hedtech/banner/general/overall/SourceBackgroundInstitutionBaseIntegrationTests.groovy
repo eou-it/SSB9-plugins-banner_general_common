@@ -30,7 +30,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 

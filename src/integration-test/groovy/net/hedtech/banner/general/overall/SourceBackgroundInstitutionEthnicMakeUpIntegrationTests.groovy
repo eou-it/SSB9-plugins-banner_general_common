@@ -27,7 +27,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 

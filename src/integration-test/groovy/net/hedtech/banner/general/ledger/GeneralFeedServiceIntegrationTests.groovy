@@ -3,8 +3,6 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.ledger
 
-import grails.gorm.transactions.Rollback
-import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 //import org.codehaus.groovy.grails.plugins.GrailsPluginUtils
@@ -12,8 +10,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-@Integration
-@Rollback
 class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
     GeneralFeedService generalFeedService;
 
@@ -29,7 +25,7 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
         super.tearDown()
     }
 
-/*    @Test
+    @Test
     public void testCreate() {
         GeneralFeed generalFeed = generalFeedService.create(createNewGenerealFeed())
         assertNotNull(generalFeed)
@@ -71,9 +67,9 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     public void testTransactionExistDataPresent() {
-        runSeedData('general-ledger-gurfeed')
+//        runSeedData('general-ledger-gurfeed')
         assertEquals(true, generalFeedService.transactionNumberExist(['DCITTST']))
-        runSeedData('general-ledger-gurfeed-clean')
+//        runSeedData('general-ledger-gurfeed-clean')
     }
 
     @Test
@@ -81,7 +77,7 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals(false, generalFeedService.transactionNumberExist(['DCITTST']))
     }
 
-    def runSeedData(String seedTestTarget) {
+    /*def runSeedData(String seedTestTarget) {
         def clazzInputData = Thread.currentThread().contextClassLoader.loadClass("net.hedtech.banner.seeddata.InputData")
         def inputData = clazzInputData.newInstance([dataSource: dataSource])
 
@@ -101,7 +97,7 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
             def seedDataLoader = new net.hedtech.banner.seeddata.SeedDataLoader(inputData)
             seedDataLoader.execute()
         }
-    }
+    }*/
 
     private createNewGenerealFeed(Map properties) {
         GeneralFeed generalFeed = new GeneralFeed()
@@ -140,5 +136,5 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
         }
 
         return generalFeed
-    }*/
+    }
 }

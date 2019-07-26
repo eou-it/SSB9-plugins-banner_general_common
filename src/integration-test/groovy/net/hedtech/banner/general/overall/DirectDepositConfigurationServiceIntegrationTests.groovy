@@ -25,7 +25,7 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
     
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 

@@ -76,7 +76,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
         if (oldHoldersConfig == null && Holders.config != null) {
             oldHoldersConfig = Holders.config

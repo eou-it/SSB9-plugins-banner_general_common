@@ -22,7 +22,7 @@ class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestC
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 

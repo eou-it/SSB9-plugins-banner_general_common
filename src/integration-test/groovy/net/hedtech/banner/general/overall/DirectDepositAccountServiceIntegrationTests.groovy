@@ -31,7 +31,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
     
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 

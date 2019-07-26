@@ -110,10 +110,10 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
 
     @Test
     void testCreatePopulationWithGrailsUser() {
-        def population = newPopulation("TEST" )
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('grails_user', 'u_pick_it'))
         SecurityContextHolder.getContext().setAuthentication(auth)
 
+        def population = newPopulation("TEST" )
         try {
             population = communicationPopulationService.create( [domainModel: population] )
             fail( 'expected failure' )
@@ -172,7 +172,7 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
         } catch (ApplicationException e) {
             assertEquals("@@r1:not.unique.message@@", e.message)
         }
-        
+
     }
 
 

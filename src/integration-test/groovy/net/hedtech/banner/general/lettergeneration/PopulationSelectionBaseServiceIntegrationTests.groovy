@@ -55,7 +55,7 @@ class PopulationSelectionBaseServiceIntegrationTests extends BaseIntegrationTest
 
     @Before
 	public void setUp() {
-		formContext = ['GUAGMNU']
+		formContext = ['SELFSERVICE']
 		super.setUp()
 	}
 
