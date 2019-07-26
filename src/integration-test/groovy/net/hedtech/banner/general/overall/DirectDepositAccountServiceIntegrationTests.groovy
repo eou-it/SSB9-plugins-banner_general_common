@@ -989,7 +989,8 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
                 hrIndicator: account.hrIndicator,
                 bankAccountNum: account.bankAccountNum,
                 bankRoutingInfo: [
-                        bankRoutingNum: account.bankRoutingInfo.bankRoutingNum
+                        bankRoutingNum: account.bankRoutingInfo.bankRoutingNum,
+                        bankName : account.bankRoutingInfo.bankName
                 ],
                 amount: account.amount,
                 percent: account.percent,
