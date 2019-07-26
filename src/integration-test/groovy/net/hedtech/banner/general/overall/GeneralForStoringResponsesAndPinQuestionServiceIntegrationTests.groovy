@@ -62,7 +62,7 @@ class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends Ba
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
         initializeTestDataForReferences()
     }

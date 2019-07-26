@@ -26,7 +26,7 @@ class InternationalInformationCompositeServiceIntegrationTests extends BaseInteg
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 

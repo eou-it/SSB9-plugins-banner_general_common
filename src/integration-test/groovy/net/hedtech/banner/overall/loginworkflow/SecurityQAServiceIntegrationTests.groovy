@@ -33,7 +33,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
+        formContext = ['SELFSERVICE'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
     }

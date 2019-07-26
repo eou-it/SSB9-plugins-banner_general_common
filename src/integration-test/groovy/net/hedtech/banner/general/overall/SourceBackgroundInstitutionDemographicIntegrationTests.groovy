@@ -25,7 +25,7 @@ import java.text.SimpleDateFormat
 class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegrationTestCase {
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 
