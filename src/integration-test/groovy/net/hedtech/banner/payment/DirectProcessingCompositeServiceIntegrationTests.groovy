@@ -67,10 +67,7 @@ class DirectProcessingCompositeServiceIntegrationTests extends BaseIntegrationTe
                 assert val == 'Application Fees'
             }
             if (key == 'payment.process.process.code.DEFAULTDESCRIPTION') {
-                assert val == 'Sungard HE University'
-            }
-            if (key == 'payment.process.process.code.WEBCCARGATEWAY') {
-                assert val == 'DO NOT KNOW'
+                assert val == 'Ellucian University'
             }
         }
     }
@@ -78,7 +75,8 @@ class DirectProcessingCompositeServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testGetTwgParamVendorUrlCheck() {
-        Holders.config['banner.payment.vendor.url'] = 'https://test.com'
+        Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
+        sql.executeUpdate( "update gurocfg set  GUROCFG_VALUE ='https://test.com'  where GUROCFG_NAME ='banner.payment.vendor.url' " )
         def ret = depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor.url', 'string' )
         assert ret == 'https://test.com'
     }
@@ -122,7 +120,7 @@ class DirectProcessingCompositeServiceIntegrationTests extends BaseIntegrationTe
                               id_in             : PersonUtility.getPerson( pidm )?.bannerId,
                               vendor_url_in     : vendorURL,
                               pidm_in           : pidm,
-                              vendor_in         : depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor', string ),
+                              vendor_in         : depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor', 'string' ),
                               pay_trans_in      : depositProcessingPaymentCompositeService.getTransactionId()]
         def ret = depositProcessingPaymentCompositeService.getPaymentUrl( procedureParam )
         assert ret.contains( '<UPDATE ME>TransactionId=' );
@@ -183,7 +181,7 @@ class DirectProcessingCompositeServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testGetTwgParamVendorCheck() {
         Holders.config.banner.payment.vendor = 'TOUCHNET'
-        def ret = depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor' )
+        def ret = depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor', 'string' )
         assert ret == 'TOUCHNET'
     }
 }
