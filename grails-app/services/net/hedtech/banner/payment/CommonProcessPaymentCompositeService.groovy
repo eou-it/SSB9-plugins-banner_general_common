@@ -189,6 +189,7 @@ abstract class CommonProcessPaymentCompositeService {
     /**
      * Gets application configuration for given key
      * @param name
+     * @param type
      * @return
      */
     public String getAppConfig( String name, String type ) {

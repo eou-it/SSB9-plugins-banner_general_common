@@ -6,8 +6,8 @@ package net.hedtech.banner.payment
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import grails.util.Holders
+import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.ConfigurationData
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -42,7 +42,7 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testCheckIfPreventPayment() {
-        def ret = creditCardPaymentCompositeService.checkIfPreventPayment( [:] )
+        def ret = creditCardPaymentCompositeService.checkIfPreventPayment( ['payment.process.prevent.payment': 'You either have a hold on your account or your account has been referred for collection. Please contact the Bursar\'s office for more information'] )
         assertFalse ret
     }
 
@@ -102,7 +102,7 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
     @Test
     void testGetTwgParamVendorUrlCheck() {
         Holders.config['banner.payment.vendor.url'] = 'https://test.com'
-        def ret = creditCardPaymentCompositeService.getAppConfig( 'banner.payment.vendor.url' )
+        def ret = creditCardPaymentCompositeService.getAppConfig( 'banner.payment.vendor.url', 'string' )
         assert ret == 'https://test.com'
     }
 
@@ -125,7 +125,7 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
     void testGetPaymentUrl() {
         Map messageMap = creditCardPaymentCompositeService.getPaymentInfoTexts()
         Holders.config['banner.payment.vendor.url'] = '<UPDATE ME>'
-        def vendorURL = creditCardPaymentCompositeService.getAppConfig( 'banner.payment.vendor.url' )
+        def vendorURL = creditCardPaymentCompositeService.getAppConfig( 'banner.payment.vendor.url', 'string' )
         Integer pidm = PersonUtility.getPerson( 'HOSARUSR1' ).pidm
         def procedureParam = [sub_code_in       : '0',
                               term_select_in    : 'Y',
@@ -145,7 +145,7 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
                               id_in             : PersonUtility.getPerson( pidm )?.bannerId,
                               vendor_url_in     : vendorURL,
                               pidm_in           : pidm,
-                              vendor_in         : creditCardPaymentCompositeService.getAppConfig( 'banner.payment.vendor' ),
+                              vendor_in         : creditCardPaymentCompositeService.getAppConfig( 'banner.payment.vendor', 'string' ),
                               pay_trans_in      : creditCardPaymentCompositeService.getTransactionId()]
         def ret = creditCardPaymentCompositeService.getPaymentUrl( procedureParam )
         assert ret.contains( '<UPDATE ME>TransactionId=' );
@@ -176,7 +176,7 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
         try {
             def ret = creditCardPaymentCompositeService.processPaymentCommon( param )
         } catch (ApplicationException e) {
-            assertApplicationException( e, 'Web credit card payments are not available at this time' )
+            assertApplicationException( e, "You either have a hold on your account or your account has been referred for collection. Please contact the Bursar's office for more information' instead" )
         }
     }
 
@@ -217,19 +217,16 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
     @Test
     void testGetTwgParamVendorCheck() {
         Holders.config.banner.payment.vendor = 'TOUCHNET'
-        def ret = creditCardPaymentCompositeService.getAppConfig( 'banner.payment.vendor' )
+        def ret = creditCardPaymentCompositeService.getAppConfig( 'banner.payment.vendor', 'string' )
         assert ret == 'TOUCHNET'
     }
 
 
     @Test
     void testGetPaymentConfiguration() {
-        ConfigurationData touchNetEnabled = creditCardPaymentCompositeService.getAppConfig( 'banner.pci.enabled.payment.gateway.available', 'boolean' )
-        touchNetEnabled.value = true
-        ConfigurationData paymentServiceURL = creditCardPaymentCompositeService.getAppConfig( 'banner.nonpci.payment.gateway.url', 'string' )
-        paymentServiceURL.value = 'testURL'
-        configurationDataService.update( touchNetEnabled )
-        configurationDataService.update( paymentServiceURL )
+        Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
+        sql.executeUpdate( "update gurocfg set  GUROCFG_VALUE ='true'  where GUROCFG_NAME ='banner.pci.enabled.payment.gateway.available' " )
+        sql.executeUpdate( "update gurocfg set  GUROCFG_VALUE ='testURL'  where GUROCFG_NAME ='banner.nonpci.payment.gateway.url' " )
         def config = creditCardPaymentCompositeService.getPaymentConfiguration()
         assert [pciEnabled: true,
                 nonPciURL : 'testURL'] == config
