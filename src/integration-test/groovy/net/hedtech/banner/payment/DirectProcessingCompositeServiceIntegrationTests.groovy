@@ -12,6 +12,7 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import groovy.sql.Sql
 
 /**
  * Tests for Payment Process Composite Service
