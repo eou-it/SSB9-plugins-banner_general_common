@@ -124,7 +124,7 @@ class DirectProcessingCompositeServiceIntegrationTests extends BaseIntegrationTe
                               vendor_in         : depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor', 'string' ),
                               pay_trans_in      : depositProcessingPaymentCompositeService.getTransactionId()]
         def ret = depositProcessingPaymentCompositeService.getPaymentUrl( procedureParam )
-        assert ret.contains( '<UPDATE ME>TransactionId=' );
+        assert ret.contains( 'UPDATE_ME' );
         assert ret.contains( '&TransactionAmount=200.00&TransactionDescription=DO+NOT+KNOW&MerchantID=0' );
     }
 
@@ -181,7 +181,8 @@ class DirectProcessingCompositeServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testGetTwgParamVendorCheck() {
-        Holders.config.banner.payment.vendor = 'TOUCHNET'
+        Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
+        sql.executeUpdate( "update gurocfg set  GUROCFG_VALUE ='TOUCHNET'  where GUROCFG_NAME =''banner.payment.vendor' " )
         def ret = depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor', 'string' )
         assert ret == 'TOUCHNET'
     }
