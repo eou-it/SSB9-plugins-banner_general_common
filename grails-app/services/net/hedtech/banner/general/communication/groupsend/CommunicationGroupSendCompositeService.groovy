@@ -60,7 +60,7 @@ class CommunicationGroupSendCompositeService {
      * Initiate the sending of a communication to a set of prospect recipients
      * @param request the communication to initiate
      */
-    public CommunicationGroupSend sendAsynchronousGroupCommunication( CommunicationGroupSendRequest request ) {
+    public CommunicationGroupSend sendAsynchronousGroupCommunication( CommunicationGroupSendRequest request, actualBannerUser=null, actualMepCode=null ) {
         if (log.isDebugEnabled()) log.debug( "Method sendAsynchronousGroupCommunication reached." );
         if (!request) throw new IllegalArgumentException( "request may not be null!" )
 
@@ -82,7 +82,11 @@ class CommunicationGroupSendCompositeService {
         groupSend.jobId = request.referenceId
         groupSend.recurrentMessageId = request.recurrentMessageId
         groupSend.communicationCodeId = request.communicationCodeId
-        String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
+        String bannerUser = (actualBannerUser != null)? actualBannerUser : SecurityContextHolder.context.authentication.principal.getOracleUserName()
+        groupSend.createdBy = bannerUser
+        if (actualMepCode != null) {
+            groupSend.mepCode = actualMepCode
+        }
 
         groupSend.setParameterNameValueMap( request.getParameterNameValueMap() )
         validateTemplateAndParameters( groupSend )
@@ -380,15 +384,14 @@ class CommunicationGroupSendCompositeService {
         if(!groupSend.currentExecutionState.isTerminal()) {
             try {
                 //Check if organization is active
-                CommunicationOrganization organization = CommunicationOrganization.get(groupSend.organizationId)
-                CommunicationTemplate template = CommunicationTemplate.get(groupSend.templateId)
-                if(!organization.isAvailable) {
-                    String message = organization.isAvailable?:"Inactive organization selected for job"
+                def orgTemplateValid = checkOrgTemplateValid(groupSend.organizationId, groupSend.templateId)
+                if(orgTemplateValid.orgValid != 'Y') {
+                    String message = "Inactive organization selected for job"
                     log.error(message)
                     groupSend.markError( CommunicationErrorCode.INACTIVE_ORGANIZATION, message )
                     groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
-                } else if(!template.isActive()) {
-                    String message = template.isActive()?:"Inactive template selected for job"
+                } else if(orgTemplateValid.templateValid != 'Y') {
+                    String message = "Inactive template selected for job"
                     log.error(message)
                     groupSend.markError( CommunicationErrorCode.INACTIVE_TEMPLATE, message )
                     groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
@@ -463,15 +466,14 @@ class CommunicationGroupSendCompositeService {
         if(!groupSend.currentExecutionState.isTerminal()) {
             try {
                 //Check if organization is active
-                CommunicationOrganization organization = CommunicationOrganization.get(groupSend.organizationId)
-                CommunicationTemplate template = CommunicationTemplate.get(groupSend.templateId)
-                if(!organization.isAvailable) {
-                    String message = organization.isAvailable?:"Inactive organization selected for job"
+                def orgTemplateValid = checkOrgTemplateValid(groupSend.organizationId, groupSend.templateId)
+                if(orgTemplateValid.orgValid != 'Y') {
+                    String message = "Inactive organization selected for job"
                     log.error(message)
                     groupSend.markError( CommunicationErrorCode.INACTIVE_ORGANIZATION, message )
                     groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
-                } else if(!template.isActive()) {
-                    String message = template.isActive()?:"Inactive template selected for job"
+                } else if(orgTemplateValid.templateValid != 'Y') {
+                    String message = "Inactive template selected for job"
                     log.error(message)
                     groupSend.markError( CommunicationErrorCode.INACTIVE_TEMPLATE, message )
                     groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
@@ -777,4 +779,45 @@ class CommunicationGroupSendCompositeService {
             }
         }
     }
+
+
+    private  checkOrgTemplateValid(orgId, templateId) {
+
+        def orgSqlString =
+                """
+                     SELECT gcroran_available_ind FROM gcroran
+                     WHERE gcroran_surrogate_id = ?
+                """
+        def templateSqlString =
+                """
+                    SELECT
+                      CASE
+                          WHEN gcbtmpl_publish = 'Y' AND SYSDATE between NVL(trunc(GCBTMPL_VALID_FROM),SYSDATE) and NVL(trunc(GCBTMPL_VALID_TO), SYSDATE)
+                          THEN 'Y'
+                          ELSE 'N'
+                          END AS active
+                    FROM gcbtmpl
+                    WHERE gcbtmpl_surrogate_id = ?
+                """
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def orgValid
+        def templateValid
+        try {
+            sql.eachRow(orgSqlString, [orgId]) { row ->
+                orgValid = row.gcroran_available_ind;
+            }
+            sql.eachRow(templateSqlString, [templateId]) { row ->
+                templateValid = row.active
+            }
+            return ['orgValid':orgValid, 'templateValid':templateValid]
+        }
+        catch (Exception ae) {
+            log.error("Exception when trying to check for org and template validity${ae} ")
+            println "CAUGHT EXCEPTION AT ORG CHECK: "+ae.getMessage()
+        }
+        finally {
+
+        }
+    }
+
 }

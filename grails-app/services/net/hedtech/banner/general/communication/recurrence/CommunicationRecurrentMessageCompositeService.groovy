@@ -225,9 +225,9 @@ class CommunicationRecurrentMessageCompositeService {
         def asynchronousBannerAuthenticationSpoofer = Holders.applicationContext.getBean( "asynchronousBannerAuthenticationSpoofer" )
         def originalMap = null
         try {
-            originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave(recurrentMessage.createdBy, recurrentMessage.mepCode)
+       //     originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave(recurrentMessage.createdBy, recurrentMessage.mepCode)
 
-            CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+            CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request,recurrentMessage.createdBy, recurrentMessage.mepCode)
 
             //Re-read the recurrent message if the throwable is of OptimisticLockException to avoid getting into a loop
             recurrentMessage.refresh()
@@ -242,9 +242,8 @@ class CommunicationRecurrentMessageCompositeService {
             log.error("Error occurred when creating group send from recurrent message " + t.printStackTrace())
             throw t;
         } finally {
-            if (originalMap) {
-                asynchronousBannerAuthenticationSpoofer.resetAuthAndFormContext( originalMap )
-            }
+
+
         }
         return recurrentMessage
     }
