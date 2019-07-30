@@ -416,6 +416,8 @@ class CommunicationGroupSendCompositeService {
                         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
                         groupSend.cumulativeExecutionState = CommunicationGroupSendExecutionState.Calculating
 
+                        //Add spoofer to change the user to created user instead of commmgr
+                        asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave(groupSend.createdBy, parameters.get("mepCode"))
                         calculation = communicationPopulationCompositeService.calculatePopulationVersionForGroupSend(populationVersion)
                         groupSend.populationCalculationId = calculation.id
                         if (calculation.errorCode || calculation.errorText) {

@@ -117,7 +117,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 communicationField = CommunicationField.fetchByName(fieldName)
             } catch(HibernateObjectRetrievalFailureException e) {
             	//If a data field cannot be found due to FGAC restrictions, ignore the exception and skip.
-                log.error(e)
+                log.error(e.message)
             }
             if (communicationField) {
                 String value = calculateSingleFieldByPidm(communicationField, parameterNameValueMap, pidm, mepCode, escapeFieldValue)
