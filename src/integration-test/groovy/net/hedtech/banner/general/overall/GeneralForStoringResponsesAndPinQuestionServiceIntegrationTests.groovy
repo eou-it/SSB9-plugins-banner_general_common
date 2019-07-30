@@ -185,7 +185,7 @@ class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends Ba
     @Test
     void testFetchQuestionForPidm() {
         def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
-        generalForStoringResponsesAndPinQuestion.save()
+        generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
         def result = generalForStoringResponsesAndPinQuestionService.fetchQuestionForPidm(generalForStoringResponsesAndPinQuestion.pidm)[0]
 
         groovy.util.GroovyTestCase.assertEquals i_success_questionDescription, result.questionDescription
@@ -205,7 +205,7 @@ class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends Ba
     @Test
     void testFetchCountOfSameQuestionForPidmByIdOne() {
         def qstn = newValidUserResponsesWithOutPinQuestion()
-        qstn.save()
+        qstn.save(failOnError: true, flush: true)
         def result = generalForStoringResponsesAndPinQuestionService.fetchCountOfSameQuestionForPidmById(qstn.pidm, qstn.questionDescription, qstn.id+1 as int)
 
         groovy.util.GroovyTestCase.assertEquals 1, result

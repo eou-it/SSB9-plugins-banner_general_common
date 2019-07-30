@@ -81,13 +81,13 @@ class InternationalInformationCompositeServiceIntegrationTests extends BaseInteg
         // test the updates worked
         def recMap = fetchAll()
 
-        assertEquals 1L, recMap.visaInformation.version
+        assertEquals 2L, recMap.visaInformation.version
         assertEquals "2", recMap.visaInformation.nationIssue
 
-        assertEquals 1L, recMap.documentInformation.version
+        assertEquals 2L, recMap.documentInformation.version
         assertEquals "A", recMap.documentInformation.disposition
 
-        assertEquals 1L, recMap.visaInternationalInformation.version
+        assertEquals 2L, recMap.visaInternationalInformation.version
         assertEquals "N", recMap.visaInternationalInformation.spouseIndicator
     }
 

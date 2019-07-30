@@ -97,7 +97,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
 
         //Assert for sucessful update
         priorCollegeDegree = PriorCollegeDegree.get(priorCollegeDegree.id)
-        assertEquals 1L, priorCollegeDegree?.version
+        assertEquals 2L, priorCollegeDegree?.version
         assertEquals 2, priorCollegeDegree.degreeSequenceNumber
         assertEquals 201.00, priorCollegeDegree.hoursTransferred, 0
         assertEquals 1001.00, priorCollegeDegree.gpaTransferred, 0

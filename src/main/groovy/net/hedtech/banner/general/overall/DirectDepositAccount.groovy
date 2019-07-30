@@ -213,6 +213,7 @@ class DirectDepositAccount implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         bankAccountNum(nullable: true, maxSize: 34)
+        bankRoutingInfo(nullable: true)
         amount(nullable: true, maxSize: 17, scale: 2)
         percent(nullable: true, maxSize: 5, scale: 2)
         accountType(nullable: true, maxSize: 1)

@@ -715,8 +715,10 @@ class DirectDepositAccountCompositeService {
                 if (it.pattern == updateUrl) {
                     // This list contains Spring SecurityConfig objects, which implement Spring's ConfigAttribute,
                     // which is what role config items need to be for the vote call below.
-                    updateList = it[accessKeyName]
-
+                    it[accessKeyName].each {
+                        // role config items should act like a ConfigAttribute
+                        updateList << [attribute: it]
+                    }
                     return true
                 }
 
