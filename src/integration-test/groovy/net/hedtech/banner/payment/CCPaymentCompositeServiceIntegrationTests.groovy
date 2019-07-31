@@ -105,9 +105,10 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testGetTwgParamVendorUrlCheck() {
-        Holders.config['banner.payment.vendor.url'] = 'https://test.com'
+        Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
+        sql.executeUpdate( "update gurocfg set  GUROCFG_VALUE ='https://test.com?'  where GUROCFG_GUBAPPL_APP_ID='GENERAL_SS' and GUROCFG_NAME ='banner.payment.vendor.url' " )
         def ret = creditCardPaymentCompositeService.getAppConfig( 'banner.payment.vendor.url', 'string' )
-        assert ret == 'https://test.com'
+        assert ret == 'https://test.com?'
     }
 
 
@@ -128,7 +129,8 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
     @Test
     void testGetPaymentUrl() {
         Map messageMap = creditCardPaymentCompositeService.getPaymentInfoTexts()
-        Holders.config['banner.payment.vendor.url'] = '<UPDATE ME>'
+        Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
+        sql.executeUpdate( "update gurocfg set  GUROCFG_VALUE ='https://test.com?'  where GUROCFG_GUBAPPL_APP_ID='GENERAL_SS' and GUROCFG_NAME ='banner.payment.vendor.url' " )
         def vendorURL = creditCardPaymentCompositeService.getAppConfig( 'banner.payment.vendor.url', 'string' )
         Integer pidm = PersonUtility.getPerson( 'HOSARUSR1' ).pidm
         def procedureParam = [sub_code_in       : '0',
@@ -152,7 +154,7 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
                               vendor_in         : creditCardPaymentCompositeService.getAppConfig( 'banner.payment.vendor', 'string' ),
                               pay_trans_in      : creditCardPaymentCompositeService.getTransactionId()]
         def ret = creditCardPaymentCompositeService.getPaymentUrl( procedureParam )
-        assert ret.contains( 'UPDATE_ME' );
+        assert ret.contains( 'https://test.com' );
         assert ret.contains( '&TransactionAmount=200.00&TransactionDescription=Registration+Fees&MerchantID=0' );
     }
 
@@ -180,7 +182,7 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
         try {
             def ret = creditCardPaymentCompositeService.processPaymentCommon( param )
         } catch (ApplicationException e) {
-            assertApplicationException( e, "You either have a hold on your account or your account has been referred for collection. Please contact the Bursar's office for more information' instead" )
+            assertApplicationException( e, "You either have a hold on your account or your account has been referred for collection. Please contact the Bursar's office for more information" )
         }
     }
 
@@ -221,7 +223,7 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
     @Test
     void testGetTwgParamVendorCheck() {
         Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
-        sql.executeUpdate( "update gurocfg set  GUROCFG_VALUE ='TOUCHNET'  where GUROCFG_NAME =''banner.payment.vendor' " )
+        sql.executeUpdate( "update gurocfg set  GUROCFG_VALUE ='TOUCHNET'  where GUROCFG_NAME ='banner.payment.vendor' " )
         def ret = creditCardPaymentCompositeService.getAppConfig( 'banner.payment.vendor', 'string' )
         assert ret == 'TOUCHNET'
     }

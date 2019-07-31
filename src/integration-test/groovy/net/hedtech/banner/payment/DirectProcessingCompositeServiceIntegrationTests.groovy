@@ -77,7 +77,7 @@ class DirectProcessingCompositeServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testGetTwgParamVendorUrlCheck() {
         Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
-        sql.executeUpdate( "update gurocfg set  GUROCFG_VALUE ='https://test.com'  where GUROCFG_NAME ='banner.payment.vendor.url' " )
+        sql.executeUpdate( "update gurocfg set  GUROCFG_VALUE ='https://test.com'  where GUROCFG_GUBAPPL_APP_ID='GENERAL_SS' and GUROCFG_NAME ='banner.payment.vendor.url' " )
         def ret = depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor.url', 'string' )
         assert ret == 'https://test.com'
     }
@@ -100,7 +100,8 @@ class DirectProcessingCompositeServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testGetPaymentUrl() {
         Map messageMap = depositProcessingPaymentCompositeService.getPaymentInfoTexts()
-        Holders.config['banner.payment.vendor.url'] = '<UPDATE ME>'
+        Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
+        sql.executeUpdate( "update gurocfg set  GUROCFG_VALUE ='https://test.com?'  where GUROCFG_GUBAPPL_APP_ID='GENERAL_SS' and GUROCFG_NAME ='banner.payment.vendor.url' " )
         def vendorURL = depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor.url', 'string' )
         Integer pidm = PersonUtility.getPerson( 'HOSARUSR1' ).pidm
         def procedureParam = [sub_code_in       : '0',
@@ -124,7 +125,7 @@ class DirectProcessingCompositeServiceIntegrationTests extends BaseIntegrationTe
                               vendor_in         : depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor', 'string' ),
                               pay_trans_in      : depositProcessingPaymentCompositeService.getTransactionId()]
         def ret = depositProcessingPaymentCompositeService.getPaymentUrl( procedureParam )
-        assert ret.contains( 'UPDATE_ME' );
+        assert ret.contains( 'https://test.com' );
         assert ret.contains( '&TransactionAmount=200.00&TransactionDescription=DO+NOT+KNOW&MerchantID=0' );
     }
 
@@ -182,7 +183,7 @@ class DirectProcessingCompositeServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testGetTwgParamVendorCheck() {
         Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
-        sql.executeUpdate( "update gurocfg set  GUROCFG_VALUE ='TOUCHNET'  where GUROCFG_NAME =''banner.payment.vendor' " )
+        sql.executeUpdate( "update gurocfg set  GUROCFG_VALUE ='TOUCHNET' where GUROCFG_GUBAPPL_APP_ID='GENERAL_SS' and GUROCFG_NAME ='banner.payment.vendor'" )
         def ret = depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor', 'string' )
         assert ret == 'TOUCHNET'
     }
