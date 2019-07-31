@@ -385,12 +385,12 @@ class CommunicationGroupSendCompositeService {
             try {
                 //Check if organization is active
                 def orgTemplateValid = checkOrgTemplateValid(groupSend.organizationId, groupSend.templateId)
-                if(orgTemplateValid.orgValid != 'Y') {
+                if(orgTemplateValid?.orgValid != 'Y') {
                     String message = "Inactive organization selected for job"
                     log.error(message)
                     groupSend.markError( CommunicationErrorCode.INACTIVE_ORGANIZATION, message )
                     groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
-                } else if(orgTemplateValid.templateValid != 'Y') {
+                } else if(orgTemplateValid?.templateValid != 'Y') {
                     String message = "Inactive template selected for job"
                     log.error(message)
                     groupSend.markError( CommunicationErrorCode.INACTIVE_TEMPLATE, message )
@@ -469,12 +469,12 @@ class CommunicationGroupSendCompositeService {
             try {
                 //Check if organization is active
                 def orgTemplateValid = checkOrgTemplateValid(groupSend.organizationId, groupSend.templateId)
-                if(orgTemplateValid.orgValid != 'Y') {
+                if(orgTemplateValid?.orgValid != 'Y') {
                     String message = "Inactive organization selected for job"
                     log.error(message)
                     groupSend.markError( CommunicationErrorCode.INACTIVE_ORGANIZATION, message )
                     groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
-                } else if(orgTemplateValid.templateValid != 'Y') {
+                } else if(orgTemplateValid?.templateValid != 'Y') {
                     String message = "Inactive template selected for job"
                     log.error(message)
                     groupSend.markError( CommunicationErrorCode.INACTIVE_TEMPLATE, message )
@@ -802,8 +802,8 @@ class CommunicationGroupSendCompositeService {
                     WHERE gcbtmpl_surrogate_id = ?
                 """
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
-        def orgValid
-        def templateValid
+        def orgValid = 'N'
+        def templateValid = 'N'
         try {
             sql.eachRow(orgSqlString, [orgId]) { row ->
                 orgValid = row.gcroran_available_ind;
@@ -816,6 +816,7 @@ class CommunicationGroupSendCompositeService {
         catch (Exception ae) {
             log.error("Exception when trying to check for org and template validity${ae} ")
             println "CAUGHT EXCEPTION AT ORG CHECK: "+ae.getMessage()
+            throw ae
         }
         finally {
 

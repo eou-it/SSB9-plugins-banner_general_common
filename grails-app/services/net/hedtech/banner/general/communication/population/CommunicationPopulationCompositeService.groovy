@@ -736,7 +736,7 @@ class CommunicationPopulationCompositeService {
         long totalCount = 0
         CommunicationPopulationQueryExecutionResult result
         try {
-            result = communicationPopulationQueryExecutionService.execute( calculation.populationQueryVersion.id, calculation.calculatedBy )
+            result = communicationPopulationQueryExecutionService.execute( calculation.populationQueryVersion.id, getOracleUserName() )
             if (result.selectionListId && !result.errorString) {
                 calculation.selectionList = CommunicationPopulationSelectionList.fetchById( result.selectionListId )
                 totalCount += result.calculatedCount
