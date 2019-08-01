@@ -390,6 +390,10 @@ class CommunicationRecurrentMessageCompositeService {
                 //new end date added
                 rescheduleNeeded = true;
             }
+        } else {
+            if(oldRecurrentMessage.endDate) {
+                rescheduleNeeded = true
+            }
         }
 
         if(recurrentMessage.noOfOccurrences) {
@@ -399,7 +403,13 @@ class CommunicationRecurrentMessageCompositeService {
                 rescheduleNeeded = true
                 recurrencesUpdated = true
             }
+        } else {
+            if(oldRecurrentMessage.noOfOccurrences) {
+                rescheduleNeeded = true
+                recurrencesUpdated = true
+            }
         }
+
         if(rescheduleNeeded) {
             recurrentMessage.createdBy = oldRecurrentMessage.createdBy
             recurrentMessage.creationDateTime = oldRecurrentMessage.creationDateTime
