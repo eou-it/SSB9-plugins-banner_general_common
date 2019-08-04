@@ -143,7 +143,7 @@ class JobsubExternalPrinterIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull pendingPrint.id
         assertNotNull pendingPrint.version
 
-        shouldFail(UncategorizedSQLException) {
+        shouldFail(grails.validation.ValidationException) {
             pendingPrint.save(flush: true, failOnError: true)
         }
 
@@ -158,7 +158,7 @@ class JobsubExternalPrinterIntegrationTests extends BaseIntegrationTestCase {
         assertTrue pendingPrint.job != "TESTAPP"
         pendingPrint.job = "TESTAPP"
 
-        shouldFail(UncategorizedSQLException) {
+        shouldFail(grails.validation.ValidationException) {
             pendingPrint.save(flush: true, failOnError: true)
         }
 
