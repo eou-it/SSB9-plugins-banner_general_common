@@ -65,8 +65,8 @@ class CommunicationPopulationQueryExecutionService {
 
             String sqlStatement = getSqlStatement( queryVersion )
 
-            def ctx = Holders.grailsApplication.getMainContext()
-            def sessionFactory = ctx.sessionFactory
+//            def ctx = Holders.grailsApplication.getMainContext()
+//            def sessionFactory = ctx.sessionFactory
             def session = sessionFactory.currentSession
             def sql = new Sql(session.connection())
 

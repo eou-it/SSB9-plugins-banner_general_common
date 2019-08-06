@@ -392,7 +392,7 @@ class CommunicationRecurrentMessageCompositeService {
             }
         } else {
             if(oldRecurrentMessage.endDate) {
-                rescheduleNeeded = true
+                rescheduleNeeded = true;
             }
         }
 
@@ -405,11 +405,10 @@ class CommunicationRecurrentMessageCompositeService {
             }
         } else {
             if(oldRecurrentMessage.noOfOccurrences) {
-                rescheduleNeeded = true
-                recurrencesUpdated = true
+                rescheduleNeeded = true;
+                recurrencesUpdated = true;
             }
         }
-
         if(rescheduleNeeded) {
             recurrentMessage.createdBy = oldRecurrentMessage.createdBy
             recurrentMessage.creationDateTime = oldRecurrentMessage.creationDateTime

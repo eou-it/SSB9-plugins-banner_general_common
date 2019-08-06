@@ -99,12 +99,6 @@ class CommunicationTestSendCompositeService  {
             checkOrgEmail(organization)
         } catch (Throwable t) {
             log.error(t.message)
-            def root = CommunicationOrganization.fetchRoot()
-            if (!root)
-                    throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
-            if (!root.sendEmailServerProperties || !root.sendEmailServerProperties?.id)
-                    throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.serverPropertiesNotFound"), CommunicationErrorCode.SERVER_PROPERTIES_NOT_FOUND.name())
-
         }
         CommunicationTemplate template = fetchTemplate(templateId)
         def fieldNames = visitEmail(template as CommunicationEmailTemplate)

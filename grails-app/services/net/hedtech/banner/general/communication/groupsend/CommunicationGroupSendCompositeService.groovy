@@ -423,6 +423,9 @@ class CommunicationGroupSendCompositeService {
                         if (calculation.errorCode || calculation.errorText) {
                             populationCalculationSuccessful = false
                             groupSend.markError(calculation.errorCode, calculation.errorText)
+                        } else if(calculation.calculatedCount == 0) {
+                            //Mark current execution status as Complete so the group send cumulative status gets marked as completed by the monitor when there are no population records
+                            groupSend.markComplete(new Date())
                         }
                         shouldUpdateGroupSend = true
                     }
@@ -453,6 +456,7 @@ class CommunicationGroupSendCompositeService {
      * the group send to processing.
      */
     private CommunicationGroupSend generateGroupSendItems( Map parameters ) {
+
         Long groupSendId = parameters.get( "groupSendId" ) as Long
         assert( groupSendId )
 
