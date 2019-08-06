@@ -456,7 +456,6 @@ class CommunicationGroupSendCompositeService {
      * the group send to processing.
      */
     private CommunicationGroupSend generateGroupSendItems( Map parameters ) {
-
         Long groupSendId = parameters.get( "groupSendId" ) as Long
         assert( groupSendId )
 
