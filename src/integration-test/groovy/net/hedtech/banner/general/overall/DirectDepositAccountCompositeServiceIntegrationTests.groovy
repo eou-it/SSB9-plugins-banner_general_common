@@ -855,10 +855,10 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     }
 
     private setupHoldersConfigWithRolesAllowingUpdates() {
-        Holders.setConfig(oldHoldersConfig.merge(["grails.plugin.springsecurity.interceptUrlMap":[[pattern:'/ssb/UpdateAccount/**', access: ['ROLE_SELFSERVICE-EMPLOYEE_BAN_DEFAULT_M', 'ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_M']]]]))
+        Holders.setConfig(oldHoldersConfig.merge(["grails.plugin.springsecurity.interceptUrlMap":[[pattern:'/ssb/UpdateAccount/**', access: [[attribute: 'ROLE_SELFSERVICE-EMPLOYEE_BAN_DEFAULT_M'], [attribute: 'ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_M']]]]]))
     }
 
     private setupHoldersConfigWithRolesNotAllowingUpdates() {
-        Holders.setConfig(oldHoldersConfig.merge(["grails.plugin.springsecurity.interceptUrlMap":[[pattern:'/ssb/UpdateAccount/**', access: ['ROLE_SELFSERVICE-EMPLOYEE_BAN_DEFAULT_Q', 'ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_Q']]]]))
+        Holders.setConfig(oldHoldersConfig.merge(["grails.plugin.springsecurity.interceptUrlMap":[[pattern:'/ssb/UpdateAccount/**', access: [[attribute:  'ROLE_SELFSERVICE-EMPLOYEE_BAN_DEFAULT_Q'], [attribute: 'ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_Q']]]]]))
     }
 }
