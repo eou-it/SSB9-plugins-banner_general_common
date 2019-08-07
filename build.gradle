@@ -85,7 +85,7 @@ dependencies {
     compile 'commons-io:commons-io:2.6'
 
     compile('org.grails:grails-docs:3.3.2') {
-        exclude group:"itext", module:"core-renderer"
+        exclude group:"org.xhtmlrenderer", module:"core-renderer"
 
     }
     // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -96,10 +96,10 @@ dependencies {
 //        excludes 'itext', 'itext-rtf'
 //    }
 //    compile 'org.xhtmlrenderer:flying-saucer-pdf:9.0.8'
-//    compile ('com.lowagie:itext:2.1.7'){
-//        exclude group:"org.bouncycastle", module:"bcprov-jdk14"
-//        exclude group:"bouncycastle", module:"bcprov-jdk14"
-//    }
+    compile ('com.lowagie:itext:2.1.7'){
+        exclude group:"org.bouncycastle", module:"bcprov-jdk14"
+        exclude group:"bouncycastle", module:"bcprov-jdk14"
+    }
     compile 'org.antlr:ST4:4.0.8'
     compile "javax.mail:javax.mail-api:1.5.5"
     runtime "com.sun.mail:javax.mail:1.5.5"
