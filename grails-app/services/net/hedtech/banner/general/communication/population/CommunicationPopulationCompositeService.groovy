@@ -736,7 +736,8 @@ class CommunicationPopulationCompositeService {
         long totalCount = 0
         CommunicationPopulationQueryExecutionResult result
         try {
-            result = communicationPopulationQueryExecutionService.execute( calculation.populationQueryVersion.id, calculation.calculatedBy )
+            //Calling execute as commmgr when it comes from recalc is fine as it gets stored in the tables as commmgr. Role needs to be set by spoofer properly.
+            result = communicationPopulationQueryExecutionService.execute( calculation.populationQueryVersion.id,  calculation.calculatedBy)
             if (result.selectionListId && !result.errorString) {
                 calculation.selectionList = CommunicationPopulationSelectionList.fetchById( result.selectionListId )
                 totalCount += result.calculatedCount

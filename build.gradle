@@ -85,7 +85,7 @@ dependencies {
     compile 'commons-io:commons-io:2.6'
 
     compile('org.grails:grails-docs:3.3.2') {
-        exclude group:"itext", module:"core-renderer"
+        exclude group:"org.xhtmlrenderer", module:"core-renderer"
 
     }
     // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.

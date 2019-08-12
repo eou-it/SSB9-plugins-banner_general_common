@@ -81,7 +81,7 @@ class CommunicationOrganizationCompositeService {
 
     def fetchRootReadOnly() {
         CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
-        return ['id':rootorg?.id, 'name':rootorg?.name, 'isRoot':true, 'version':rootorg.version]
+        return ['id':rootorg?.id, 'name':rootorg?.name, 'isRoot':true, 'version':rootorg?.version]
 
     }
 

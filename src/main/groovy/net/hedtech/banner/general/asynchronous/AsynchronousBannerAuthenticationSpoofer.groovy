@@ -25,11 +25,11 @@ import java.sql.SQLException
 /**
  * An authentication provider for batch threads that authorize a user using behind a batch job thread.
  */
-@Transactional
+
 public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationProvider {
     private static final log = Logger.getLogger(AsynchronousBannerAuthenticationSpoofer.class)
     public static final monitorOracleUserName = 'COMMMGR'
-    public static final monitorOracleUserNameForHR = 'COMMMGRHR'
+    public static final monitorOracleUserNameForHR = 'COMMHRMGR'
 
     def dataSource  // injected by Spring
     MultiEntityProcessingService multiEntityProcessingService
