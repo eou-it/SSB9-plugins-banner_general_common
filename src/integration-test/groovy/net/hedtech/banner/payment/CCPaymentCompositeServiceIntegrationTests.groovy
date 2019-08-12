@@ -155,7 +155,7 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
                               pay_trans_in      : creditCardPaymentCompositeService.getTransactionId()]
         def ret = creditCardPaymentCompositeService.getPaymentUrl( procedureParam )
         assert ret.contains( 'https://test.com' );
-        assert ret.contains( '&TransactionAmount=200.00&TransactionDescription=Registration+Fees&MerchantID=0' );
+        assert ret.contains( '&TransactionAmount=200&TransactionDescription=Registration+Fees&MerchantID=0' );
     }
 
 
