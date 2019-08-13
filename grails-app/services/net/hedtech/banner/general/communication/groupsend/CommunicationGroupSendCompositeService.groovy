@@ -425,7 +425,10 @@ class CommunicationGroupSendCompositeService {
                             groupSend.markError(calculation.errorCode, calculation.errorText)
                         } else if(calculation.calculatedCount == 0) {
                             //Mark current execution status as Complete so the group send cumulative status gets marked as completed by the monitor when there are no population records
-                            groupSend.markComplete(new Date())
+                            Date now = new Date()
+                            groupSend.setCurrentExecutionState(CommunicationGroupSendExecutionState.Complete )
+                            groupSend.startedDate = now
+                            groupSend.stopDate = now
                         }
                         shouldUpdateGroupSend = true
                     }
