@@ -3,7 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.aip
 
-import org.apache.log4j.Logger
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import org.springframework.dao.InvalidDataAccessResourceUsageException
@@ -21,9 +21,8 @@ import static net.hedtech.banner.general.aip.AipNotificationConstants.ICSN_CODE_
  * Service Class for Aip Notification which holds methods
  * methods for checking action items and gorricr flag
  */
+@Slf4j
 public class AipNotificationService extends ServiceBase {
-
-    private static final LOGGER = Logger.getLogger(AipNotificationService.class.name)
 
     /**
      * checks whether user has an active action item
@@ -34,10 +33,10 @@ public class AipNotificationService extends ServiceBase {
         try {
             return pidm?UserActiveActionItem.checkIfActionItemPresent(pidm):false //gidm user will not have action items
         } catch (SQLException e) {
-            LOGGER.warn("Exception while fetching aip enabled flag from goriccr" + e.getMessage())
+            log.warn("Exception while fetching aip enabled flag from goriccr" + e.getMessage())
             return false
         } catch (InvalidDataAccessResourceUsageException e) {
-            LOGGER.warn("view GVQ_GCRACPN does not exist or does not have necessary privileges" + e.getMessage())
+            log.warn("view GVQ_GCRACPN does not exist or does not have necessary privileges" + e.getMessage())
             return false
         }
     }
@@ -50,13 +49,13 @@ public class AipNotificationService extends ServiceBase {
         def aipEnabledStatus
         try {
             aipEnabledStatus = IntegrationConfiguration.fetchByProcessCodeAndSettingName(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS)?.value == YES ? ENABLED : DISABLED
-            LOGGER.debug("AIP Enabled status [GENERAL_SSB,ENABLE.ACTION.ITEMS]=" + aipEnabledStatus)
+            log.debug("AIP Enabled status [GENERAL_SSB,ENABLE.ACTION.ITEMS]=" + aipEnabledStatus)
         } catch (SQLException e) {
             aipEnabledStatus = ""
-            LOGGER.warn("Exception while fetching aip enabled flag from goriccr" + e.getMessage())
+            log.warn("Exception while fetching aip enabled flag from goriccr" + e.getMessage())
         } catch (InvalidDataAccessResourceUsageException e) {
             aipEnabledStatus = ""
-            LOGGER.warn("Exception while fetching aip enabled flag from goriccr" + e.getMessage())
+            log.warn("Exception while fetching aip enabled flag from goriccr" + e.getMessage())
         }
 
         return aipEnabledStatus

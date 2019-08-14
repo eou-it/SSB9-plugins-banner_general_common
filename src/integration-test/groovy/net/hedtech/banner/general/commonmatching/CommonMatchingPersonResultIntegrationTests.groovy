@@ -36,7 +36,7 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
     @Test
     void testCreateValidCommonMatchingPersonResult() {
         def CommonMatchingPersonResult = newValidCommonMatchingPersonResult()
-        shouldFail(InvalidDataAccessResourceUsageException) {
+        shouldFail(grails.validation.ValidationException) {
             CommonMatchingPersonResult.save(failOnError: true, flush: true)
         }
     }
@@ -48,7 +48,7 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
         def personList = CommonMatchingPersonResult.findAll()
         assertEquals 1, personList.size()
         personList[0].message = "test"
-        shouldFail(InvalidDataAccessResourceUsageException) {
+        shouldFail(grails.validation.ValidationException) {
             personList[0].save(failOnError: true, flush: true)
         }
     }
@@ -60,7 +60,7 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
         def personList = CommonMatchingPersonResult.findAll()
         assertEquals 1, personList.size()
         assertNotNull personList[0].id
-        shouldFail(InvalidDataAccessResourceUsageException) {
+        shouldFail(grails.validation.ValidationException) {
             personList[0].delete(failOnError: true, flush: true)
         }
     }
