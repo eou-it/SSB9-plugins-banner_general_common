@@ -29,6 +29,7 @@ import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.commons.lang.StringUtils
 import org.springframework.security.core.context.SecurityContextHolder
 import grails.gorm.transactions.Transactional
+import org.springframework.web.context.request.RequestContextHolder
 
 import java.sql.Connection
 import java.sql.SQLException
@@ -70,6 +71,14 @@ class CommunicationPopulationCompositeService {
         population.description = description
         population.changesPending = true
         population.setSystemIndicator(systemIndicator)
+
+        if (RequestContextHolder?.getRequestAttributes()?.request?.session) {
+            def session = RequestContextHolder.currentRequestAttributes()?.request?.session
+            def mepCode = session?.getAttribute("mep")
+            if (mepCode != null) {
+                population.setMepCode(mepCode)
+            }
+        }
         population = communicationPopulationService.create( population )
         return population
     }
@@ -367,6 +376,13 @@ class CommunicationPopulationCompositeService {
             population.scheduledDate = scheduledDate
             population.status = CommunicationPopulationCalculationStatus.SCHEDULED
         }
+        if (RequestContextHolder?.getRequestAttributes()?.request?.session) {
+            def session = RequestContextHolder.currentRequestAttributes()?.request?.session
+            def mepCode = session?.getAttribute("mep")
+            if (mepCode != null) {
+                population.setMepCode(mepCode)
+            }
+        }
         population = communicationPopulationService.create( population )
 
         CommunicationPopulationQueryAssociation populationQueryAssociation = new CommunicationPopulationQueryAssociation()
@@ -409,6 +425,13 @@ class CommunicationPopulationCompositeService {
         if(scheduledDate) {
             population.scheduledDate = scheduledDate
             population.status = CommunicationPopulationCalculationStatus.SCHEDULED
+        }
+        if (RequestContextHolder?.getRequestAttributes()?.request?.session) {
+            def session = RequestContextHolder.currentRequestAttributes()?.request?.session
+            def mepCode = session?.getAttribute("mep")
+            if (mepCode != null) {
+                population.setMepCode(mepCode)
+            }
         }
         population = communicationPopulationService.create( population )
 
@@ -793,6 +816,7 @@ class CommunicationPopulationCompositeService {
         try {
             CommunicationPopulationVersion populationVersion = new CommunicationPopulationVersion()
             populationVersion.population = population
+            populationVersion.mepCode = population.mepCode
             populationVersion.includeList = cloneSelectionList( population.includeList )
 
             populationVersion = (CommunicationPopulationVersion) communicationPopulationVersionService.create( populationVersion )
@@ -895,6 +919,7 @@ class CommunicationPopulationCompositeService {
         populationCalculation.calculatedBy = calculatedBy
         populationCalculation.status = CommunicationPopulationCalculationStatus.PENDING_EXECUTION
         populationCalculation.jobId = UUID.randomUUID().toString()
+        populationCalculation.mepCode = populationVersion.mepCode
         populationCalculation = communicationPopulationCalculationService.create(populationCalculation)
         return populationCalculation
     }

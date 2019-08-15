@@ -31,6 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Propagation
 import grails.gorm.transactions.Transactional
 import grails.util.Holders
+import org.springframework.web.context.request.RequestContextHolder
 
 import java.sql.Connection
 import java.sql.SQLException
@@ -86,6 +87,12 @@ class CommunicationGroupSendCompositeService {
         groupSend.createdBy = bannerUser
         if (actualMepCode != null) {
             groupSend.mepCode = actualMepCode
+        } else if (RequestContextHolder?.getRequestAttributes()?.request?.session) {
+            def session = RequestContextHolder.currentRequestAttributes()?.request?.session
+            def mepCode = session?.getAttribute("mep")
+            if (mepCode != null) {
+                groupSend.setMepCode(mepCode)
+            }
         }
 
         groupSend.setParameterNameValueMap( request.getParameterNameValueMap() )
