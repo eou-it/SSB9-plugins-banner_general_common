@@ -177,7 +177,7 @@ class DirectDepositAccountCompositeService {
 
     private def setNextPriority(account) {
         def accts = DirectDepositAccount.fetchByPidm(account.pidm)
-        
+
         // AP records are created with a priority of 0
         if(account.hrIndicator != 'A' && account.apIndicator == 'A' && accts.size() == 0) {
             account.priority = 0
@@ -186,7 +186,7 @@ class DirectDepositAccountCompositeService {
             def lowestPriority = accts*.priority.max()
             account.priority = (lowestPriority ? lowestPriority+1 : 1)
         }
-        
+
         account
     }
 
@@ -711,16 +711,20 @@ class DirectDepositAccountCompositeService {
         }
 
         if (accessKeyName) {
-            urlList.find {
+            /*When the UpdateAccount roles are different than the roles set in the configuration, there is a new entry in the URLList appended to the list.
+            * Because the customized roles in the database should take precedence over the default roles, the updateList should only be set according to the roles in the
+            * LAST entry that matches the pattern, as that is the entry based off of the database roles.*/
+            urlList.each {
                 if (it.pattern == updateUrl) {
                     // This list contains Spring SecurityConfig objects, which implement Spring's ConfigAttribute,
                     // which is what role config items need to be for the vote call below.
                     updateList = it[accessKeyName]
-                    return true
                 }
-
-                return false
             }
+        }
+
+        if (updateList == []) {
+            return false
         }
 
         def voter = new BannerAccessDecisionVoter()
