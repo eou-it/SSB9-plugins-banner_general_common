@@ -8,6 +8,9 @@ import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
+import org.grails.web.converters.exceptions.ConverterException
+
+import java.sql.SQLException
 
 /**
  * Service to get Json Data from SQl.
@@ -29,7 +32,7 @@ class GeneralSqlJsonService {
      * @param listOfParams
      * @return
      */
-    def call( String functionName, List listOfParams ) {
+    def call( String functionName, List listOfParams )throws SQLException, ConverterException {
         JSON json_data = null
         try {
             String json_string
@@ -41,7 +44,6 @@ class GeneralSqlJsonService {
                       }
             )
             json_data = new JsonSlurper().parseText( json_string.toString() )
-
         } finally {
             clearPidmContext()
         }
