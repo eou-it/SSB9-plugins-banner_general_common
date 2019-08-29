@@ -66,7 +66,6 @@ class GeneralSqlJsonService {
                 clearPidmContext()
             }
             catch (SQLException e) {
-                e.printStackTrace()
                 log.error e
                 String message = MessageHelper.message( 'banner.general.sql.exception.clearContext' )
                 throw new ApplicationException( GeneralSqlJsonService.class, new BusinessLogicValidationException( message, [] ) )
