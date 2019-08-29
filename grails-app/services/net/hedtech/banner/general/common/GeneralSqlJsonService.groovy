@@ -58,7 +58,7 @@ class GeneralSqlJsonService {
         }
         catch (SQLException | ConverterException e) {
             log.error e
-            String message = MessageHelper.message( 'facultyFeedback.sql.exception' )
+            String message = MessageHelper.message( 'banner.general.sql.exception' )
             throw new ApplicationException( GeneralSqlJsonService.class, new BusinessLogicValidationException( message, [] ) )
         }
         finally {
@@ -68,7 +68,7 @@ class GeneralSqlJsonService {
             catch (SQLException e) {
                 e.printStackTrace()
                 log.error e
-                String message = MessageHelper.message( 'faculty.sql.exception.clearContext' )
+                String message = MessageHelper.message( 'banner.general.sql.exception.clearContext' )
                 throw new ApplicationException( GeneralSqlJsonService.class, new BusinessLogicValidationException( message, [] ) )
             }
         }
