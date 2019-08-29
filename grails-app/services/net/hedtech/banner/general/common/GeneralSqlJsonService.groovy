@@ -26,12 +26,10 @@ class GeneralSqlJsonService {
     def sessionFactory
     def springSecurityService
 
-
     private void setPidmToContext( def pidm ) {
         Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
         sql.call( 'call gb_common.p_set_context(?, ?, ?,?)', ['SS_ACC', 'LOG_ID', pidm.toString(), 'N'] )
     }
-
 
     /**
      * Sets Pidm to the context and executes function.
@@ -73,7 +71,6 @@ class GeneralSqlJsonService {
         }
         json_data
     }
-
 
     private clearPidmContext() {
         setPidmToContext( '' )
