@@ -14,6 +14,7 @@ import javax.persistence.Entity
 import javax.persistence.Lob
 import javax.persistence.PrimaryKeyJoinColumn
 import javax.persistence.Table
+import javax.persistence.Transient
 
 @Entity
 @Table(name = "GCBLTPL")
@@ -34,6 +35,9 @@ class CommunicationLetterTemplate extends CommunicationTemplate implements Seria
     @Column(name = "GCBLTPL_CONTENT")
     String content
 
+    @Transient
+    Long parentVersion
+
     static constraints = {
         toAddress(nullable: true)
         style(nullable: true)
@@ -42,6 +46,10 @@ class CommunicationLetterTemplate extends CommunicationTemplate implements Seria
 
     public CommunicationLetterTemplate() {
         super( CommunicationChannel.LETTER )
+    }
+
+    Long getParentVersion() {
+        return super.getVersion()
     }
 
     @Override

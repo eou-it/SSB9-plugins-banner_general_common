@@ -24,7 +24,6 @@ apply plugin: "net.saliman.cobertura"
 
 codenarc {
     toolVersion = '0.27.0'
-//    configFile = file("${rootProject.projectDir}/config/codenarc/rules.groovy") 
     def codenarcRulePath = project(":banner-codenarc").projectDir.absolutePath + "/config/codenarc/rules.groovy"
     configFile = file(codenarcRulePath)
     reportFormat = 'html'
@@ -32,7 +31,20 @@ codenarc {
 }
 
 cobertura {
-    coverageFormats = ['html', 'xml']
+    coverageFormats = ['xml','html']
+    coverageIgnoreTrivial = true
+    coverageIgnores = ['org.slf4j.Logger.*']             
+    //only an example to skip instrumentation
+    //coverageIgnoreMethodAnnotations = ['grails.gorm.transactions.Transactional']
+    coverageExcludes = ['.Application.',
+                        '.BootStrap.',
+                        '.UrlMappings.']
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
+}    
+
+integrationTest {
+        ignoreFailures = true
 }
 
 repositories {
@@ -81,7 +93,7 @@ dependencies {
     compile 'commons-io:commons-io:2.6'
 
     compile('org.grails:grails-docs:3.3.2') {
-        exclude group:"itext", module:"core-renderer"
+        exclude group:"org.xhtmlrenderer", module:"core-renderer"
 
     }
     // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -138,7 +150,9 @@ assets {
 
 grails {
     plugins {
+        compile project(":banner-core")    
         compile project(":banner-general-person")
+        compile project(":banner-general-validation-common")
     }
 }
 
@@ -162,6 +176,7 @@ task concurrentTest (type: Test) {
     description 'Runs the concurrent tests.'
     testClassesDir = project.sourceSets.concurrentTest.output.classesDir
     classpath += project.sourceSets.concurrentTest.runtimeClasspath
+    ignoreFailures = true
 
     filter {
         includeTestsMatching "*ConcurrentTests*"

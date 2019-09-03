@@ -27,7 +27,7 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 
@@ -82,7 +82,7 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
 
         //Assert for successful update
         sourceBackgroundInstitutionContactPerson = SourceBackgroundInstitutionContactPerson.get(sourceBackgroundInstitutionContactPerson.id)
-        assertEquals 1L, sourceBackgroundInstitutionContactPerson?.version
+        assertEquals 2L, sourceBackgroundInstitutionContactPerson?.version
         assertEquals "UPDATE", sourceBackgroundInstitutionContactPerson.phoneArea
         assertEquals "UPDATE789012", sourceBackgroundInstitutionContactPerson.phoneNumber
         assertEquals "UPDATE7890", sourceBackgroundInstitutionContactPerson.phoneExtension

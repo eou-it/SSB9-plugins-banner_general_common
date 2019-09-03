@@ -33,7 +33,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
+        formContext = ['SELFSERVICE'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
     }
@@ -376,7 +376,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("update GUBPPRF set GUBPPRF_NO_OF_QSTNS = ?",[noOfQuestions])
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+          //commenting out for grails 3  sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
     }
 

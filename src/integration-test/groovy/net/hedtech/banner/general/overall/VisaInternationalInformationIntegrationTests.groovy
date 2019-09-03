@@ -24,7 +24,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 

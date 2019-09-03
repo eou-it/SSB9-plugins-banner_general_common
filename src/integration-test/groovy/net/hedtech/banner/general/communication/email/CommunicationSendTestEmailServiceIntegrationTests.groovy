@@ -28,9 +28,10 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.rules.ExpectedException;
 
-@Integration
-@Rollback
+//@Integration
+//@Rollback
 class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBaseIntegrationTestCase {
+/*
 
     @Rule
     public ExpectedException thrown = ExpectedException.none()
@@ -67,7 +68,6 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
     }
 
-/*
     void setUpData() {
         setUpEmailTestOrganization()
         mailServer.start()
@@ -388,6 +388,6 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         )
         emailTestOrganization.senderMailboxAccount = cma
     }
-*/
 
+*/
 }

@@ -24,7 +24,7 @@ class JobsubSavedOutputIntegrationTests extends BaseIntegrationTestCase {
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
+        formContext = ['SELFSERVICE'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
@@ -60,7 +60,7 @@ class JobsubSavedOutputIntegrationTests extends BaseIntegrationTestCase {
 
         def savedPrint = new JobsubSavedOutput(job: "STUREPT", oneUpNo: 3333,
            fileName: "sturpt_3333.lis", mime: "2", createDate: new Date(),
-            creatorId: "JOBSUB")
+            creatorId: "JOBSUB", lastModified: new Date(), lastModifiedBy : 'GRAILS_USER')
         assertNotNull savedPrint
         assertTrue savedPrint instanceof JobsubSavedOutput
         savedPrint.save(flush: true, failOnError: true)

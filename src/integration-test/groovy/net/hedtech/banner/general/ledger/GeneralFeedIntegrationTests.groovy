@@ -14,9 +14,9 @@ import org.junit.Test
 @Integration
 @Rollback
 class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
-   @Before
+    @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 
@@ -26,7 +26,7 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         super.tearDown()
     }
 
-/*     @Test
+    @Test
     public void testValidateReferenceNumber() {
         //null is allowed
         GeneralFeed generalFeed = createNewGenerealFeed([referenceNumber: null])
@@ -591,9 +591,9 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         assertEquals([], GeneralFeedShadow.fetchAllByGuidInList(guids))
     }
 
-*//*    @Test
+    @Test
     public void testFetchAllByGuidInListValidValues(){
-        runSeedData('general-ledger')
+//        runSeedData('general-ledger')
         String guid = GeneralFeedShadow.findAll().guid.unique()[0]
         assertNotNull(guid)
         List<String> guids = [guid,"invalid-value","random-value"]
@@ -602,8 +602,8 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull(guid1)
         guids = [guid, guid1]
         assertEquals([guid, guid1].unique().sort(), GeneralFeedShadow.fetchAllByGuidInList(guids).guid.unique().sort())
-        runSeedData('general-ledger-clean')
-    }*//*
+//        runSeedData('general-ledger-clean')
+    }
 
     @Test
     public void testTransactionNumberExistNullList() {
@@ -620,14 +620,14 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         assertEquals(false, GeneralFeed.transactionNumberExist(['invalid1', 'invalid2']))
     }
 
-*//*    @Test
+    @Test
     public void testTransactionNumberExist() {
-        runSeedData('general-ledger-gurfeed')
+//        runSeedData('general-ledger-gurfeed')
         assertEquals(true, GeneralFeed.transactionNumberExist(['DCITTST']))
-        runSeedData('general-ledger-gurfeed-clean')
-    }*//*
+//        runSeedData('general-ledger-gurfeed-clean')
+    }
 
-*//*    def runSeedData(String seedTestTarget) {
+/*    def runSeedData(String seedTestTarget) {
         def clazzInputData = Thread.currentThread().contextClassLoader.loadClass("net.hedtech.banner.seeddata.InputData")
         def inputData = clazzInputData.newInstance([dataSource: dataSource])
 
@@ -647,7 +647,7 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
             def seedDataLoader = new net.hedtech.banner.seeddata.SeedDataLoader(inputData)
             seedDataLoader.execute()
         }
-    }*//*
+    }*/
 
     private createNewGenerealFeed(Map properties) {
         GeneralFeed generalFeed = new GeneralFeed()
@@ -692,5 +692,5 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         }
 
         return generalFeed
-    }*/
+    }
 }

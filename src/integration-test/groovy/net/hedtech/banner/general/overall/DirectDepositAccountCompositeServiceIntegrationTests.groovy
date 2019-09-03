@@ -76,7 +76,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
         if (oldHoldersConfig == null && Holders.config != null) {
             oldHoldersConfig = Holders.config
@@ -144,7 +144,8 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         account1 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
 
         def testBankRoutingInfo1 = [
-                bankRoutingNum: '748972234'
+                bankRoutingNum: '748972234',
+                bankName:'TTTT1'
         ]
 
         def existingItemMap0 = [
@@ -195,7 +196,8 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         def existingItemMap0 = [
                 accountType: firstAcct.accountType,
                 bankAccountNum: firstAcct.bankAccountNum,
-                bankRoutingInfo: [bankRoutingNum: firstAcct.bankRoutingInfo.bankRoutingNum],
+                bankRoutingInfo: [bankRoutingNum: firstAcct.bankRoutingInfo.bankRoutingNum,
+                                  bankName:firstAcct.bankRoutingInfo.bankName],
                 documentType: firstAcct.documentType,
                 id: firstAcct.id,
                 apIndicator: firstAcct.apIndicator,
@@ -228,7 +230,8 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         def existingItemMap0 = [
                 accountType: lastAcct.accountType,
                 bankAccountNum: lastAcct.bankAccountNum,
-                bankRoutingInfo: [bankRoutingNum: lastAcct.bankRoutingInfo.bankRoutingNum],
+                bankRoutingInfo: [bankRoutingNum: lastAcct.bankRoutingInfo.bankRoutingNum,
+                                  bankName:lastAcct.bankRoutingInfo.bankName],
                 documentType: lastAcct.documentType,
                 id: lastAcct.id,
                 apIndicator: lastAcct.apIndicator,
@@ -261,7 +264,8 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         def existingItemMap0 = [
                 accountType: firstAcct.accountType,
                 bankAccountNum: firstAcct.bankAccountNum,
-                bankRoutingInfo: [bankRoutingNum: firstAcct.bankRoutingInfo.bankRoutingNum],
+                bankRoutingInfo: [bankRoutingNum: firstAcct.bankRoutingInfo.bankRoutingNum,
+                                  bankName:firstAcct.bankRoutingInfo.bankName],
                 documentType: firstAcct.documentType,
                 id: firstAcct.id,
                 apIndicator: firstAcct.apIndicator,
@@ -297,7 +301,8 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         def existingItemMap0 = [
                 accountType: lastAcct.accountType,
                 bankAccountNum: lastAcct.bankAccountNum,
-                bankRoutingInfo: [bankRoutingNum: lastAcct.bankRoutingInfo.bankRoutingNum],
+                bankRoutingInfo: [bankRoutingNum: lastAcct.bankRoutingInfo.bankRoutingNum,
+                                  bankName:lastAcct.bankRoutingInfo.bankName],
                 documentType: lastAcct.documentType,
                 id: lastAcct.id,
                 apIndicator: lastAcct.apIndicator,
@@ -327,7 +332,8 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         def pidm = PersonUtility.getPerson("GDP000001").pidm
 
         def testBankRoutingInfo1 = [
-                bankRoutingNum: '748972234'
+                bankRoutingNum: '748972234',
+                bankName:'TTTT3'
         ]
 
         def newAccountMap0 = [
@@ -365,7 +371,8 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         def newAccountMap0 = [
                 accountType: 'C',
                 bankAccountNum: '777777',
-                bankRoutingInfo: [bankRoutingNum: '748972234'],
+                bankRoutingInfo: [bankRoutingNum: '748972234',
+                                  bankName:'TTTT5'],
                 documentType: 'D',
                 percent: 10,
                 apIndicator: 'A',
@@ -396,7 +403,8 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         def newAccountMap0 = [
                 accountType: 'C',
                 bankAccountNum: '777777',
-                bankRoutingInfo: [bankRoutingNum: '748972234'],
+                bankRoutingInfo: [bankRoutingNum: '748972234',
+                                  bankName:'TTTT6'],
                 documentType: 'D',
                 percent: 10,
                 apIndicator: 'A',
@@ -427,7 +435,8 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         def newAccountMap0 = [
                 accountType: 'C',
                 bankAccountNum: '777777',
-                bankRoutingInfo: [bankRoutingNum: '748972234'],
+                bankRoutingInfo: [bankRoutingNum: '748972234',
+                                  bankName:'TTTT7'],
                 documentType: 'D',
                 percent: 10,
                 apIndicator: 'A',
@@ -846,10 +855,10 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     }
 
     private setupHoldersConfigWithRolesAllowingUpdates() {
-        Holders.setConfig(oldHoldersConfig.merge(["grails.plugin.springsecurity.interceptUrlMap":[[pattern:'/ssb/UpdateAccount/**', access: ['ROLE_SELFSERVICE-EMPLOYEE_BAN_DEFAULT_M', 'ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_M']]]]))
+        Holders.setConfig(oldHoldersConfig.merge(["grails.plugin.springsecurity.interceptUrlMap":[[pattern:'/ssb/UpdateAccount/**', access: [[attribute: 'ROLE_SELFSERVICE-EMPLOYEE_BAN_DEFAULT_M'], [attribute: 'ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_M']]]]]))
     }
 
     private setupHoldersConfigWithRolesNotAllowingUpdates() {
-        Holders.setConfig(oldHoldersConfig.merge(["grails.plugin.springsecurity.interceptUrlMap":[[pattern:'/ssb/UpdateAccount/**', access: ['ROLE_SELFSERVICE-EMPLOYEE_BAN_DEFAULT_Q', 'ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_Q']]]]))
+        Holders.setConfig(oldHoldersConfig.merge(["grails.plugin.springsecurity.interceptUrlMap":[[pattern:'/ssb/UpdateAccount/**', access: [[attribute:  'ROLE_SELFSERVICE-EMPLOYEE_BAN_DEFAULT_Q'], [attribute: 'ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_Q']]]]]))
     }
 }

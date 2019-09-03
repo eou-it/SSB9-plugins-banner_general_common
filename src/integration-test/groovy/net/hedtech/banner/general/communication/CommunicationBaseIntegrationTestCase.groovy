@@ -29,22 +29,16 @@ import grails.web.servlet.context.GrailsWebApplicationContext
  */
 class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
-//    def communicationGroupSendMonitor
-//    def communicationGroupSendCompositeService
-//    CommunicationMailboxAccountService communicationMailboxAccountService
-//    def communicationFolderService
-//    def communicationTemplateService
-//    def communicationEmailTemplateService
-//    def communicationOrganizationCompositeService
-//    def communicationGroupSendItemProcessingEngine
-//    def communicationJobProcessingEngine
-//    def communicationFieldService
-//
-//    protected CommunicationOrganization defaultOrganization
-//    protected CommunicationFolder defaultFolder
-//    protected CommunicationEmailTemplate defaultEmailTemplate
-//    protected GreenMail mailServer
-//    protected static final int smtp_port = 4025
+    CommunicationMailboxAccountService communicationMailboxAccountService
+    def communicationFolderService
+    def communicationEmailTemplateService
+    def communicationOrganizationCompositeService
+
+    protected CommunicationOrganization defaultOrganization
+    protected CommunicationFolder defaultFolder
+    protected CommunicationEmailTemplate defaultEmailTemplate
+    protected GreenMail mailServer
+    protected static final int smtp_port = 4025
 
     def userName = 'BCMADMIN'
     def password = '111111'
@@ -69,9 +63,9 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
     @After
     public void tearDown() {
-//        if (mailServer) mailServer.stop()
+        if (mailServer) mailServer.stop()
 
-//        deleteAll()
+        deleteAll()
         logout()
         super.tearDown()
     }
@@ -82,20 +76,18 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
     }
 
-//    public void dataAndMailServerSetUp() {
-//        deleteAll()
-//        setUpDefaultOrganization()
-//        setUpDefaultFolder()
-//        setUpDefaultEmailTemplate()
-//
-//        ServerSetup smtpServerSetup = new ServerSetup( smtp_port, "127.0.0.1", ServerSetup.PROTOCOL_SMTP);
-//        mailServer = new GreenMail( smtpServerSetup)
-//
-//        CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.sendEmailServerProperties
-//        String userPassword = communicationMailboxAccountService.decryptPassword( defaultOrganization.senderMailboxAccount.encryptedPassword )
-//    }
+    public void dataAndMailServerSetUp() {
+        deleteAll()
+        setUpDefaultOrganization()
+        setUpDefaultFolder()
+        setUpDefaultEmailTemplate()
 
-/*    protected void deleteAll() {
+        ServerSetup smtpServerSetup = new ServerSetup( smtp_port, "127.0.0.1", ServerSetup.PROTOCOL_SMTP);
+        mailServer = new GreenMail( smtpServerSetup)
+
+    }
+
+    protected void deleteAll() {
         def sql
         try {
             sessionFactory.currentSession.with { session ->
@@ -140,17 +132,13 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
                 sql.executeUpdate("Delete from GCBSPRP WHERE NOT EXISTS (SELECT S.GCRORAN_SEND_EMAILPROP_ID FROM GCRORAN S WHERE S.GCRORAN_SEND_EMAILPROP_ID = GCBSPRP_SURROGATE_ID)")
                 sql.executeUpdate("Delete from GCRMBAC WHERE NOT EXISTS (SELECT S.GCRORAN_SEND_MAILBOX_ID FROM GCRORAN S WHERE S.GCRORAN_SEND_MAILBOX_ID = GCRMBAC_SURROGATE_ID) AND \
                                                              NOT EXISTS (SELECT R.GCRORAN_REPLY_MAILBOX_ID FROM GCRORAN R WHERE R.GCRORAN_REPLY_MAILBOX_ID = GCRMBAC_SURROGATE_ID)")
-                tx.commit()
+//                tx.commit()
             }
         } finally {
 //            sql?.close()
         }
     }
 
-*//*
-
-
-     *//*
 
 
     protected void setUpDefaultOrganization() {
@@ -210,6 +198,6 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         service.findAll().each {
             service.delete( it )
         }
-    }*/
+    }
 
 }

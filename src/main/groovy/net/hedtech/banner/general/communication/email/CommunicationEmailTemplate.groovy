@@ -14,6 +14,7 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.PrimaryKeyJoinColumn
 import javax.persistence.Table
+import javax.persistence.Transient
 
 @Entity
 @Table(name = "GCBEMTL")
@@ -59,6 +60,9 @@ class CommunicationEmailTemplate extends CommunicationTemplate implements Serial
     @Column(name = "GCBEMTL_TOLIST")
     String toList
 
+    @Transient
+    Long parentVersion
+
     static constraints = {
         bccList(nullable: true, maxSize: 1020)
         ccList(nullable: true, maxSize: 1020)
@@ -70,6 +74,10 @@ class CommunicationEmailTemplate extends CommunicationTemplate implements Serial
 
     public CommunicationEmailTemplate() {
         super( CommunicationChannel.EMAIL )
+    }
+
+    Long getParentVersion() {
+        return super.getVersion()
     }
 
     @Override

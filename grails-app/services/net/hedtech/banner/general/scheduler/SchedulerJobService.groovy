@@ -156,20 +156,26 @@ class SchedulerJobService {
                     .inTimeZone(TimeZone.getTimeZone(jobContext.cronScheduleTimezone))
                     .withMisfireHandlingInstructionFireAndProceed())
 
-            CronTrigger newTrigger = builder.build()
+            TriggerBuilder newBuilder = TriggerBuilder.newTrigger().withIdentity(jobContext.jobId, jobContext.groupId)
+                    .startAt(jobContext.scheduledStartDate)
+                    .withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule)
+                    .inTimeZone(TimeZone.getTimeZone(jobContext.cronScheduleTimezone))
+                    .withMisfireHandlingInstructionFireAndProceed())
+            CronTrigger interimTrigger = newBuilder.build()
 
             Date endDate
             if (jobContext.endDate != null) {
                 endDate = jobContext.endDate
             } else if(jobContext.noOfOccurrences) {
-                endDate = TriggerUtils.computeEndTimeToAllowParticularNumberOfFirings((OperableTrigger) newTrigger,
+                endDate = TriggerUtils.computeEndTimeToAllowParticularNumberOfFirings((OperableTrigger) interimTrigger,
                         new BaseCalendar(Calendar.getInstance().getTimeZone()), jobContext.noOfOccurrences.intValue())
             }
 
+            CronTrigger newTrigger
             if(endDate) {
-                newTrigger = newTrigger.getTriggerBuilder().endAt(endDate).build()
+                newTrigger = builder.endAt(endDate).build()
             } else {
-                newTrigger = newTrigger.getTriggerBuilder().build()
+                newTrigger = builder.build()
             }
             rescheduleJob(oldTrigger.getKey(), newTrigger)
         } catch(CommunicationApplicationException e) {

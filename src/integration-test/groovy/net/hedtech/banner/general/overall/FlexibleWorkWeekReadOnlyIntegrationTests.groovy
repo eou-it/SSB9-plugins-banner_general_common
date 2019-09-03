@@ -69,7 +69,7 @@ class FlexibleWorkWeekReadOnlyIntegrationTests extends BaseIntegrationTestCase {
         def fww = new FlexibleWorkWeekReadOnly()
         fww.id = 11111111
         fww.version = 11111111
-        shouldFail(UncategorizedSQLException) {
+        shouldFail {
             fww.save(failOnError: true, flush: true)
         }
     }
@@ -82,7 +82,7 @@ class FlexibleWorkWeekReadOnlyIntegrationTests extends BaseIntegrationTestCase {
 
         // Update domain values
         fww.firstWeekendDay = 999999
-        shouldFail(UncategorizedSQLException) {
+        shouldFail {
             fww.save(failOnError: true, flush: true)
         }
     }

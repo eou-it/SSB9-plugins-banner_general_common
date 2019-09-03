@@ -29,6 +29,7 @@ import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.commons.lang.StringUtils
 import org.springframework.security.core.context.SecurityContextHolder
 import grails.gorm.transactions.Transactional
+import org.springframework.web.context.request.RequestContextHolder
 
 import java.sql.Connection
 import java.sql.SQLException
@@ -70,6 +71,14 @@ class CommunicationPopulationCompositeService {
         population.description = description
         population.changesPending = true
         population.setSystemIndicator(systemIndicator)
+
+        if (RequestContextHolder?.getRequestAttributes()?.request?.session) {
+            def session = RequestContextHolder.currentRequestAttributes()?.request?.session
+            def mepCode = session?.getAttribute("mep")
+            if (mepCode != null) {
+                population.setMepCode(mepCode)
+            }
+        }
         population = communicationPopulationService.create( population )
         return population
     }
@@ -367,6 +376,13 @@ class CommunicationPopulationCompositeService {
             population.scheduledDate = scheduledDate
             population.status = CommunicationPopulationCalculationStatus.SCHEDULED
         }
+        if (RequestContextHolder?.getRequestAttributes()?.request?.session) {
+            def session = RequestContextHolder.currentRequestAttributes()?.request?.session
+            def mepCode = session?.getAttribute("mep")
+            if (mepCode != null) {
+                population.setMepCode(mepCode)
+            }
+        }
         population = communicationPopulationService.create( population )
 
         CommunicationPopulationQueryAssociation populationQueryAssociation = new CommunicationPopulationQueryAssociation()
@@ -409,6 +425,13 @@ class CommunicationPopulationCompositeService {
         if(scheduledDate) {
             population.scheduledDate = scheduledDate
             population.status = CommunicationPopulationCalculationStatus.SCHEDULED
+        }
+        if (RequestContextHolder?.getRequestAttributes()?.request?.session) {
+            def session = RequestContextHolder.currentRequestAttributes()?.request?.session
+            def mepCode = session?.getAttribute("mep")
+            if (mepCode != null) {
+                population.setMepCode(mepCode)
+            }
         }
         population = communicationPopulationService.create( population )
 
@@ -659,11 +682,11 @@ class CommunicationPopulationCompositeService {
             try {
                 communicationPopulationCalculationService.delete( calculation )
             } catch( ApplicationException e ) {
-                if (e.getWrappedException()?.getCause()?.getConstraintName()?.equals( "GENERAL.FK1_GCBGSND_INV_GCRPOPC" )) {
-                    throw CommunicationExceptionFactory.createApplicationException(this.getClass(), "cannotDeletePopulationWithExistingGroupSends")
-                } else {
+//                if (e.getWrappedException()?.getCause()?.getConstraintName()?.equals( "GENERAL.FK1_GCBGSND_INV_GCRPOPC" )) {
+//                    throw CommunicationExceptionFactory.createApplicationException(this.getClass(), "cannotDeletePopulationWithExistingGroupSends")
+//                } else {
                     throw e
-                }
+//                }
             }
 
             if (selectionList) {
@@ -736,7 +759,8 @@ class CommunicationPopulationCompositeService {
         long totalCount = 0
         CommunicationPopulationQueryExecutionResult result
         try {
-            result = communicationPopulationQueryExecutionService.execute( calculation.populationQueryVersion.id, calculation.calculatedBy )
+            //Calling execute as commmgr when it comes from recalc is fine as it gets stored in the tables as commmgr. Role needs to be set by spoofer properly.
+            result = communicationPopulationQueryExecutionService.execute( calculation.populationQueryVersion.id,  calculation.calculatedBy)
             if (result.selectionListId && !result.errorString) {
                 calculation.selectionList = CommunicationPopulationSelectionList.fetchById( result.selectionListId )
                 totalCount += result.calculatedCount
@@ -792,6 +816,7 @@ class CommunicationPopulationCompositeService {
         try {
             CommunicationPopulationVersion populationVersion = new CommunicationPopulationVersion()
             populationVersion.population = population
+            populationVersion.mepCode = population.mepCode
             populationVersion.includeList = cloneSelectionList( population.includeList )
 
             populationVersion = (CommunicationPopulationVersion) communicationPopulationVersionService.create( populationVersion )
@@ -894,6 +919,7 @@ class CommunicationPopulationCompositeService {
         populationCalculation.calculatedBy = calculatedBy
         populationCalculation.status = CommunicationPopulationCalculationStatus.PENDING_EXECUTION
         populationCalculation.jobId = UUID.randomUUID().toString()
+        populationCalculation.mepCode = populationVersion.mepCode
         populationCalculation = communicationPopulationCalculationService.create(populationCalculation)
         return populationCalculation
     }

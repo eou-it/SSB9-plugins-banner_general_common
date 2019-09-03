@@ -18,7 +18,7 @@ class SectionMeetingTimeConflictViewIntegrationTests extends net.hedtech.banner.
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 

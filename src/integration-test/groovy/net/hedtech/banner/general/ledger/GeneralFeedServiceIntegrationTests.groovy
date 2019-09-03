@@ -19,7 +19,7 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 
@@ -29,7 +29,7 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
         super.tearDown()
     }
 
-/*    @Test
+    @Test
     public void testCreate() {
         GeneralFeed generalFeed = generalFeedService.create(createNewGenerealFeed())
         assertNotNull(generalFeed)
@@ -71,9 +71,9 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     public void testTransactionExistDataPresent() {
-        runSeedData('general-ledger-gurfeed')
+//        runSeedData('general-ledger-gurfeed')
         assertEquals(true, generalFeedService.transactionNumberExist(['DCITTST']))
-        runSeedData('general-ledger-gurfeed-clean')
+//        runSeedData('general-ledger-gurfeed-clean')
     }
 
     @Test
@@ -81,7 +81,7 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals(false, generalFeedService.transactionNumberExist(['DCITTST']))
     }
 
-    def runSeedData(String seedTestTarget) {
+    /*def runSeedData(String seedTestTarget) {
         def clazzInputData = Thread.currentThread().contextClassLoader.loadClass("net.hedtech.banner.seeddata.InputData")
         def inputData = clazzInputData.newInstance([dataSource: dataSource])
 
@@ -101,7 +101,7 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
             def seedDataLoader = new net.hedtech.banner.seeddata.SeedDataLoader(inputData)
             seedDataLoader.execute()
         }
-    }
+    }*/
 
     private createNewGenerealFeed(Map properties) {
         GeneralFeed generalFeed = new GeneralFeed()
@@ -140,5 +140,5 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
         }
 
         return generalFeed
-    }*/
+    }
 }

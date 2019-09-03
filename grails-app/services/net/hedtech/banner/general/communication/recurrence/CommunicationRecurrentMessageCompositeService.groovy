@@ -124,7 +124,7 @@ class CommunicationRecurrentMessageCompositeService {
         return recurrentMessage
     }
 
-    private void reScheduleRecurrentMessage( CommunicationRecurrentMessage recurrentMessage, String bannerUser ) {
+    private void reScheduleRecurrentMessage( CommunicationRecurrentMessage recurrentMessage, String bannerUser, boolean recurrencesUpdated ) {
 
         Date now = new Date()
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
@@ -143,14 +143,19 @@ class CommunicationRecurrentMessageCompositeService {
             }
         }
 
+        //Just refresh the object right before setting the final number of occurences to the Qartz job, this would help jobs of lesser fire frequency to have the correct count
+        recurrentMessage.refresh()
+        Long noOfOccurrences = recurrencesUpdated && recurrentMessage.noOfOccurrences ? recurrentMessage.noOfOccurrences - recurrentMessage.totalCount : recurrentMessage.noOfOccurrences
+        Date scheduledStartDate = recurrencesUpdated? Calendar.getInstance().getTime() : recurrentMessage.startDate
+
         SchedulerJobContext jobContext = new SchedulerJobContext( recurrentMessage.jobId )
                 .setBannerUser( bannerUser )
                 .setMepCode( recurrentMessage.mepCode )
                 .setCronSchedule( recurrentMessage.cronExpression )
                 .setCronScheduleTimezone(recurrentMessage.cronTimezone)
-                .setScheduledStartDate(recurrentMessage.startDate)
+                .setScheduledStartDate(scheduledStartDate)
                 .setEndDate(recurrentMessage.endDate)
-                .setNoOfOccurrences(recurrentMessage.noOfOccurrences)
+                .setNoOfOccurrences(noOfOccurrences)
                 .setParameter( "recurrentMessageId", recurrentMessage.id )
 
         jobContext.setJobHandle( "communicationRecurrentMessageCompositeService", "generateGroupSendFired" )
@@ -189,6 +194,8 @@ class CommunicationRecurrentMessageCompositeService {
                 recurrentMessage = generateGroupSendImpl(recurrentMessage)
             } catch (Throwable t) {
                 log.error(t.getMessage())
+                //Re-read the recurrent message if the throwable is of OptimisticLockException to avoid getting into a loop
+                recurrentMessage.refresh()
                 recurrentMessage.setCurrentExecutionState(CommunicationGroupSendExecutionState.Error)
                 recurrentMessage.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
                 recurrentMessage.errorText = t.printStackTrace()
@@ -218,10 +225,12 @@ class CommunicationRecurrentMessageCompositeService {
         def asynchronousBannerAuthenticationSpoofer = Holders.applicationContext.getBean( "asynchronousBannerAuthenticationSpoofer" )
         def originalMap = null
         try {
-            originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave(recurrentMessage.createdBy, recurrentMessage.mepCode)
+       //     originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave(recurrentMessage.createdBy, recurrentMessage.mepCode)
 
-            CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+            CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request,recurrentMessage.createdBy, recurrentMessage.mepCode)
 
+            //Re-read the recurrent message if the throwable is of OptimisticLockException to avoid getting into a loop
+            recurrentMessage.refresh()
             if (!recurrentMessage.currentExecutionState.isTerminalWithoutErrors()) {
                 recurrentMessage.setCurrentExecutionState(CommunicationGroupSendExecutionState.Scheduled)
             }
@@ -233,9 +242,8 @@ class CommunicationRecurrentMessageCompositeService {
             log.error("Error occurred when creating group send from recurrent message " + t.printStackTrace())
             throw t;
         } finally {
-            if (originalMap) {
-                asynchronousBannerAuthenticationSpoofer.resetAuthAndFormContext( originalMap )
-            }
+
+
         }
         return recurrentMessage
     }
@@ -341,9 +349,12 @@ class CommunicationRecurrentMessageCompositeService {
         if (log.isDebugEnabled()) log.debug( "Method updateRecurrentMessageCommunication reached." );
 
         boolean rescheduleNeeded = false;
+        boolean recurrencesUpdated = false;
+
         CommunicationRecurrentMessage oldRecurrentMessage = CommunicationRecurrentMessage.get(recurrentMessage.id)
         if(recurrentMessage.cronExpression != null && !oldRecurrentMessage.cronExpression.equalsIgnoreCase(recurrentMessage.cronExpression)) {
             rescheduleNeeded = true;
+            recurrencesUpdated = true;
         }
 
         Date now = new Date()
@@ -357,6 +368,7 @@ class CommunicationRecurrentMessageCompositeService {
             if(today.compareTo(oldScheduledDate) == 0) {
                 //no change to start date as it the scheduled date is for today
                 recurrentMessage.startDate = oldRecurrentMessage.startDate
+                recurrencesUpdated = true
             } else {
                 recurrentMessage.startDate = now
                 rescheduleNeeded = true;
@@ -378,6 +390,10 @@ class CommunicationRecurrentMessageCompositeService {
                 //new end date added
                 rescheduleNeeded = true;
             }
+        } else {
+            if(oldRecurrentMessage.endDate) {
+                rescheduleNeeded = true
+            }
         }
 
         if(recurrentMessage.noOfOccurrences) {
@@ -385,8 +401,15 @@ class CommunicationRecurrentMessageCompositeService {
                 rescheduleNeeded = true;
             } else if(oldRecurrentMessage.noOfOccurrences != recurrentMessage.noOfOccurrences) {
                 rescheduleNeeded = true
+                recurrencesUpdated = true
+            }
+        } else {
+            if(oldRecurrentMessage.noOfOccurrences) {
+                rescheduleNeeded = true
+                recurrencesUpdated = true
             }
         }
+
         if(rescheduleNeeded) {
             recurrentMessage.createdBy = oldRecurrentMessage.createdBy
             recurrentMessage.creationDateTime = oldRecurrentMessage.creationDateTime
@@ -399,7 +422,7 @@ class CommunicationRecurrentMessageCompositeService {
 
             String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
 
-            reScheduleRecurrentMessage(recurrentMessage, bannerUser)
+            reScheduleRecurrentMessage(recurrentMessage, bannerUser, recurrencesUpdated)
         }
 
 

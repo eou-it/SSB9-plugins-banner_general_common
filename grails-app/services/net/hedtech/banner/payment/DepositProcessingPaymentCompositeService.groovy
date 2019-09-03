@@ -84,7 +84,6 @@ class DepositProcessingPaymentCompositeService extends CommonProcessPaymentCompo
         callFunction( "{ ? = call gokfunc.f_get_default_subcode(group_in =>  ?, default_label_in => ?, default_group_in => ? )}", [Sql.VARCHAR, 'WEBPAYGCCID', 'DEFAULT', defaultGroup], {returnMessage ->
             subCode = returnMessage
         } )
-        println( 'subCode' + subCode )
         subCode
     }
 

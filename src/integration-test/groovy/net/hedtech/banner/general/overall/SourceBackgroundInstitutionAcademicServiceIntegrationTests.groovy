@@ -22,7 +22,7 @@ class SourceBackgroundInstitutionAcademicServiceIntegrationTests extends BaseInt
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 
