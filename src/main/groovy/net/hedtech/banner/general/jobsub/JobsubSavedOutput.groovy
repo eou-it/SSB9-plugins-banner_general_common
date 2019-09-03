@@ -122,6 +122,14 @@ class JobsubSavedOutput implements Serializable {
     @Transient
     FileOutputStream jobsubOutput
 
+
+    static constraints = {
+        printDate(nullable: true)
+        printer(nullable: true)
+        printForm(nullable:true)
+        dataOrigin(nullable: true)
+    }
+
     /**
      * Fetch list of print jobs with blank print date for list of printers
      * @param printers

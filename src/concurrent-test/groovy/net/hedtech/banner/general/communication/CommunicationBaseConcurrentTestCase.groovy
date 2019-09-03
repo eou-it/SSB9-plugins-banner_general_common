@@ -121,7 +121,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     CommunicationParameterService communicationParameterService
     CommunicationEventMappingService communicationEventMappingService
 
-    GrailsTestInterceptor interceptor
+//    GrailsTestInterceptor interceptor
 
     protected CommunicationOrganization defaultOrganization
     protected CommunicationFolder defaultFolder
@@ -165,13 +165,13 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         }
 
         GrailsWebMockUtil.bindMockWebRequest(webAppCtx)
-        interceptor = new GrailsTestInterceptor(this, new GrailsTestMode( autowire: true,
-                wrapInRequestEnvironment: true,
-                wrapInTransaction: true),
-                grails.util.Holders.grailsApplication.mainContext,
-                ['ConcurrentTests'] as String[] )
-
-        interceptor?.init()
+//        interceptor = new GrailsTestInterceptor(this, new GrailsTestMode( autowire: true,
+//                wrapInRequestEnvironment: true,
+//                wrapInTransaction: true),
+//                grails.util.Holders.grailsApplication.mainContext,
+//                ['ConcurrentTests'] as String[] )
+//
+//        interceptor?.init()
 //        def webRequest = GrailsWebMockUtil.bindMockWebRequest(webAppCtx,new GrailsMockHttpServletRequest(), new GrailsMockHttpServletResponse())
 
         if (controller) {
@@ -211,7 +211,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     @After
     public void tearDown() {
         FormContext.clear()
-        interceptor?.destroy()
+//        interceptor?.destroy()
     }
 
     public void assertTrueWithRetry( Closure booleanClosure, Object arguments, long maxAttempts, int pauseBetweenAttemptsInSeconds = 5 ) {

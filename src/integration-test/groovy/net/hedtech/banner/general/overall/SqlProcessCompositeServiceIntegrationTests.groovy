@@ -27,7 +27,7 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
     @Before
     void setUp() {
 
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 

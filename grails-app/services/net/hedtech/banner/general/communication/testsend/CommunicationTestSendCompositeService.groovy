@@ -25,6 +25,7 @@ import net.hedtech.banner.general.communication.template.CommunicationMessage
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import org.springframework.transaction.annotation.Propagation
 import grails.gorm.transactions.Transactional
+import org.springframework.web.context.request.RequestContextHolder
 
 @Slf4j
 @Transactional
@@ -92,28 +93,30 @@ class CommunicationTestSendCompositeService  {
         }
     }
 
+    def getSessionMepCode() {
+        def session = RequestContextHolder?.currentRequestAttributes()?.request?.session
+        def mepCode = session?.getAttribute("mep")
+        return mepCode
+    }
 
     def sendTestEmail (Long pidm, Long organizationId, Long templateId, Map parameterNameValuesMap) {
         def organization = fetchOrg(organizationId)
         try {
             checkOrgEmail(organization)
         } catch (Throwable t) {
-            log.error(t)
-            def root = CommunicationOrganization.fetchRoot()
-            if (!root)
-                    throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
-            if (!root.sendEmailServerProperties || !root.sendEmailServerProperties?.id)
-                    throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.serverPropertiesNotFound"), CommunicationErrorCode.SERVER_PROPERTIES_NOT_FOUND.name())
-
+            log.error(t.message)
+            if (t instanceof ApplicationException)
+                throw t
+            throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.testSendTemplate.email"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
         }
         CommunicationTemplate template = fetchTemplate(templateId)
         def fieldNames = visitEmail(template as CommunicationEmailTemplate)
-        def recipientData = createCommunicationRecipientData( pidm, organizationId,  templateId, fieldNames, parameterNameValuesMap, template.mepCode)
+        def recipientData = createCommunicationRecipientData( pidm, organizationId,  templateId, fieldNames, parameterNameValuesMap, ((getSessionMepCode() != null)? getSessionMepCode():template.mepCode))
 
         try {
             sendCommunicationWithNewTransaction(recipientData, template, organization, organizationId, pidm)
         } catch (Throwable t) {
-            log.error(t)
+            log.error(t.message)
             if (t instanceof ApplicationException)
                 throw t
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.testSendTemplate.email"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
@@ -128,7 +131,7 @@ class CommunicationTestSendCompositeService  {
         try {
             checkOrgMobile(organization)
         } catch (Throwable t) {
-            log.error(t)
+            log.error(t.message)
             def root = CommunicationOrganization.fetchRoot()
             checkOrgMobile(root)
         }
@@ -136,12 +139,12 @@ class CommunicationTestSendCompositeService  {
         CommunicationTemplate template = fetchTemplate(templateId)
         checkExternalIdExists(pidm)
         def fieldNames = visitMobileNotification(template as CommunicationMobileNotificationTemplate)
-        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames, parameterNameValuesMap, template.mepCode)
+        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames, parameterNameValuesMap, ((getSessionMepCode() != null)? getSessionMepCode():template.mepCode))
 
         try {
             sendCommunicationWithNewTransaction(recipientData, template, organization, organizationId, pidm)
         } catch (Throwable t) {
-            log.error(t)
+            log.error(t.message)
             if (t instanceof ApplicationException)
                 throw t
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.testSendTemplate.mobile"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
@@ -161,7 +164,7 @@ class CommunicationTestSendCompositeService  {
         try {
             return sendCommunicationWithNewTransaction(recipientData, template, organization, organizationId, pidm)
         } catch (Throwable t) {
-            log.error(t)
+            log.error(t.message)
             if (t instanceof ApplicationException)
                 throw t
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.testSendTemplate.letter"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
@@ -215,7 +218,7 @@ class CommunicationTestSendCompositeService  {
             fieldNames << it
         }
         fieldNames = fieldNames.unique()
-        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames, parameterNameValuesMap, template.mepCode, true)
+        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames, parameterNameValuesMap, ((getSessionMepCode() != null)? getSessionMepCode():template.mepCode), true)
         return recipientData
     }
 
@@ -247,7 +250,8 @@ class CommunicationTestSendCompositeService  {
                 fieldValues: fieldNameValueMap,
                 organizationId: organizationId,
                 communicationChannel: channel,
-                templateId: templateId
+                templateId: templateId,
+                mepCode:mepCode
         )
     }
 
@@ -257,7 +261,7 @@ class CommunicationTestSendCompositeService  {
             if (!externalId)
                 throw new RuntimeException("External Id not found.")
         } catch (Throwable e) {
-            log.error(e)
+            log.error(e.message)
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.emptyExternalId"), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER.name())
         }
     }
@@ -267,7 +271,7 @@ class CommunicationTestSendCompositeService  {
         try {
             return CommunicationOrganization.fetchById(organizationId)
         } catch (Throwable t) {
-            log.error(t)
+            log.error(t.message)
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
         }
     }
@@ -278,7 +282,7 @@ class CommunicationTestSendCompositeService  {
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
         if (!org.sendEmailServerProperties)
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.serverPropertiesNotFound"), CommunicationErrorCode.SERVER_PROPERTIES_NOT_FOUND.name())
-        if (!org.senderMailboxAccount)
+        if (!org.senderMailboxAccount || !org.replyToMailboxAccount)
                 throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.invalidSenderMailbox"), CommunicationErrorCode.INVALID_SENDER_MAILBOX.name())
     }
 
@@ -307,10 +311,10 @@ class CommunicationTestSendCompositeService  {
             service.validatePublished(template)
             return template
         } catch (ApplicationException e) {
-            log.error(e)
+            log.error(e.message)
             throw e
         } catch (Throwable t) {
-            log.error(t)
+            log.error(t.message)
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.templateErrorUnknown"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
         }
     }

@@ -23,7 +23,7 @@ class UserActiveActionItemIntegrationTest extends BaseIntegrationTestCase {
 
     @Before
     void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE','GUAGMNU']
         super.setUp()
     }
 
@@ -74,7 +74,7 @@ class UserActiveActionItemIntegrationTest extends BaseIntegrationTestCase {
         userActiveActionItem.displayEndDate=new Date()+20
 
         shouldFail(UncategorizedSQLException) {
-        userActiveActionItem.save(flush :true , ailOnError: true)}
+        userActiveActionItem.save(flush :true , failOnError: true)}
     }
 
 

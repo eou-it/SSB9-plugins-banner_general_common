@@ -76,7 +76,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         communicationGroupSendItemProcessingEngine.stopRunning()
         communicationJobProcessingEngine.stopRunning()
 
-        deleteAll()
+//        deleteAll()
         super.tearDown()
         sessionFactory.currentSession?.close()
         logout()
@@ -89,9 +89,10 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
     }
 
     @Test
-//    @Transactional(propagation= Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
+    @Transactional
     public void testAllSpridenPopulationFromQuery() {
-        setUpData()
+//        setUpData()
+        setUpDefaultFolder()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 folder: defaultFolder,
                 name: "testAllSpridenPopulationFromQuery",
@@ -116,7 +117,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         assertEquals( populationQuery.id, association.populationQuery.id )
         assertNull( association.populationQueryVersion )
 
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy(population.id, 'BCMADMIN')
         assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
             def theCalculation = CommunicationPopulationCalculation.get( it )

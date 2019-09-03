@@ -19,7 +19,7 @@ class GeneralFeedShadowServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 
@@ -29,7 +29,7 @@ class GeneralFeedShadowServiceIntegrationTests extends BaseIntegrationTestCase {
         super.tearDown()
     }
 
-/*    @Test
+    @Test
     public void testCreate() {
         GeneralFeedShadow generalFeedShadow = generalFeedShadowService.create(createNewGenerealFeed())
         assertNotNull(generalFeedShadow)
@@ -71,19 +71,19 @@ class GeneralFeedShadowServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     public void testFetchAllByGuidInListValidValues() {
-        runSeedData('general-ledger')
+//        runSeedData('general-ledger')
         String guid = GeneralFeedShadow.findAll().guid.unique()[0]
         assertNotNull(guid)
         assertEquals([guid], generalFeedShadowService.fetchAllByGuidInList([guid]).guid.unique())
         String guid1 = GeneralFeedShadow.findAll().guid.unique()[1]
         assertNotNull(guid1)
         assertEquals([guid, guid1].unique().sort(), generalFeedShadowService.fetchAllByGuidInList([guid, guid1]).guid.unique().sort())
-        runSeedData('general-ledger-clean')
+//        runSeedData('general-ledger-clean')
     }
 
     @Test
     public void testFetchByGuid() {
-        runSeedData('general-ledger')
+//        runSeedData('general-ledger')
         String guid = GeneralFeedShadow.findAll().guid.unique()[0]
         assertNotNull(guid)
         assertEquals([guid], generalFeedShadowService.fetchByGuid(guid).guid.unique())
@@ -120,7 +120,7 @@ class GeneralFeedShadowServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    def runSeedData(String seedTestTarget) {
+/*    def runSeedData(String seedTestTarget) {
         def clazzInputData = Thread.currentThread().contextClassLoader.loadClass("net.hedtech.banner.seeddata.InputData")
         def inputData = clazzInputData.newInstance([dataSource: dataSource])
 

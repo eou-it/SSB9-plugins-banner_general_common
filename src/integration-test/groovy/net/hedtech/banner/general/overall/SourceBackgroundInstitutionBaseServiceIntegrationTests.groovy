@@ -25,7 +25,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 

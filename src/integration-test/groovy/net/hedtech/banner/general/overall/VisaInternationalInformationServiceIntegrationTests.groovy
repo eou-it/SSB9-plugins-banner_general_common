@@ -23,7 +23,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 

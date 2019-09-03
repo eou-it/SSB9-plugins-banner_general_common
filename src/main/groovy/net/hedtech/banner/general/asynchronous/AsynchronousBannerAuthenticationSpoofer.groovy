@@ -25,10 +25,11 @@ import java.sql.SQLException
 /**
  * An authentication provider for batch threads that authorize a user using behind a batch job thread.
  */
-@Transactional
+
 public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationProvider {
     private static final log = Logger.getLogger(AsynchronousBannerAuthenticationSpoofer.class)
     public static final monitorOracleUserName = 'COMMMGR'
+    public static final monitorOracleUserNameForHR = 'COMMHRMGR'
 
     def dataSource  // injected by Spring
     MultiEntityProcessingService multiEntityProcessingService
@@ -55,7 +56,9 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
             if (log.isDebugEnabled()) log.debug("Authenticated as ${monitorOracleUserName} for async task process monitor thread.")
         } else {
             //adding this here for grails 3 as the form context value was getting blanked out at some point
-            FormContext.set(['CMQUERYEXECUTE'])
+            if(CommunicationCommonUtility.getUserOracleUserName().equals(monitorOracleUserName) || CommunicationCommonUtility.getUserOracleUserName().equals(monitorOracleUserNameForHR)) {
+                FormContext.set(['CMQUERYEXECUTE'])
+            }
             log.debug("Already authenticated as ${SecurityContextHolder.getContext().getAuthentication().principal.toString()}.")
         }
     }

@@ -58,6 +58,9 @@ class CommunicationMobileNotificationTemplate extends CommunicationTemplate impl
     @Type(type="yes_no")
     boolean sticky = false
 
+    @Transient
+    Long parentVersion
+
     public CommunicationMobileNotificationTemplate() {
         super( CommunicationChannel.MOBILE_NOTIFICATION )
     }
@@ -74,6 +77,10 @@ class CommunicationMobileNotificationTemplate extends CommunicationTemplate impl
         expirationDateTime(nullable: true)
         push(nullable: false)
         sticky(nullable: false)
+    }
+
+    Long getParentVersion() {
+        return super.getVersion()
     }
 
     @Override

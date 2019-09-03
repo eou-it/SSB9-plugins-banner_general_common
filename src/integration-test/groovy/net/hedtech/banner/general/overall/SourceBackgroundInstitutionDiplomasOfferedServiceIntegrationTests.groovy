@@ -26,7 +26,7 @@ class SourceBackgroundInstitutionDiplomasOfferedServiceIntegrationTests extends 
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 

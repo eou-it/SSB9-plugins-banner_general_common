@@ -87,9 +87,6 @@ class CommunicationItemGurmailCodeAssociation implements Serializable {
     @Column(name = "GCRLMAP_DATA_ORIGIN")
     String dataOrigin
 
-    @Column(name = "GCRLMAP_VPDI_CODE")
-    String mepCode
-
 
     static constraints = {
         referenceId(nullable: false)
@@ -97,7 +94,6 @@ class CommunicationItemGurmailCodeAssociation implements Serializable {
         gurmailAction(nullable: true)
         errorCode(nullable: true)
         errorText(nullable: true)
-        mepCode(nullable: true)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)

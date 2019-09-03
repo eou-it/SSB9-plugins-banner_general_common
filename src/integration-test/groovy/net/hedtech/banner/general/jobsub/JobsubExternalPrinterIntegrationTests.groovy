@@ -29,7 +29,7 @@ class JobsubExternalPrinterIntegrationTests extends BaseIntegrationTestCase {
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
+        formContext = ['SELFSERVICE'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
@@ -143,7 +143,7 @@ class JobsubExternalPrinterIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull pendingPrint.id
         assertNotNull pendingPrint.version
 
-        shouldFail(UncategorizedSQLException) {
+        shouldFail(grails.validation.ValidationException) {
             pendingPrint.save(flush: true, failOnError: true)
         }
 
@@ -158,7 +158,7 @@ class JobsubExternalPrinterIntegrationTests extends BaseIntegrationTestCase {
         assertTrue pendingPrint.job != "TESTAPP"
         pendingPrint.job = "TESTAPP"
 
-        shouldFail(UncategorizedSQLException) {
+        shouldFail(grails.validation.ValidationException) {
             pendingPrint.save(flush: true, failOnError: true)
         }
 

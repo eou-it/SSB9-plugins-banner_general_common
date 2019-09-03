@@ -31,7 +31,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
     
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 
@@ -328,7 +328,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
                 apIndicator: "I",
                 hrIndicator: "A",
                 bankAccountNum: "36948575",
-                bankRoutingInfo: [bankRoutingNum: "234798944"],
+                bankRoutingInfo: [bankRoutingNum: "234798944", bankName: 'TTTT-T1'],
                 amount: null,
                 percent: 11.0,
                 accountType: "C",
@@ -349,7 +349,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
                 apIndicator: "I",
                 hrIndicator: "A",
                 bankAccountNum: "36948575",
-                bankRoutingInfo: [bankRoutingNum: "234798944"],
+                bankRoutingInfo: [bankRoutingNum: "234798944", bankName: 'TTTT-T2'],
                 amount: null,
                 percent: 11.0,
                 accountType: "S",
@@ -380,7 +380,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
                 apIndicator: "I",
                 hrIndicator: "A",
                 bankAccountNum: "36948575",
-                bankRoutingInfo: [bankRoutingNum: "234798944"],
+                bankRoutingInfo: [bankRoutingNum: "234798944", bankName: 'TTTT-T3'],
                 amount: null,
                 percent: 11.0,
                 accountType: "C",
@@ -403,7 +403,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
                 apIndicator: "A",
                 hrIndicator: "I",
                 bankAccountNum: "36948575",
-                bankRoutingInfo: [bankRoutingNum: "234798944"],
+                bankRoutingInfo: [bankRoutingNum: "234798944", bankName: 'TTTT-T4'],
                 amount: null,
                 percent: 100.0,
                 accountType: "C",
@@ -435,7 +435,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
             apIndicator: "A",
             hrIndicator: "A",
             bankAccountNum: "36948575",
-            bankRoutingInfo: [bankRoutingNum: "234798944"],
+            bankRoutingInfo: [bankRoutingNum: "234798944", bankName: 'TTTT-T5'],
             amount: null,
             percent: 11.0,
             accountType: "C",
@@ -989,7 +989,8 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
                 hrIndicator: account.hrIndicator,
                 bankAccountNum: account.bankAccountNum,
                 bankRoutingInfo: [
-                        bankRoutingNum: account.bankRoutingInfo.bankRoutingNum
+                        bankRoutingNum: account.bankRoutingInfo.bankRoutingNum,
+                        bankName : account.bankRoutingInfo.bankName
                 ],
                 amount: account.amount,
                 percent: account.percent,

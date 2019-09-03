@@ -15,7 +15,7 @@ import org.junit.Test
 class GeneralFeedShadowIntegrationTests extends BaseIntegrationTestCase {
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 

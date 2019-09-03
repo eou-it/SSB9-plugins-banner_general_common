@@ -27,7 +27,7 @@ class SourceBackgroundInstitutionCharacteristicServiceIntegrationTests extends B
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 

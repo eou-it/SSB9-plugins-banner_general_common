@@ -78,7 +78,7 @@ class BannerServiceMethodJob implements Job {
         def asynchronousBannerAuthenticationSpoofer = Holders.applicationContext.getBean( "asynchronousBannerAuthenticationSpoofer" )
         def originalMap = null
         try {
-            if (methodHandle.service.contains("RecurrentMessageCompositeService")) {
+            if (methodHandle.service.contains("RecurrentMessageCompositeService") || methodHandle.service.contains("GroupSendCompositeService")) {
                 originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
             } else {
                 originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave(oracleUserName, mepCode)

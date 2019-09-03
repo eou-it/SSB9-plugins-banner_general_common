@@ -126,7 +126,8 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
             ownerId: groupSendItem.communicationGroupSend.createdBy,
             fieldValues: fieldNameValueMap,
             organizationId: groupSendItem.communicationGroupSend.organizationId,
-            communicationChannel: template.communicationChannel
+            communicationChannel: template.communicationChannel,
+            mepCode: groupSendItem.mepCode
         )
 
     }

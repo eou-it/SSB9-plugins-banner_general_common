@@ -60,7 +60,7 @@ class CommunicationTextMessageTemplateServiceIntegrationTests extends BaseIntegr
     }
 
     void setUpData() {
-        defaultFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave("default folder")
+        defaultFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
     }
 
     @Test

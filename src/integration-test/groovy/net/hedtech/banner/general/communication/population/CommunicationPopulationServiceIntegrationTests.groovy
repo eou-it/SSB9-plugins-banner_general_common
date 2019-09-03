@@ -37,7 +37,7 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['GUAGMNU','SELFSERVICE']
         super.setUp()
         webAppCtx = new GrailsWebApplicationContext()
         mockRequest()
@@ -58,7 +58,7 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
     }
 
     void setUpData() {
-        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolder()
+        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
     }
 
     @Test
@@ -110,10 +110,10 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
 
     @Test
     void testCreatePopulationWithGrailsUser() {
+        def population = newPopulation("TEST" )
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('grails_user', 'u_pick_it'))
         SecurityContextHolder.getContext().setAuthentication(auth)
 
-        def population = newPopulation("TEST" )
         try {
             population = communicationPopulationService.create( [domainModel: population] )
             fail( 'expected failure' )
@@ -126,10 +126,10 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
     void testCreateWithMissingFolder() {
         def population = newPopulation("TEST" )
         population.folder = null
-        def message = shouldFail( ApplicationException ) {
+        def exception = shouldFail( ApplicationException ) {
             communicationPopulationService.create( [domainModel: population] )
         }
-        assertEquals "Incorrect failure message returned", "@@r1:folderCannotBeNull@@", message
+        assertEquals "Incorrect failure message returned", "@@r1:folderCannotBeNull@@", exception.wrappedException.message
     }
 
 
@@ -227,7 +227,10 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
 
 
     private def newPopulation(String populationName) {
-        setUpData()
+        if(!testFolder) {
+            setUpData()
+        }
+
         def population = new CommunicationPopulation(
                 // Required fields
                 folder: testFolder,
