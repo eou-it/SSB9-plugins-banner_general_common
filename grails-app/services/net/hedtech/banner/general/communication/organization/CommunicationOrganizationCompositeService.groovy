@@ -56,9 +56,13 @@ class CommunicationOrganizationCompositeService {
     }
 
     void deleteOrganization( Map organizationAsMap ) {
-        CommunicationOrganization organization = this.getOrganization( organizationAsMap.id )
-        communicationOrganizationService.delete( organizationAsMap )
-        removeDependentMailboxAccountsAndEmailServerProperties( organization )
+        try {
+            CommunicationOrganization organization = this.getOrganization(organizationAsMap.id)
+            communicationOrganizationService.delete(organizationAsMap)
+            removeDependentMailboxAccountsAndEmailServerProperties(organization)
+        } catch(Exception e) {
+            throw e;
+        }
     }
 
     Boolean emailDetailExists(id) {
