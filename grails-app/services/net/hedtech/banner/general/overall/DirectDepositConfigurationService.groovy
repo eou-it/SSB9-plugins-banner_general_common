@@ -48,6 +48,7 @@ class DirectDepositConfigurationService extends ServiceBase {
 
         // Add "are accounts updatable" param
         retParams.areAccountsUpdatable = directDepositAccountCompositeService.areAccountsUpdatable()
+        retParams.enableVerifyAccountNumber = directDepositAccountCompositeService.isVerifyAccountNumberEnabled()
 
         retParams
     }
