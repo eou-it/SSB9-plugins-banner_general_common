@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import grails.util.Holders
 import groovy.sql.Sql
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.exceptions.ApplicationException
@@ -11,6 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 class DirectDepositAccountService extends ServiceBase{
 
     static transactional = true
+
+    def directDepositAccountCompositeService
     
     def validateAccountNumFormat(accountNum) {
         Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
@@ -230,6 +233,30 @@ class DirectDepositAccountService extends ServiceBase{
         if(existingAccounts) {
             if (existingAccounts.size() > 1 || existingAccounts[0].id != account.id) {
                 throw new ApplicationException(DirectDepositAccount, "@@r1:recordAlreadyExists@@")
+            }
+        }
+    }
+
+    def validateRemainingAmountStatusValid(accts, isDelete=false) {
+        def remainingAmountAllowed = Holders?.config?.directDeposit?.remainingAmountAllowed
+
+        if (remainingAmountAllowed instanceof Boolean && !remainingAmountAllowed) {
+            def hrAllocs = directDepositAccountCompositeService.getUserHrAllocationsAsListOfMaps(getPrincipalPidm())
+
+            hrAllocs.allocations.removeAll{ existing ->
+                accts.any {acct ->
+                    existing.id == acct.id
+                }
+            }
+
+            if (!isDelete) {
+                hrAllocs.allocations.addAll(accts)
+            }
+
+            def hasAnAllocationTakingAllRemaining = hrAllocs?.allocations.any() {it.percent == 100}
+
+            if (!hasAnAllocationTakingAllRemaining) {
+                throw new ApplicationException(DirectDepositAccount, "@@r1:oneAcctMustUseRemainingAmt@@")
             }
         }
     }
