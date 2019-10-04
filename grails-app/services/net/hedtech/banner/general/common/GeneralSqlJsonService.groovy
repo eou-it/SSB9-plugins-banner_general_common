@@ -44,7 +44,8 @@ class GeneralSqlJsonService {
     def executeProcedure(String procedureName, def inputParamsList = null) {
         OracleCallableStatement callableStatement = getCallableStatement(procedureName, inputParamsList)
         callableStatement?.executeQuery()
-        Clob json_clob = callableStatement?.getClob(inputParamsList?.size() + 1)
+        int size = inputParamsList ? inputParamsList.size() : 0
+        Clob json_clob = callableStatement?.getClob(size + 1)
         String json_string = json_clob?.characterStream?.text
         JSON json_data = new JsonSlurper().parseText(json_string)
         json_data
@@ -65,9 +66,11 @@ class GeneralSqlJsonService {
     private def getProcedureStatement(procedureName, int numberOfParams) {
         String procedureStmt = "${procedureName}("
         for (int i = 0; i < numberOfParams; i++) {
-            procedureStmt = "${procedureStmt}?,"
+            procedureStmt = "${procedureStmt}?"
+            if (i < numberOfParams-1) {
+                procedureStmt = procedureStmt + ','
+            }
         }
-        procedureStmt = procedureStmt.replaceLast(',', '')
         procedureStmt = "${procedureStmt})"
         procedureStmt
     }
@@ -78,12 +81,12 @@ class GeneralSqlJsonService {
                     lv_json_out clob;
                 BEGIN
                     gb_common.p_set_context('SS_ACC', 'LOG_ID', ${pidm}, 'N');
-                    APEX_JSON.initialize_clob_output;
-                    APEX_JSON.open_object;
+                    gokjson.initialize_clob_output;
+                    gokjson.open_object;
                     ${procedure};
-                    APEX_JSON.close_object;
-                    lv_json_out := APEX_JSON.get_clob_output();
-                    APEX_JSON.free_output;
+                    gokjson.close_object;
+                    lv_json_out := gokjson.get_clob_output;
+                    gokjson.free_output;
                     gb_common.p_set_context('SS_ACC', 'LOG_ID', '');
                     ? := lv_json_out;
                 END;"""
@@ -94,25 +97,29 @@ class GeneralSqlJsonService {
         OracleCallableStatement callableStatement = (OracleCallableStatement) oraconnection.prepareCall(plSqlBlock)
         int indexCounter = 1
         inputParamsList?.each { inputParam ->
-
-            switch (inputParam?.paramType?.toLowerCase()) {
-                case 'string':
-                    callableStatement.setString(inputParam.paramIndex, inputParam.paramValue)
-                    break
-                case 'int':
-                    callableStatement.setInt(inputParam.paramIndex, inputParam.paramValue)
-                    break
-                case 'ident_arr':
-                    String[] identArray = inputParam.paramValue?.toArray(new String[0])
-                    callableStatement.setPlsqlIndexTable(inputParam.paramIndex, identArray, identArray?.length, identArray?.length, OracleTypes.VARCHAR, 30)
-                    break
-                case 'vc_arr':
-                    String[] vcArray = inputParam.paramValue?.toArray(new String[0])
-                    callableStatement.setPlsqlIndexTable(inputParam.paramIndex, vcArray, vcArray?.length, vcArray?.length, OracleTypes.VARCHAR, 4000)
-                    break
-                default :
-                    callableStatement.setString(inputParam.paramIndex, inputParam.paramValue)
-                    break
+            int paramIndex = inputParam.paramIndex?.intValue()
+            if (!inputParam.paramValue) {
+                callableStatement.setString(paramIndex,'')
+            } else {
+                switch (inputParam?.paramType?.toLowerCase()) {
+                    case 'string':
+                        callableStatement.setString(paramIndex, inputParam.paramValue)
+                        break
+                    case 'int':
+                        callableStatement.setInt(paramIndex, inputParam.paramValue as int)
+                        break
+                    case 'ident_arr':
+                        String[] identArray = inputParam.paramValue?.toArray(new String[0])
+                        callableStatement.setPlsqlIndexTable(paramIndex, identArray, identArray?.length, identArray?.length, OracleTypes.VARCHAR, 30)
+                        break
+                    case 'vc_arr':
+                        String[] vcArray = inputParam.paramValue?.toArray(new String[0])
+                        callableStatement.setPlsqlIndexTable(paramIndex, vcArray, vcArray?.length, vcArray?.length, OracleTypes.VARCHAR, 4000)
+                        break
+                    default:
+                        callableStatement.setString(paramIndex, inputParam.paramValue)
+                        break
+                }
             }
             indexCounter++
         }
