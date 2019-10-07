@@ -754,7 +754,7 @@ class DirectDepositAccountCompositeService {
     }
 
     def isVerifyAccountNumberEnabled() {
-        def isVerifyAccountNumberEnabled = Holders?.config?.enableVerifyAccountNumber
+        def isVerifyAccountNumberEnabled = Holders?.config?.'directDeposit.verifyAccountNumberFieldEnabled'
         return isVerifyAccountNumberEnabled ? isVerifyAccountNumberEnabled : false
     }
 
