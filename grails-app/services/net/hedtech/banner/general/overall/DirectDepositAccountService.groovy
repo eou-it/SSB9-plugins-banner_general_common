@@ -238,7 +238,7 @@ class DirectDepositAccountService extends ServiceBase{
     }
 
     def validateRemainingAmountStatusValid(accts, isDelete=false) {
-        def remainingAmountAllowed = Holders?.config?.directDeposit?.remainingAmountAllowed
+        def remainingAmountAllowed = Holders?.config?.directDeposit?.remainingAmountAsCheckAllowed
 
         if (remainingAmountAllowed instanceof Boolean && !remainingAmountAllowed) {
             def hrAllocs = directDepositAccountCompositeService.getUserHrAllocationsAsListOfMaps(getPrincipalPidm())
