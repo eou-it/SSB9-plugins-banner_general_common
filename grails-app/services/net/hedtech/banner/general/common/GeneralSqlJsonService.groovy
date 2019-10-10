@@ -6,6 +6,7 @@ package net.hedtech.banner.general.common
 import grails.converters.JSON
 import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
+import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
@@ -36,6 +37,7 @@ import java.sql.Types
 @Slf4j
 class GeneralSqlJsonService {
     def sessionFactory
+    def springSecurityService
     private static final String PACKAGE_NAME = 'SS_ACC'
     private static final String CONTEXT_NAME = 'LOG_ID'
 
@@ -65,11 +67,11 @@ class GeneralSqlJsonService {
     private def getCallableStatement(String procedureName, def inputParamsList) {
         def connection = sessionFactory.currentSession.connection()
         DatabaseMetaData metadata = connection.getMetaData()
-        def oraconnection = metadata.getConnection().unwrap(OracleConnection.class)
+        def oraConnection = metadata.getConnection().unwrap(OracleConnection.class)
         def loggedInUser = SecurityContextHolder?.context?.authentication?.principal?.pidm
         String procedureStmt = getProcedureStatement(procedureName, inputParamsList)
         String plSqlBlock = getJsonSqlString(procedureStmt, loggedInUser)
-        OracleCallableStatement callableStatement = bindParameters(oraconnection, plSqlBlock, inputParamsList)
+        OracleCallableStatement callableStatement = bindParameters(oraConnection, plSqlBlock, inputParamsList)
         callableStatement
     }
 
@@ -135,5 +137,43 @@ class GeneralSqlJsonService {
         callableStatement.registerOutParameter(size + 1, java.sql.Types.CLOB)
         callableStatement
     }
+
+    //TODO: Remove below methods after refactoring application services to call executeProcedure method, instead of call.
+    /**
+     * Sets Pidm to the context and executes function.
+     * Wrapper function is expected to return a CLOB object.
+     * Fetches the JSON from CLOB object.
+     *
+     * @param functionName
+     * @param listOfParams
+     * @return
+     */
+    def call( String functionName, List listOfParams ) throws SQLException, ConverterException {
+        JSON json_data = null
+        try {
+            String json_string
+            setPidmToContext( springSecurityService.getAuthentication()?.user?.pidm )
+            Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
+            sql.call( functionName, listOfParams,
+                    {result ->
+                        json_string = result?.asciiStream?.text
+                    }
+            )
+            json_data = new JsonSlurper().parseText( json_string.toString() )
+        } finally {
+            clearPidmContext()
+        }
+        json_data
+    }
+
+    private clearPidmContext() {
+        setPidmToContext( '' )
+    }
+
+    private void setPidmToContext( def pidm ) {
+        Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
+        sql.call( 'call gb_common.p_set_context(?, ?, ?,?)', ['SS_ACC', 'LOG_ID', pidm.toString(), 'N'] )
+    }
+
 
 }
