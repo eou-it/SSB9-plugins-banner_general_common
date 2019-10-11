@@ -1,15 +1,19 @@
 /*******************************************************************************
- Copyright 2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2019 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.ledger
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+//import net.hedtech.banner.seeddata.InputData
+//import net.hedtech.banner.seeddata.SeedDataLoader
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-//import org.codehaus.groovy.grails.plugins.GrailsPluginUtils
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
+//import java.nio.file.Path
+//import java.nio.file.Paths
 
 @Integration
 @Rollback
@@ -591,9 +595,16 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         assertEquals([], GeneralFeedShadow.fetchAllByGuidInList(guids))
     }
 
+    /*
+    This test cannot run the seed data without the seed data catalog being added as a dependency.
+    The tests need to be redesigned to not use the seed data, seed data needs to be added as a dependency,
+    or another method to access the seed data catalog without adding it as a dependency needs to be introduced in
+    order to stop ignoring this test. As of 10/10/19 this test passes with the seed data dependency added.
+    */
+    @Ignore
     @Test
     public void testFetchAllByGuidInListValidValues(){
-//        runSeedData('general-ledger')
+        runSeedData('general-ledger')
         String guid = GeneralFeedShadow.findAll().guid.unique()[0]
         assertNotNull(guid)
         List<String> guids = [guid,"invalid-value","random-value"]
@@ -602,7 +613,7 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull(guid1)
         guids = [guid, guid1]
         assertEquals([guid, guid1].unique().sort(), GeneralFeedShadow.fetchAllByGuidInList(guids).guid.unique().sort())
-//        runSeedData('general-ledger-clean')
+        runSeedData('general-ledger-clean')
     }
 
     @Test
@@ -620,36 +631,72 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         assertEquals(false, GeneralFeed.transactionNumberExist(['invalid1', 'invalid2']))
     }
 
+    /*
+    This test cannot run the seed data without the seed data catalog being added as a dependency.
+    The tests need to be redesigned to not use the seed data, seed data needs to be added as a dependency,
+    or another method to access the seed data catalog without adding it as a dependency needs to be introduced in
+    order to stop ignoring this test. As of 10/10/19 this test passes with the seed data dependency added.
+    */
+    @Ignore
     @Test
     public void testTransactionNumberExist() {
-//        runSeedData('general-ledger-gurfeed')
+       runSeedData('general-ledger-gurfeed')
         assertEquals(true, GeneralFeed.transactionNumberExist(['DCITTST']))
-//        runSeedData('general-ledger-gurfeed-clean')
+       runSeedData('general-ledger-gurfeed-clean')
     }
 
-/*    def runSeedData(String seedTestTarget) {
-        def clazzInputData = Thread.currentThread().contextClassLoader.loadClass("net.hedtech.banner.seeddata.InputData")
-        def inputData = clazzInputData.newInstance([dataSource: dataSource])
+/*
+    private void runSeedData(String seedTestTarget) {
 
-        def xmlFiles = inputData.targets.find { it.key == seedTestTarget }?.value
-        if (!xmlFiles) xmlFiles = inputData.seleniumTargets.find { it.key == seedTestTarget }?.value
+        InputData inputData = new InputData()
+        inputData.username = 'baninst1'
+        inputData.password = 'u_pick_it'
+        inputData.hostname = 'localhost'
+        inputData.instance = 'BAN83'
 
         def basedir = System.properties['base.dir']
-        xmlFiles.each { xmlFileName ->
-            inputData.xmlFile = GrailsPluginUtils.getPluginDirForName('banner-seeddata-catalog').path + xmlFileName.value
-            inputData.tableCnts = []
-            inputData.username = "baninst1"
-            inputData.password = "u_pick_it"
-            inputData.tableSize = 0
-            def inputFile = new File(inputData.xmlFile)
-            if (!inputFile.exists())
-                inputData.xmlFile = "${basedir}${xmlFileName.value}"
-            def seedDataLoader = new net.hedtech.banner.seeddata.SeedDataLoader(inputData)
+        Path currentWorkingFolder = Paths.get("").toAbsolutePath()
+        Path seedDataPluginPath
+        if (currentWorkingFolder.toString().contains('plugins')) {
+            seedDataPluginPath = currentWorkingFolder.getParent().resolve("banner_seeddata_catalog.git")
+        } else {
+            seedDataPluginPath = currentWorkingFolder.resolve('plugins').resolve("banner_seeddata_catalog.git")
+        }
+
+        def xmlFiles = inputData.targets.find { it.key == seedTestTarget }?.value
+        if (!xmlFiles) {
+            xmlFiles = inputData.seleniumTargets.find { it.key == seedTestTarget }?.value
+        }
+        if (!xmlFiles) {
+            xmlFiles = inputData.aipTargets.find { it.key == seedTestTarget }?.value
+        }
+        if (!xmlFiles) {
+            xmlFiles = inputData.bcmTargets.find { it.key == seedTestTarget }?.value
+        }
+        if (!xmlFiles) {
+            xmlFiles = inputData.calbTargets.find { it.key == seedTestTarget }?.value
+        }
+
+        xmlFiles.each {
+            InputData xmlInputData = new InputData()
+            xmlInputData.username = 'baninst1'
+            xmlInputData.password = 'u_pick_it'
+            xmlInputData.hostname = 'localhost'
+            xmlInputData.instance = 'BAN83'
+
+            xmlInputData.xmlFile = "$seedDataPluginPath/$it.value"
+            def inputFile = new File(xmlInputData.xmlFile)
+            if (!inputFile.exists()) {
+                xmlInputData.xmlFile = "${basedir}${it.value}"
+            }
+            xmlInputData.replaceData = true
+            SeedDataLoader seedDataLoader = new SeedDataLoader(xmlInputData)
             seedDataLoader.execute()
         }
-    }*/
+    }
+    */
 
-    private createNewGenerealFeed(Map properties) {
+        private createNewGenerealFeed(Map properties) {
         GeneralFeed generalFeed = new GeneralFeed()
         generalFeed.referenceNumber = "REF_NUM1"
         generalFeed.transactionNumber = "TRAN_NUM"

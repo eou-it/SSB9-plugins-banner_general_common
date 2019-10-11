@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2019 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 
 package net.hedtech.banner.general.commonmatching
@@ -36,7 +36,7 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
     @Test
     void testCreateValidCommonMatchingPersonResult() {
         def CommonMatchingPersonResult = newValidCommonMatchingPersonResult()
-        shouldFail(grails.validation.ValidationException) {
+        shouldFail(InvalidDataAccessResourceUsageException) {
             CommonMatchingPersonResult.save(failOnError: true, flush: true)
         }
     }
@@ -48,7 +48,13 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
         def personList = CommonMatchingPersonResult.findAll()
         assertEquals 1, personList.size()
         personList[0].message = "test"
-        shouldFail(grails.validation.ValidationException) {
+        personList[0].emailRowid = "Test"
+        personList[0].idRowid = "Test"
+        personList[0].telephoneRowid = "Test"
+        personList[0].nameRowid = "Test"
+        personList[0].addressRowid = "Test"
+        personList[0].additionalIdRowid = "Test"
+        shouldFail(InvalidDataAccessResourceUsageException) {
             personList[0].save(failOnError: true, flush: true)
         }
     }
@@ -60,7 +66,7 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
         def personList = CommonMatchingPersonResult.findAll()
         assertEquals 1, personList.size()
         assertNotNull personList[0].id
-        shouldFail(grails.validation.ValidationException) {
+        shouldFail(InvalidDataAccessResourceUsageException) {
             personList[0].delete(failOnError: true, flush: true)
         }
     }
@@ -128,12 +134,25 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
 
     private def newValidCommonMatchingPersonResult() {
         def result = new CommonMatchingPersonResult(
-                id: "1",
+                id: 999,
                 pidm: 11111,
+                idRowid: "Test",
+                nameRowid: "Test",
+                addressRowid: "Test",
+                emailRowid: "Test",
+                additionalIdRowid: "Test",
+                telephoneRowid: "Test",
+                commonMatchingSource: "Test",
+                commonMatchingPriority: 999,
                 resultType: "M",
                 message: "Testing",
+                resultIndicator: "Test",
                 name: "Emily Jamison",
-                bannerId: "HOS000001"
+                bannerId: "HOS000001",
+                dataOrigin: "Test",
+                lastName: "Jamison",
+                firstName: "Emily",
+                mi: "B"
         )
         return result
     }
@@ -152,8 +171,7 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
 
         def result
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
-        try {
-            sql.call("""
+        sql.call("""
               declare
                 cmsc  varchar2(100) := 'HEDM_PERSON_MATCH' ;
                 lv_last_name varchar2(100) := ? ;
@@ -210,11 +228,7 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
 
                 end;
              """, [person.lastName, person.firstName]) { output_info ->
-                result = output_info
-            }
-        }
-        finally {
-//            sql?.close()
+            result = output_info
         }
 
     }
@@ -227,8 +241,7 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
 
         def result
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
-        try {
-            sql.call("""
+        sql.call("""
               declare
                 cmsc  varchar2(100) := 'HEDM_PERSON_MATCH' ;
                 lv_last_name varchar2(100) := ?;
@@ -263,11 +276,7 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
 
                 end;
              """, ["Lincoln", "Abraham"]) { output_info ->
-                result = output_info
-            }
-        }
-        finally {
-//            sql?.close()
+            result = output_info
         }
 
     }
@@ -285,8 +294,7 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
         assertTrue list1.cnt > 20
         assertNotNull list1.spriden_last_name
         def result
-        try {
-            sql.call("""
+        sql.call("""
               declare
                 cmsc  varchar2(100) := 'HEDM_LASTNAME_MATCH' ;
                 lv_last_name varchar2(100) := ? ;
@@ -343,11 +351,7 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
 
                 end;
              """, [list1.spriden_last_name]) { output_info ->
-                result = output_info
-            }
-        }
-        finally {
-//            sql?.close()
+            result = output_info
         }
     }
 }

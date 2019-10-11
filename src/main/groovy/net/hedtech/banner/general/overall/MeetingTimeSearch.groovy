@@ -291,7 +291,7 @@ class MeetingTimeSearch {
         def cnt = 0
         meetingFilter.each { param ->
             // get meta data for the parameter to parse the condition
-            PersistentEntity grailsDomainClass = Holders.getGrailsApplication().getMappingContext().getPersistentEntity(MeetingTimeSearch)
+            PersistentEntity grailsDomainClass = Holders.getGrailsApplication().getMappingContext().getPersistentEntity(MeetingTimeSearch.name)
             PersistentProperty[] fields = grailsDomainClass.getPersistentProperties()
 
             def field = fields.find { it.name == param.key }
