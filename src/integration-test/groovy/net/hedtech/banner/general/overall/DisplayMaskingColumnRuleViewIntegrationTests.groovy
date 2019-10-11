@@ -1,15 +1,15 @@
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2019 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 
 package net.hedtech.banner.general.overall
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import org.codehaus.groovy.runtime.InvokerHelper
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
-
 import groovy.sql.Sql
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.jdbc.UncategorizedSQLException
@@ -40,13 +40,15 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
     void testCreateExceptionResults() {
         def existingMask = DisplayMaskingColumnRuleView.findAll()[0]
         assertNotNull existingMask
-        DisplayMaskingColumnRuleView newMask = new DisplayMaskingColumnRuleView(existingMask.properties)
+        DisplayMaskingColumnRuleView newMask = new DisplayMaskingColumnRuleView()
+        InvokerHelper.setProperties(newMask, existingMask.properties)
         newMask.concealIndicator = true
         newMask.displayIndicator = true
         newMask.version = 0
         newMask.id = 2222222
+        newMask = getNullSafeDisplayMaskingColumnRuleView(newMask)
         shouldFail(UncategorizedSQLException) {
-            newMask.save(flush: true, onError: true)
+            newMask.save(flush: true, failOnError: true)
         }
 
     }
@@ -58,8 +60,9 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
         assertNotNull existingMask
         existingMask.concealIndicator = true
         existingMask.displayIndicator = true
+        existingMask = getNullSafeDisplayMaskingColumnRuleView(existingMask)
         shouldFail(UncategorizedSQLException) {
-            existingMask.save(flush: true, onError: true)
+            existingMask.save(flush: true, failOnError: true)
         }
     }
 
@@ -69,7 +72,7 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
         def existingMask = DisplayMaskingColumnRuleView.findAll()[0]
         assertNotNull existingMask
         shouldFail(UncategorizedSQLException) {
-            existingMask.delete(flush: true, onError: true)
+            existingMask.delete(flush: true, failOnError: true)
         }
     }
 
@@ -109,6 +112,16 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
         assertNotNull displayRules
         assertEquals displayRules.size,4
 
+    }
+
+    private static def getNullSafeDisplayMaskingColumnRuleView (DisplayMaskingColumnRuleView displayMaskingColumnRuleView) {
+        displayMaskingColumnRuleView.dataMask = "Test"
+        displayMaskingColumnRuleView.maskLength = 999
+        displayMaskingColumnRuleView.dataOrigin = "Test"
+        displayMaskingColumnRuleView.fineGrainedAccessControlUserId = "Test"
+        displayMaskingColumnRuleView.fgacBusinessProfile = "Test"
+        displayMaskingColumnRuleView.maskDirection = "Test"
+        return displayMaskingColumnRuleView
     }
 
 }

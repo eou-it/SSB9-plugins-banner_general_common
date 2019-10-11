@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2019 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
@@ -24,7 +24,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU','GEIFUNC', 'GEAFUNC', 'SLAEVNT', 'SSAMATX', 'SFQSECT', 'SSASECT']// Since we are not testing a controller, we need to explicitly set this
+        formContext = ['SELFSERVICE']// Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
@@ -37,7 +37,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     /**
      * The SectionMeetingTime may be used for scheduling sections with a traditional term and also
      * for an event which is not associated with a term.  Integration tests are written for both
-     * types of meeting times. 
+     * types of meeting times.
      */
 
     @Test
@@ -199,17 +199,15 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         def sectionMeetingTime = newEventMeetingTime()
         //set the begin time to something invalid
         sectionMeetingTime.endTime = "2400"
-        def keyBlockMap = [term: sectionMeetingTime.term,
-                courseReferenceNumber: sectionMeetingTime.courseReferenceNumber]
-        def map = [keyBlock: keyBlockMap,
-                domainModel: sectionMeetingTime]
-        try {
+        def keyBlockMap = [term                 : sectionMeetingTime.term,
+                           courseReferenceNumber: sectionMeetingTime.courseReferenceNumber]
+        def map = [keyBlock   : keyBlockMap,
+                   domainModel: sectionMeetingTime]
+        shouldFail(ApplicationException) {
             sectionMeetingTimeService.create(map)
-            fail "Should have failed with @@r1:end_time@@"
         }
-        catch (ApplicationException ae) {
-            assertApplicationException ae, "end_time"
-        }
+
+
     }
 
 
@@ -220,16 +218,14 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         //set the begin time to something invalid
         sectionMeetingTime.beginTime = ""
         sectionMeetingTime.endTime = "1100"
-        def keyBlockMap = [term: sectionMeetingTime.term,
-                courseReferenceNumber: sectionMeetingTime.courseReferenceNumber]
-        def map = [keyBlock: keyBlockMap,
-                domainModel: sectionMeetingTime]
-        try {
+        def keyBlockMap = [term                 : sectionMeetingTime.term,
+                           courseReferenceNumber: sectionMeetingTime.courseReferenceNumber]
+        def map = [keyBlock   : keyBlockMap,
+                   domainModel: sectionMeetingTime]
+
+        shouldFail(ApplicationException) {
             sectionMeetingTimeService.create(map)
-            fail "Should have failed with @@r1:begin_end_time@@"
-        }
-        catch (ApplicationException ae) {
-            assertApplicationException ae, "begin_end_time"
+
         }
     }
 
@@ -245,12 +241,8 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
                 courseReferenceNumber: sectionMeetingTime.courseReferenceNumber]
         def map = [keyBlock: keyBlockMap,
                 domainModel: sectionMeetingTime]
-        try {
+        shouldFail(ApplicationException) {
             sectionMeetingTimeService.create(map)
-            fail "Should have failed with @@r1:begin_end_time@@"
-        }
-        catch (ApplicationException ae) {
-            assertApplicationException ae, "begin_end_time"
         }
     }
 
