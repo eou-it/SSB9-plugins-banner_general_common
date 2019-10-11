@@ -11,10 +11,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
-//import net.hedtech.banner.seeddata.InputData
-//import net.hedtech.banner.seeddata.SeedDataLoader
-//import java.nio.file.Path
-//import java.nio.file.Paths
 
 import static groovy.test.GroovyAssert.*
 
