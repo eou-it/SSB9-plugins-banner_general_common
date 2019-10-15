@@ -67,6 +67,54 @@ class CommunicationSendEmailService {
         }
     }
 
+    /**
+     * Sends an email message (single) based on the contents of EmailMessage passed.
+     *
+     * @param organization the organization address config to use for obtaining credentials to connect to the
+     *                           SMTP server, and to use to own comm items and interactions generated from the send
+     * @param emailMessage the email message contituents encapsulated in an EmailMessage object
+     * @param recipientData the recipient data this email message belongs to
+     * @param pidm the identifier for the constituent for whom the email is being sent
+     */
+    public void send(CommunicationSendEmailItem sendEmailItem) {
+        log.debug("sending email message")
+
+        asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), sendEmailItem.mepCode)
+
+        //TODO - If organization Id is provided use it, otherwise use the root organization. Need to discuss how to provide organization ID in this case.
+        //TODO - May be have a CLOB column in the SITM table to provide host and port and authentication details.
+        //TODO - Add a new char column to the organization table itself, that flags it to be used for communication from packages.
+        //TODO - Use the event mapping to connect it, by adding an event id column to SITM
+        CommunicationOrganization organization
+        if (sendEmailItem.organizationId) {
+            organization = CommunicationOrganization.fetchById(sendEmailItem.organizationId)
+        } else {
+            organization = CommunicationOrganization.fetchRoot()
+        }
+
+        if(!organization?.senderMailboxAccount)
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidSenderMailbox"), CommunicationErrorCode.INVALID_SENDER_MAILBOX.name())
+
+        if (organization?.senderMailboxAccount?.encryptedPassword != null)
+            organization.senderMailboxAccount.clearTextPassword = communicationMailboxAccountService.decryptPassword( organization.senderMailboxAccount.encryptedPassword )
+
+        CommunicationEmailMessage emailMessage = buildEmailMessage(sendEmailItem)
+        CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendEmailMethod(emailMessage, organization);
+        sendEmailMethod.execute();
+
+        //TODO FOR SURE - Go and complete the status in the SITM table
+
+        //TODO - Do we need to track this communication on item tables, how about GURMAIL?? Should this be configurable?
+        //TODO - If not, do we create a separate view for the SITM table to view only outside BCM communications?
+//        try {
+//            trackEmailMessage(organization, emailMessage, recipientData, pidm)
+//        } catch (Throwable t) {
+//            log.error(t.message)
+//            throw t;
+//        } finally {
+//        }
+    }
+
      public void sendTest(Long organizationId, String sendTo, Map messageData) {
          if (sendTo == null || sendTo.length() == 0)
              throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS .name())
@@ -256,4 +304,27 @@ class CommunicationSendEmailService {
         log.debug("recorded email item sent with item id = ${emailItem.id}.")
     }
 
+    private CommunicationEmailMessage buildEmailMessage(CommunicationSendEmailItem sendItem) {
+        CommunicationEmailMessage emailMessage = new CommunicationEmailMessage()
+//        emailMessage.bccList.add(sendItem.bccList)
+//        emailMessage.ccList.add(sendItem.ccList)
+        Set replyTo = new HashSet()
+        CommunicationEmailAddress emailAddress = new CommunicationEmailAddress()
+        emailAddress.mailAddress = sendItem.replyTo
+        replyTo.add(emailAddress)
+        emailMessage.replyTo = replyTo
+
+        //TODO - How to address comma separated list
+        Set toList = new HashSet()
+        emailAddress = new CommunicationEmailAddress()
+        emailAddress.mailAddress = sendItem.toList
+        toList.add(emailAddress)
+        emailMessage.toList = toList
+
+        emailMessage.subjectLine = sendItem.subject
+        emailMessage.setMessageBody(sendItem.content)
+
+        return emailMessage
+
+    }
 }

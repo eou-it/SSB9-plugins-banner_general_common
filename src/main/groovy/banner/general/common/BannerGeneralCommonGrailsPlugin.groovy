@@ -72,6 +72,19 @@ This plugin is BannerGeneralCommon.
             pollingInterval = Holders.config.communication?.communicationJobProcessingEngine?.pollingInterval ?: 2000
             deleteSuccessfullyCompleted = Holders.config.communication?.communicationJobProcessingEngine?.deleteSuccessfullyCompleted ?: false
         }
+
+        communicationSendProcessingEngine (AsynchronousTaskProcessingEngineImpl) { bean ->
+            bean.autowire = 'byName'
+            bean.initMethod = 'init'
+            jobManager = ref('communicationSendTaskManagerService')
+            asynchronousBannerAuthenticationSpoofer = ref('asynchronousBannerAuthenticationSpoofer')
+            maxThreads = Holders.config.communication?.communicationSendProcessingEngine?.maxThreads ?: 10
+            maxQueueSize = Holders.config.communication?.communicationSendProcessingEngine?.maxQueueSize ?: 5000
+            continuousPolling = Holders.config.communication?.communicationSendProcessingEngine?.continuousPolling ?: true
+            enabled = Holders.config.communication?.communicationSendProcessingEngine?.enabled ?: true
+            pollingInterval = Holders.config.communication?.communicationSendProcessingEngine?.pollingInterval ?: 2000
+            deleteSuccessfullyCompleted = Holders.config.communication?.communicationSendProcessingEngine?.deleteSuccessfullyCompleted ?: false
+        }
     }
     }
 
