@@ -253,10 +253,13 @@ class DirectDepositAccountService extends ServiceBase{
                 hrAllocs.allocations.addAll(accts)
             }
 
-            def hasAnAllocationTakingAllRemaining = hrAllocs?.allocations.any() {it.percent == 100}
+            // The two valid states are: 1) there are no accounts, 2) an account exists taking all remaining funds.
+            if (hrAllocs.allocations.size() > 0) {
+                def hasAnAllocationTakingAllRemaining = hrAllocs?.allocations.any() { it.percent == 100 }
 
-            if (!hasAnAllocationTakingAllRemaining) {
-                throw new ApplicationException(DirectDepositAccount, "@@r1:oneAcctMustUseRemainingAmt@@")
+                if (!hasAnAllocationTakingAllRemaining) {
+                    throw new ApplicationException(DirectDepositAccount, "@@r1:oneAcctMustUseRemainingAmt@@")
+                }
             }
         }
     }
