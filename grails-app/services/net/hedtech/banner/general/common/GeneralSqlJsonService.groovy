@@ -95,9 +95,16 @@ class GeneralSqlJsonService {
                 BEGIN
                     gb_common.p_set_context('${PACKAGE_NAME}', '${CONTEXT_NAME}', ${pidm}, 'N');
                     gokjson.initialize_clob_output;
-                    gokjson.open_object;
-                    ${procedure};
-                    gokjson.close_object;
+                    BEGIN
+                      gokjson.open_object(with_exception => true);
+                      ${procedure};
+                      gokjson.close_object;
+                    EXCEPTION
+                      WHEN OTHERS THEN
+                        gokjson.close_for_exception;
+                        gokjson.put_exception_info(sqlcode, SQLERRM);
+                        gokjson.close_object;
+                    END;
                     lv_json_out := gokjson.get_clob_output;
                     gokjson.free_output;
                     gb_common.p_set_context('${PACKAGE_NAME}', '${CONTEXT_NAME}', '');
@@ -113,12 +120,12 @@ class GeneralSqlJsonService {
             def inputParam = inputParamsList[i - 1]
             switch (inputParam?.paramType?.toLowerCase()) {
                 case 'string':
-                    (inputParam.paramValue) ?
+                    (inputParam.paramValue != null) ?
                             callableStatement.setString(i, inputParam.paramValue) :
                             callableStatement.setNull(i, Types.VARCHAR)
                     break
                 case 'int':
-                    (inputParam.paramValue) ?
+                    (inputParam.paramValue != null) ?
                             callableStatement.setInt(i, inputParam.paramValue as int) :
                             callableStatement.setNull(i, Types.INTEGER)
                     break
