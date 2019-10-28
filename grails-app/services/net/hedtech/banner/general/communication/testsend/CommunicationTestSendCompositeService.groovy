@@ -280,8 +280,11 @@ class CommunicationTestSendCompositeService  {
     private void checkOrgEmail (CommunicationOrganization org) {
         if (!org)
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
-        if (!org.sendEmailServerProperties)
-            throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.serverPropertiesNotFound"), CommunicationErrorCode.SERVER_PROPERTIES_NOT_FOUND.name())
+        if (!org.sendEmailServerProperties) {
+            def root = CommunicationOrganization.fetchRoot()
+            if(!root.sendEmailServerProperties)
+                throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.serverPropertiesNotFound"), CommunicationErrorCode.SERVER_PROPERTIES_NOT_FOUND.name())
+        }
         if (!org.senderMailboxAccount || !org.replyToMailboxAccount)
                 throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.invalidSenderMailbox"), CommunicationErrorCode.INVALID_SENDER_MAILBOX.name())
     }
