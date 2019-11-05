@@ -317,7 +317,7 @@ class SectionMeetingTimeService extends ServiceBase {
         return entities
     }
     public List fetchByTermAndCourseReferenceNumber(term, crn){
-       def meetingData=SectionMeetingTime.fetchByTermAndCourseReferenceNumber(term, crn)
+        def meetingData = SectionMeetingTime.fetchByTermAndCourseReferenceNumber( term, crn)
         return  meetingData
     }
 }
