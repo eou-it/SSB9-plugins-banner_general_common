@@ -115,7 +115,7 @@ class GeneralSqlJsonService {
                     END;
                     lv_json_out := gokjson.get_clob_output;
                     gokjson.free_output;
-                    gb_common.p_clear_user_context;
+                    gokjson.p_clear_user_context;
                     ? := lv_json_out;
                 END;"""
         sql
