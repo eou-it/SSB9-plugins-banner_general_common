@@ -56,13 +56,9 @@ class CommunicationOrganizationCompositeService {
     }
 
     void deleteOrganization( Map organizationAsMap ) {
-        try {
-            CommunicationOrganization organization = this.getOrganization(organizationAsMap.id)
-            communicationOrganizationService.delete(organizationAsMap)
-            removeDependentMailboxAccountsAndEmailServerProperties(organization)
-        } catch(Exception e) {
-            throw e;
-        }
+        CommunicationOrganization organization = this.getOrganization( organizationAsMap.id )
+        communicationOrganizationService.delete( organizationAsMap )
+        removeDependentMailboxAccountsAndEmailServerProperties( organization )
     }
 
     Boolean emailDetailExists(id) {
@@ -107,9 +103,13 @@ class CommunicationOrganizationCompositeService {
             if ( (smtpProperties == null || smtpProperties?.auth == null || smtpProperties?.auth) && (newOrganization.senderMailboxAccount && !(newOrganization.senderMailboxAccount.emailAddress != null && newOrganization.senderMailboxAccount.userName != null)
                     && !(newOrganization.senderMailboxAccount.emailAddress == null && newOrganization.senderMailboxAccount.userName == null)
                     && ((oldOrganization?.sendEmailServerProperties?.getSmtpPropertiesAsMap()?.auth) || (!newOrganization.parent))) ){
-                throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
+//                Do nothing here and throw a warning message from the controller
+//                throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
+            } else if (newOrganization.senderMailboxAccount && (newOrganization.senderMailboxAccount.emailAddress == null && newOrganization.senderMailboxAccount.userName == null
+                    && newOrganization.senderMailboxAccount.clearTextPassword == null && newOrganization.senderMailboxAccount.emailDisplayName == null)) {
+                //setting the object to null if it was pre-existing and all attributes were nulled out during the update of organization, so it does not try to create it
+                newOrganization.senderMailboxAccount = null;
             }
-
             if (newOrganization?.senderMailboxAccount?.id != null) {
                 newOrganization.senderMailboxAccount = communicationMailboxAccountService.update(newOrganization.senderMailboxAccount)
             } else  {
@@ -127,6 +127,10 @@ class CommunicationOrganizationCompositeService {
                     && !(newOrganization.replyToMailboxAccount.emailAddress == null && newOrganization.replyToMailboxAccount.userName == null))
                     && ((oldOrganization?.sendEmailServerProperties?.getSmtpPropertiesAsMap()?.auth) || (!newOrganization.parent))){
                 throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
+            } else if (newOrganization.replyToMailboxAccount && (newOrganization.replyToMailboxAccount.emailAddress == null && newOrganization.replyToMailboxAccount.userName == null
+                    && newOrganization.replyToMailboxAccount.clearTextPassword == null && newOrganization.replyToMailboxAccount.emailDisplayName == null)) {
+                //setting the object to null if it was pre-existing and all attributes were nulled out during the update of organization, so it does not try to create it
+                newOrganization.replyToMailboxAccount = null;
             }
             if (newOrganization.replyToMailboxAccount?.id != null) {
                 newOrganization.replyToMailboxAccount = communicationMailboxAccountService.update(newOrganization.replyToMailboxAccount)
