@@ -51,7 +51,7 @@ class GeneralSqlJsonService {
      * @return Data as JSON
      */
     def executeProcedure(String procedureName, def inputParamsList = null) {
-        def result_data = [:], json_data, messages_data
+        def json_data, messages_data
         OracleCallableStatement callableStatement = getCallableStatement(procedureName, inputParamsList)
         int size = inputParamsList ? inputParamsList.size() : 0
         try{
@@ -60,16 +60,15 @@ class GeneralSqlJsonService {
             String json_string = json_clob?.characterStream?.text
             json_data = new JsonSlurper().parseText(json_string)
             messages_data = populateMessagesFromJson(json_data)
-            result_data << [ data : json_data]
             if (messages_data.size() > 0) {
-                result_data << [messages : messages_data]
+                json_data << [messages : messages_data]
             }
         }catch(SQLException | ConverterException e){
             log.error 'Exception in GeneralSqlJsonService.executeProcedure ${e}'
             String message = MessageHelper.message('default.unknown.banner.api.exception')
             throw new ApplicationException(GeneralSqlJsonService, new BusinessLogicValidationException(message, []))
         }
-        result_data
+        json_data
     }
 
     private def getCallableStatement(String procedureName, def inputParamsList) {
