@@ -4,11 +4,10 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import grails.gorm.transactions.Transactional
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.job.CommunicationJobStatus
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
@@ -16,9 +15,9 @@ import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureExcep
 /**
  * Created by mbrzycki on 12/5/14.
  */
+@Slf4j
 @Transactional
 class CommunicationGroupSendMonitor implements DisposableBean {
-    private Log log = LogFactory.getLog(this.getClass())
     private CommunicationGroupSendMonitorThread monitorThread
     private CommunicationGroupSendCumulativeMonitorThread cumulativeMonitorThread
     private CommunicationGroupSendService communicationGroupSendService

@@ -7,7 +7,7 @@ import net.hedtech.banner.general.communication.email.CommunicationSendEmailItem
 import net.hedtech.banner.general.communication.email.CommunicationSendEmailService
 import net.hedtech.banner.general.communication.letter.CommunicationGenerateLetterService
 import net.hedtech.banner.general.communication.mobile.CommunicationSendMobileNotificationService
-import net.hedtech.banner.general.communication.template.*
+import net.hedtech.banner.general.communication.textmessage.CommunicationSendTextMessageItem
 import net.hedtech.banner.general.communication.textmessage.CommunicationSendTextMessageService
 
 /**
@@ -46,8 +46,8 @@ class CommunicationSendDispatcher implements CommunicationSendItemVisitor {
 //        communicationSendMobileNotificationService.send( recipientData.organizationId, message as CommunicationMobileNotificationMessage, recipientData )
 //    }
 //
-//    @Override
-//    void visitTextMessage(CommunicationTextMessageTemplate template) {
-//        communicationSendTextMessageService.send( recipientData.organizationId, message as CommunicationTextMessage, recipientData, recipientData.pidm )
-//    }
+    @Override
+    void visitTextMessage(CommunicationSendTextMessageItem textMessageItem) {
+        //DO NOTHING - Text message is honored via the RESTFUL API and hence not need to be processed as of now
+    }
 }

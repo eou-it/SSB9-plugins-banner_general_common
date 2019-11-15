@@ -117,7 +117,7 @@ class CommunicationSendTaskManagerService implements AsynchronousTaskManager {
                 throw simulatedFailureException;
             }
 
-            communicationSendProcessorService.performSendCommunication( task.getId() );
+            communicationSendProcessorService.performSendCommunication(task.getId());
 
         } catch (Exception e) {
             if (log.isDebugEnabled()) {

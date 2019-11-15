@@ -101,6 +101,12 @@ public abstract class CommunicationSendItem implements AsynchronousTask, Seriali
     Long organizationId
 
     /**
+     * The source
+     */
+    @Column(name="GCRSITM_SOURCE")
+    String source
+
+    /**
      * The reference id
      */
     @Column(name = "GCRSITM_REFERENCE_ID")
@@ -141,11 +147,15 @@ public abstract class CommunicationSendItem implements AsynchronousTask, Seriali
 //        recipientPidm(nullable: true)
         sentDate(nullable: true)
 //        templateId(nullable: true)
+        source(nullable:false)
+        referenceId(nullable: false)
         organizationId(nullable: true)
-        createdBy(nullable: true)
-        creationDateTime(nullable: true)
-        lastModified(nullable: true)
-        lastModifiedBy(nullable: true, maxSize: 30)
+        createdBy(nullable: false)
+        creationDateTime(nullable: false)
+        errorCode(nullable: true)
+        errorText(nullable: true)
+        lastModified(nullable: false)
+        lastModifiedBy(nullable: false, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
         mepCode(nullable: true)
     }

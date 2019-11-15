@@ -4,9 +4,8 @@
 package net.hedtech.banner.general.scheduler.quartz
 
 import grails.util.Holders
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.quartz.JobPersistenceException
 
 import java.sql.Connection;
@@ -48,9 +47,10 @@ import org.springframework.jdbc.support.MetaDataAccessException;
  * as they assume to get proper locks etc.
  *
  */
+@Slf4j
 public class BannerDataSourceJobStoreCMT extends JobStoreCMT {
 
-    private final Log log = LogFactory.getLog( BannerDataSourceJobStoreCMT.class );
+//    private final Log log = LogFactory.getLog( BannerDataSourceJobStoreCMT.class );
 
 
     /**

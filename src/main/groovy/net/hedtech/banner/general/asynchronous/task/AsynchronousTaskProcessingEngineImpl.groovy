@@ -4,13 +4,12 @@
 package net.hedtech.banner.general.asynchronous.task
 
 import grails.gorm.transactions.Transactional
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.AsynchronousActionPoolThreadFactory
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationApplicationException
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.transaction.TransactionException
@@ -23,10 +22,9 @@ import java.util.concurrent.*
  *
  * @author charlie hardt (Very significantly based upon work by Shane Riddell)
  */
+@Slf4j
 @Transactional
 public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskProcessingEngine, DisposableBean {
-
-    private final Log log = LogFactory.getLog(this.getClass());
 
     /*
      * Configuration Bean that this engine will work with
@@ -450,14 +448,13 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
         }
     }
 
-
+    @Slf4j
     private class MonitorThread extends Thread {
 
         private boolean _keepRunning = true;
         private final ArrayList monitoredThreads = new ArrayList();
         private static final long DEFAULT_UPDATE_INTERVAL = 60 * 1000;
         private long _updateInterval = DEFAULT_UPDATE_INTERVAL;
-        private final Log log = LogFactory.getLog(MonitorThread.class.getName());
 
 
         @SuppressWarnings("unchecked")

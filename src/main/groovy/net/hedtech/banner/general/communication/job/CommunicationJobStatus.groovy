@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.job
  * the job is pending processing or has been dispatched to a processing engine.
  */
 public enum CommunicationJobStatus {
+    HOLD,
     PENDING,   // The job has not yet been processed.
     DISPATCHED,  // The job has been given to a thread for execution
     STOPPED, // The job has been requested to stop
@@ -17,6 +18,6 @@ public enum CommunicationJobStatus {
      * @return Set<CommunicationJobStatus> the set of CommunicationJobStatus
      */
     public Set<CommunicationJobStatus> set() {
-        return EnumSet.range( CommunicationJobStatus.PENDING, CommunicationJobStatus.COMPLETED );
+        return EnumSet.range( CommunicationJobStatus.HOLD, CommunicationJobStatus.COMPLETED );
     }
 }

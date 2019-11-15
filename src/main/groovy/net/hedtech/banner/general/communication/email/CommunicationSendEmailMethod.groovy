@@ -3,14 +3,13 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.email
 
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.apache.commons.mail.EmailException
 import org.apache.commons.mail.HtmlEmail
 
@@ -22,8 +21,8 @@ import javax.mail.internet.InternetAddress
 /**
  * Performs the details of assembling and sending out a java mail mime message.
  */
+@Slf4j
 class CommunicationSendEmailMethod {
-    private Log log = LogFactory.getLog( this.getClass() )
 
     private CommunicationEmailMessage emailMessage;
     private CommunicationOrganization senderOrganization;

@@ -19,7 +19,7 @@ import net.hedtech.banner.service.ServiceBase
 class CommunicationSendItemService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {
-        CommunicationSendItem sendItem = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationJob
+        CommunicationSendItem sendItem = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationSendItem
         if (sendItem.getCreationDateTime() == null) {
             sendItem.setCreationDateTime(new Date())
         }
