@@ -64,7 +64,7 @@ class GeneralSqlJsonService {
                 json_data << [messages : messages_data]
             }
         }catch(SQLException | ConverterException e){
-            log.error 'Exception in GeneralSqlJsonService.executeProcedure ${e}'
+            log.error "Exception in GeneralSqlJsonService.executeProcedure ${e}"
             String message = MessageHelper.message('default.unknown.banner.api.exception')
             throw new ApplicationException(GeneralSqlJsonService, new BusinessLogicValidationException(message, []))
         }
@@ -202,9 +202,9 @@ class GeneralSqlJsonService {
                         def messages =  messageInfoObj?."${MESSAGES}"
                         messages?.each{ messageObj ->
                             def message = messageObj?."${MESSAGE}"
-                            if(errors.containsKey(messageType)){
+                            if (errors.containsKey(messageType)) {
                                 errors.get(messageType).add(message)
-                            }else{
+                            } else {
                                 errors.put(messageType, [message])
                             }
                         }
