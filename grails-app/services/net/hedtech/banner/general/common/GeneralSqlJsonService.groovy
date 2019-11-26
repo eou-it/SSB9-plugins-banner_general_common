@@ -3,7 +3,6 @@
  *******************************************************************************/
 package net.hedtech.banner.general.common
 
-import grails.converters.JSON
 import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
 import groovy.sql.Sql
@@ -24,9 +23,9 @@ import java.sql.Types
 /**
  * This is a common service to execute any 8x procedure that returns data as JSON.
  * This service -
-     * creates a pl/sql anonymous block to execute procedure,
-     * creates OracleCallableStatement and binds parameters of types - VARCHAR, INTEGER, OWA_UTIL.IDENT_ARR & OWA_UTIL.VC_ARR
-     * executes the query and converts the clob output to JSON
+ * creates a pl/sql anonymous block to execute procedure,
+ * creates OracleCallableStatement and binds parameters of types - VARCHAR, INTEGER, OWA_UTIL.IDENT_ARR & OWA_UTIL.VC_ARR
+ * executes the query and converts the clob output to JSON
  *
  * Note: Some 8x procedures accepts PL/SQL index-by table parameters (OWA_UTIL.IDENT_ARR & OWA_UTIL.VC_ARR). To bind such parameters,
  * setPlsqlIndexTable() method defined in the OraclePreparedStatement and OracleCallableStatement classes is used.
@@ -40,6 +39,10 @@ class GeneralSqlJsonService {
     def springSecurityService
     private static final String PACKAGE_NAME = 'SS_ACC'
     private static final String CONTEXT_NAME = 'LOG_ID'
+    private static final String MESSAGE_TAGS = 'message_info'
+    private static final String MESSAGE_TYPE = 'message_type'
+    private static final String MESSAGES = 'messages'
+    private static final String MESSAGE = 'message'
 
     /**
      * @param procedureName Name of the procedure
@@ -48,7 +51,7 @@ class GeneralSqlJsonService {
      * @return Data as JSON
      */
     def executeProcedure(String procedureName, def inputParamsList = null) {
-        JSON json_data
+        def json_data, messages_data
         OracleCallableStatement callableStatement = getCallableStatement(procedureName, inputParamsList)
         int size = inputParamsList ? inputParamsList.size() : 0
         try{
@@ -56,8 +59,12 @@ class GeneralSqlJsonService {
             Clob json_clob = callableStatement?.getClob(size + 1)
             String json_string = json_clob?.characterStream?.text
             json_data = new JsonSlurper().parseText(json_string)
+            messages_data = populateMessagesFromJson(json_data)
+            if (messages_data.size() > 0) {
+                json_data << [messages : messages_data]
+            }
         }catch(SQLException | ConverterException e){
-            log.error 'Exception in GeneralSqlJsonService.executeProcedure ${e}'
+            log.error "Exception in GeneralSqlJsonService.executeProcedure ${e}"
             String message = MessageHelper.message('default.unknown.banner.api.exception')
             throw new ApplicationException(GeneralSqlJsonService, new BusinessLogicValidationException(message, []))
         }
@@ -107,7 +114,7 @@ class GeneralSqlJsonService {
                     END;
                     lv_json_out := gokjson.get_clob_output;
                     gokjson.free_output;
-                    gb_common.p_set_context('${PACKAGE_NAME}', '${CONTEXT_NAME}', '');
+                    gokjson.p_clear_user_context;
                     ? := lv_json_out;
                 END;"""
         sql
@@ -156,7 +163,7 @@ class GeneralSqlJsonService {
      * @return
      */
     def call( String functionName, List listOfParams ) throws SQLException, ConverterException {
-        JSON json_data = null
+        def json_data = null
         try {
             String json_string
             setPidmToContext( springSecurityService.getAuthentication()?.user?.pidm )
@@ -182,5 +189,35 @@ class GeneralSqlJsonService {
         sql.call( 'call gb_common.p_set_context(?, ?, ?,?)', ['SS_ACC', 'LOG_ID', pidm.toString(), 'N'] )
     }
 
+
+    // Filters the messages from the given Json
+    private def populateMessagesFromJson(tree, errors = [:]) {
+        switch (tree) {
+            case Map:
+                tree.each { k, v ->
+                    def key = k.toUpperCase()
+                    if (key?.toLowerCase().startsWith(MESSAGE_TAGS)) {
+                        def messageInfoObj = v
+                        def messageType =  messageInfoObj?."${MESSAGE_TYPE}"?.toLowerCase()
+                        def messages =  messageInfoObj?."${MESSAGES}"
+                        messages?.each{ messageObj ->
+                            def message = messageObj?."${MESSAGE}"
+                            if (errors.containsKey(messageType)) {
+                                errors.get(messageType).add(message)
+                            } else {
+                                errors.put(messageType, [message])
+                            }
+                        }
+                    }
+                    populateMessagesFromJson(v, errors)
+                }
+                return errors
+            case Collection:
+                tree.each { e-> populateMessagesFromJson(e, errors) }
+                return errors
+            default:
+                return errors
+        }
+    }
 
 }
