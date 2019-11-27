@@ -61,6 +61,10 @@ class CommunicationPopulationListView implements Serializable {
     @Column(name = "POPULATION_DESCRIPTION")
     String description
 
+    @Type(type = "yes_no")
+    @Column(name = "POPULATION_PERSONAL")
+    Boolean personal
+
     @Column(name = "POPULATION_FOLDER_NAME")
     String populationFolderName
 
@@ -113,6 +117,12 @@ class CommunicationPopulationListView implements Serializable {
      */
     @Column(name = "CALCULATED_COUNT")
     Long lastCalculatedCount
+
+    /**
+     * Total count
+     */
+    @Column(name = "TOTAL_COUNT")
+    Long totalCountIncDuplicates
 
     /**
      * This field is the status of the calculation.
@@ -304,13 +314,19 @@ class CommunicationPopulationListView implements Serializable {
         def queryCriteria = CommunicationPopulationListView.createCriteria()
         def searchName = CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name)
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-            eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toUpperCase())
-            gt("lastCalculatedCount",0L)
+            gt("totalCountIncDuplicates",0L)
             eq("systemIndicator", false)
             and {
                 or {
                     ilike("name", searchName)
                     ilike("populationFolderName", searchName)
+                }
+            }
+            and {
+                or {
+                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toUpperCase())
+                    eq("calculatedBy", CommunicationCommonUtility.getUserOracleUserName().toUpperCase())
+                    eq("personal", false)
                 }
             }
         }
