@@ -126,19 +126,6 @@ class CommunicationInteractionView implements Serializable {
         return results
     }
 
-    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
-
-        def ascdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'asc'
-        def searchName = filterData?.params?.name
-
-        def queryCriteria = CommunicationInteractionView.createCriteria()
-        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-                eq("bannerId", searchName)
-            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
-        }
-        return results
-    }
-
     public static Map findDistinctConstituentsByNameWithPagingAndSortParams(filter, pagingAndSortParams) {
         return [list: CommunicationInteractionView.findAllDistinctConstituentsByNameWithPagingAndSortParams(filter, pagingAndSortParams)
                 , totalCount: CommunicationInteractionView.findCountDistinctConstituentsByName(filter)]

@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2018 Ellucian Company L.P. and its affiliates.
+ Copyright 2019 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 
 package net.hedtech.banner.general.aip
@@ -13,7 +13,6 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.jdbc.UncategorizedSQLException
 
-import static org.junit.Assert.*
 import static groovy.test.GroovyAssert.*
 
 @Integration
@@ -23,7 +22,7 @@ class UserActiveActionItemIntegrationTest extends BaseIntegrationTestCase {
 
     @Before
     void setUp() {
-        formContext = ['SELFSERVICE','GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
     }
 
@@ -63,20 +62,20 @@ class UserActiveActionItemIntegrationTest extends BaseIntegrationTestCase {
         assertFalse("AIPADM001 Shuld not have any action items",hasActiveActionItem)
     }
 
+    /*Prove that you cannot save to read only view.*/
 
     @Test
     public void testSave()
     {
-        UserActiveActionItem userActiveActionItem = new UserActiveActionItem();
-        userActiveActionItem.id=10
+        UserActiveActionItem userActiveActionItem = new UserActiveActionItem()
+        userActiveActionItem.id=898
         userActiveActionItem.pidm=10001
         userActiveActionItem.displayStartDate= new Date()
         userActiveActionItem.displayEndDate=new Date()+20
-
-        shouldFail(UncategorizedSQLException) {
-        userActiveActionItem.save(flush :true , failOnError: true)}
+        shouldFail(UncategorizedSQLException){
+            userActiveActionItem.save(flush: true, failOnError: true)
+        }
     }
-
 
     @Test
     public void testDelete()
@@ -91,7 +90,7 @@ class UserActiveActionItemIntegrationTest extends BaseIntegrationTestCase {
         def userActiveActionItem=listOfActionItems[0]
 
         shouldFail(UncategorizedSQLException) {
-            userActiveActionItem.delete(flush :true , failOnError: true)}
+            userActiveActionItem.delete(flush: true, failOnError: true)}
     }
 
 

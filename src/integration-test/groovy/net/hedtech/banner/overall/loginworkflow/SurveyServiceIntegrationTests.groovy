@@ -65,8 +65,7 @@ class SurveyServiceIntegrationTests extends BaseIntegrationTestCase {
         quiredPersonRace = PersonRace.fetchByPidmAndRace(i_success_pidm, i_success_race)
         assertNotNull quiredPersonRace
 
-        quiredPersonRace.delete()
-
+        quiredPersonRace.delete(flush: true)
         quiredPersonRace = PersonRace.fetchByPidmAndRace(i_success_pidm, i_success_race)
         assertNull quiredPersonRace
 

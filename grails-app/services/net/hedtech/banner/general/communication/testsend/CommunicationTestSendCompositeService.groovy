@@ -3,6 +3,8 @@
 ********************************************************************************/
 package net.hedtech.banner.general.communication.testsend
 
+import grails.util.Holders
+import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
@@ -26,6 +28,8 @@ import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import org.springframework.transaction.annotation.Propagation
 import grails.gorm.transactions.Transactional
 import org.springframework.web.context.request.RequestContextHolder
+
+import java.sql.SQLException
 
 @Slf4j
 @Transactional
@@ -71,6 +75,32 @@ class CommunicationTestSendCompositeService  {
     public  sendCommunicationWithNewTransaction(recipientDataToBeCreated, template, organization, organizationId, Long pidm) {
 
         def recipientData = communicationRecipientDataService.create(recipientDataToBeCreated) as CommunicationRecipientData
+
+        //Insert gcrlmap in case of test template
+        def sql
+        if(template.communicationCode) {
+            try {
+                def ctx = Holders.grailsApplication.getMainContext()
+                def sessionFactory = ctx.sessionFactory
+                def session = sessionFactory.currentSession
+                sql = new Sql(session.connection())
+                sql.execute("""
+            INSERT INTO gcrlmap (gcrlmap_reference_id, gcrlmap_letr_id, gcrlmap_user_id, gcrlmap_activity_date)
+                values (?,?,?,?)""", [recipientData.referenceId,template.communicationCode.id,recipientData.ownerId,new Date().toTimestamp()])
+
+                if (log.isDebugEnabled()) log.debug("Created " + sql.updateCount + " gcrlmap records for recipient data with reference id = " + recipientData.referenceId)
+            } catch (SQLException ae) {
+                log.debug "SqlException in INSERT INTO gcrlmap ${ae}"
+                log.debug ae.stackTrace
+                throw ae
+            } catch (Exception ae) {
+                log.debug "Exception in INSERT INTO gcrlmap ${ae}"
+                log.debug ae.stackTrace
+                throw ae
+            } finally {
+            }
+        }
+
         CommunicationMessageGenerator messageGenerator = new CommunicationMessageGenerator(
                 communicationTemplateMergeService: communicationTemplateMergeService
         )
@@ -280,8 +310,11 @@ class CommunicationTestSendCompositeService  {
     private void checkOrgEmail (CommunicationOrganization org) {
         if (!org)
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
-        if (!org.sendEmailServerProperties)
-            throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.serverPropertiesNotFound"), CommunicationErrorCode.SERVER_PROPERTIES_NOT_FOUND.name())
+        if (!org.sendEmailServerProperties) {
+            def root = CommunicationOrganization.fetchRoot()
+            if(!root.sendEmailServerProperties)
+                throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.serverPropertiesNotFound"), CommunicationErrorCode.SERVER_PROPERTIES_NOT_FOUND.name())
+        }
         if (!org.senderMailboxAccount || !org.replyToMailboxAccount)
                 throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.invalidSenderMailbox"), CommunicationErrorCode.INVALID_SENDER_MAILBOX.name())
     }

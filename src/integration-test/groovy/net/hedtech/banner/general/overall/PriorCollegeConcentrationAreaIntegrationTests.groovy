@@ -13,7 +13,9 @@ import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.GeneralCommonUtility
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import java.text.SimpleDateFormat
+ import org.springframework.jdbc.UncategorizedSQLException
+
+ import java.text.SimpleDateFormat
 import static groovy.test.GroovyAssert.*
 
 @Integration
@@ -56,7 +58,7 @@ class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestC
 
         priorCollegeConcentrationArea.concentration = MajorMinorConcentration.findByCode("ECNO")
         //Changed from org.springframework.orm.hibernate3.HibernateJdbcException due to spring 4.1.5
-        shouldFail(org.springframework.dao.QueryTimeoutException) {
+        shouldFail(UncategorizedSQLException) {
             priorCollegeConcentrationArea.save(flush: true, failOnError: true)
             fail("this should have failed, update not allowed")
         }
