@@ -152,44 +152,6 @@ class GeneralSqlJsonService {
         callableStatement
     }
 
-    //TODO: Remove below methods after refactoring application services to call executeProcedure method, instead of call.
-    /**
-     * Sets Pidm to the context and executes function.
-     * Wrapper function is expected to return a CLOB object.
-     * Fetches the JSON from CLOB object.
-     *
-     * @param functionName
-     * @param listOfParams
-     * @return
-     */
-    def call( String functionName, List listOfParams ) throws SQLException, ConverterException {
-        def json_data = null
-        try {
-            String json_string
-            setPidmToContext( springSecurityService.getAuthentication()?.user?.pidm )
-            Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
-            sql.call( functionName, listOfParams,
-                    {result ->
-                        json_string = result?.asciiStream?.text
-                    }
-            )
-            json_data = new JsonSlurper().parseText( json_string.toString() )
-        } finally {
-            clearPidmContext()
-        }
-        json_data
-    }
-
-    private clearPidmContext() {
-        setPidmToContext( '' )
-    }
-
-    private void setPidmToContext( def pidm ) {
-        Sql sql = new Sql( sessionFactory.getCurrentSession().connection() )
-        sql.call( 'call gb_common.p_set_context(?, ?, ?,?)', ['SS_ACC', 'LOG_ID', pidm.toString(), 'N'] )
-    }
-
-
     // Filters the messages from the given Json
     private def populateMessagesFromJson(tree, errors = [:]) {
         switch (tree) {
