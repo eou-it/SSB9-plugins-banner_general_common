@@ -1,17 +1,19 @@
 /*********************************************************************************
-  Copyright 2010-2018 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2019 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import org.codehaus.groovy.runtime.InvokerHelper
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.jdbc.UncategorizedSQLException
+
 import static groovy.test.GroovyAssert.*
 
 @Integration
@@ -162,7 +164,7 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
         filterData = [saturday: true, term: "201410"]
         meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr", filterData)
         assertNotNull meetingQuery
-        meetings = MeetingTimeSearch.findAll("from MeetingTimeSearch sr where ${meetingQuery.query}" , meetingQuery.filter)
+        meetings = MeetingTimeSearch.findAll("from MeetingTimeSearch sr where ${meetingQuery.query}".flattenString() , meetingQuery.filter)
         meetings.each { meet ->
             assertTrue meet.saturday
         }
@@ -194,12 +196,14 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
     void testCreateExceptionResults() {
         def existingMeeting = MeetingTimeSearch.findByCourseReferenceNumberAndTerm("20001", "201410")
         assertNotNull existingMeeting
-        MeetingTimeSearch newMeetingList = new MeetingTimeSearch(existingMeeting.properties)
+        MeetingTimeSearch newMeetingList = new MeetingTimeSearch()
+        InvokerHelper.setProperties(newMeetingList, existingMeeting.properties)
         newMeetingList.courseReferenceNumber = '4444'
         newMeetingList.version = 0
         newMeetingList.id = 2222222
+        newMeetingList = makeMeetingTimeSearchNullSafe(newMeetingList)
         shouldFail(UncategorizedSQLException) {
-            newMeetingList.save(flush: true, onError: true)
+            newMeetingList.save(flush: true, failOnError: true)
         }
 
     }
@@ -209,9 +213,10 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
     void testUpdateExceptionResults() {
         def existingMeeting = MeetingTimeSearch.findByCourseReferenceNumberAndTerm("20001", "201410")
         assertNotNull existingMeeting
+        existingMeeting = makeMeetingTimeSearchNullSafe(existingMeeting)
         existingMeeting.room = "100"
         shouldFail(UncategorizedSQLException) {
-            existingMeeting.save(flush: true, onError: true)
+            existingMeeting.save(flush: true, failOnError: true)
         }
     }
 
@@ -221,7 +226,7 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
         def existingMeeting = MeetingTimeSearch.findByCourseReferenceNumberAndTerm("20001", "201410")
         assertNotNull existingMeeting
         shouldFail(UncategorizedSQLException) {
-            existingMeeting.delete(flush: true, onError: true)
+            existingMeeting.delete(flush: true, failOnError: true)
         }
     }
 
@@ -284,5 +289,17 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
             assertNotNull meetingTime
             assertNotNull meetingTime.meetingType
         }
+    }
+
+    private static def makeMeetingTimeSearchNullSafe(MeetingTimeSearch meetingTimeSearch){
+        meetingTimeSearch.campus = "Test"
+        meetingTimeSearch.dayOfWeek = "Test"
+        meetingTimeSearch.function = "Test"
+        meetingTimeSearch.building = "Test"
+        meetingTimeSearch.override = "Test"
+        meetingTimeSearch.buildingDescription = "Test"
+        meetingTimeSearch.dayNumber = 99
+        meetingTimeSearch.room = 100
+        return meetingTimeSearch
     }
 }

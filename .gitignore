@@ -32,3 +32,4 @@ grails-synch-jvm-options.txt
 build/
 .gradle
 *.scss
+/src/main/webapp/css/theme/*.css

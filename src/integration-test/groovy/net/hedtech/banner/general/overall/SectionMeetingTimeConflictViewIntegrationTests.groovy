@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2019 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
@@ -9,6 +9,7 @@ import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
+
 import static groovy.test.GroovyAssert.*
 import org.springframework.dao.InvalidDataAccessResourceUsageException
 
@@ -51,13 +52,13 @@ class SectionMeetingTimeConflictViewIntegrationTests extends net.hedtech.banner.
     void testCreateExceptionResults() {
 
         SectionMeetingTimeConflictView newSectionList = new SectionMeetingTimeConflictView()
-        newSectionList.courseReferenceNumber = '20002'
-        newSectionList.courseReferenceNumberConflict = '20202'
-        newSectionList.term = '201410'
-        newSectionList.version = 0
+        newSectionList.courseReferenceNumber = '99999'
+        newSectionList.courseReferenceNumberConflict = '99999'
+        newSectionList.term = '999999'
+        newSectionList.version = new Long(999)
         newSectionList.id = 2222222
         shouldFail(InvalidDataAccessResourceUsageException) {
-            newSectionList.save(flush: true, onError: true)
+            newSectionList.save(flush: true, failOnError: true)
         }
     }
 
@@ -68,8 +69,11 @@ class SectionMeetingTimeConflictViewIntegrationTests extends net.hedtech.banner.
                 "201410", "20201", "20228")[0]
         assertNotNull existingSection
         existingSection.version = new Long(1)
+        existingSection.courseReferenceNumberConflict = "New Value"
+        existingSection.courseReferenceNumber = "New Value"
+        existingSection.term = "New Value"
         shouldFail(InvalidDataAccessResourceUsageException) {
-            existingSection.save(flush: true, onError: true)
+            existingSection.save(flush: true, failOnError: true)
         }
     }
 
@@ -80,7 +84,7 @@ class SectionMeetingTimeConflictViewIntegrationTests extends net.hedtech.banner.
                 "201410", "20201", "20228") [0]
         assertNotNull existingSection
         shouldFail(InvalidDataAccessResourceUsageException) {
-            existingSection.delete(flush: true, onError: true)
+            existingSection.delete(flush: true, failOnError: true)
         }
     }
 

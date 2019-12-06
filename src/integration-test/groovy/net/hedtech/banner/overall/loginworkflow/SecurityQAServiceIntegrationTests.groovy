@@ -311,7 +311,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         def exceptionMessage = shouldFail(ApplicationException) {
             securityQAService.saveOrUpdateSecurityQAResponse(i_success_pidm, quesAnsList, validPassword)
         }
-        assertEquals 'securityQA.unique.question', exceptionMessage
+        assertEquals 'securityQA.unique.question', exceptionMessage.message
         int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
         assertTrue ansrCount==1
     }
@@ -360,7 +360,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
 
     private def newValidUserResponsesWithOutPinQuestion() {
         def generalForStoringResponsesAndPinQuestion = new GeneralForStoringResponsesAndPinQuestion(
-                pidm: i_success_pidm,
+                pidm: i_success_pidm as Integer,
                 number: 1,
                 questionDescription: i_user_def_question2,
                 answerDescription: i_success_answer1,
