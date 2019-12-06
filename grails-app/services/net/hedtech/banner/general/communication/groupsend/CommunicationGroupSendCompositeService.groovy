@@ -565,6 +565,8 @@ class CommunicationGroupSendCompositeService {
         // We'll created the group send items synchronously for now until we have support for scheduling.
         // The individual group send items will still be processed asynchronously via the framework.
         createGroupSendItems(groupSend)
+        //Refresh the group send if other threads have already updated the same
+        groupSend.refresh()
         groupSend.markProcessing()
 
         groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)

@@ -134,4 +134,40 @@ class CommunicationItemView implements Serializable {
         return results
     }
 
+    public static findByNameWithPagingAndSortParams(String bannerId, Date fromDate, Date toDate, String subSearchString, pagingAndSortParams) {
+
+        def ascdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'asc'
+
+        def queryCriteria = CommunicationItemView.createCriteria()
+        def results
+        if (subSearchString && subSearchString.trim().length() > 0) {
+            if (!subSearchString.contains( '%' )) {
+                subSearchString = '%' + subSearchString + '%'
+            }
+
+            results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+                ilike("bannerId", bannerId)
+                between("sentDate", fromDate, toDate + 1)
+                or {
+                    ilike( "bannerId", subSearchString )
+                    ilike( "firstName", subSearchString )
+                    ilike( "middleName", subSearchString )
+                    ilike( "lastName", subSearchString )
+                    ilike( "organizationName", subSearchString )
+                    ilike( "name", subSearchString )
+                    ilike( "templateName", subSearchString )
+                }
+                order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
+            }
+        } else {
+            results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+                ilike("bannerId", bannerId)
+                between("sentDate", fromDate, toDate + 1)
+                order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
+            }
+        }
+
+        return results
+    }
+
 }

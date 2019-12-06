@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2019 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -14,6 +14,8 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.springframework.jdbc.UncategorizedSQLException
+
 import java.text.SimpleDateFormat
 import static groovy.test.GroovyAssert.*
 
@@ -66,7 +68,7 @@ class PriorCollegeMinorIntegrationTests extends BaseIntegrationTestCase {
 
         priorCollegeMinor.majorMinorConcentrationMinor = MajorMinorConcentration.findByCode("ECNO")
         //Changed from org.springframework.orm.hibernate3.HibernateJdbcException due to spring 4.1.5
-        shouldFail(org.springframework.dao.QueryTimeoutException) {
+        shouldFail(UncategorizedSQLException) {
             priorCollegeMinor.save(flush: true, failOnError: true)
             fail("this should have failed, update not allowed")
         }

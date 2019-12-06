@@ -119,7 +119,7 @@ class CommunicationGurmailTrackingService extends ServiceBase {
         try {
             sql.eachRow(sqlString, [crd.pidm, letter.code]) { row ->
                 def stmt = "{call tkkddnp.PR_SET_INST_PAYER_NOTIF(?,?,?,?,?}"
-                def params = [crd.pidm, row.TBRISTL_REF_NUMBER, row.TKRDDIC_SEQ_NO, letter.code, citem.lastModified]
+                def params = [crd.pidm, row.TBRISTL_REF_NUMBER, row.TKRDDIC_SEQ_NO, letter.code, new java.sql.Date(citem.lastModified.getTime())]
                 sql.call stmt, params
             }
         }

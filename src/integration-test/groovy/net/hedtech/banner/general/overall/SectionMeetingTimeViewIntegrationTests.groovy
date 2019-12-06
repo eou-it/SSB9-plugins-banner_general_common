@@ -1,11 +1,13 @@
 /*********************************************************************************
-  Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2019 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.codehaus.groovy.runtime.InvokerHelper
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -15,7 +17,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException
 
 @Integration
 @Rollback
-class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.BaseIntegrationTestCase {
+class SectionMeetingTimeViewIntegrationTests extends BaseIntegrationTestCase {
 
     @Before
     public void setUp() {
@@ -141,12 +143,14 @@ class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.
         def existingSection = SectionMeetingTimeView.findAllByTermAndCourseReferenceNumber(
                 "201410", "20001")[0]
         assertNotNull existingSection
-        SectionMeetingTimeView newSectionList = new SectionMeetingTimeView(existingSection.properties)
+        SectionMeetingTimeView newSectionList = new SectionMeetingTimeView()
+        InvokerHelper.setProperties(newSectionList, existingSection.properties)
+        newSectionList = getNullSafeSectionMeetingTimeView(newSectionList)
         newSectionList.courseReferenceNumber = '20002'
         newSectionList.version = 0
         newSectionList.id = 2222222
         shouldFail(InvalidDataAccessResourceUsageException) {
-            newSectionList.save(flush: true, onError: true)
+            newSectionList.save(flush: true, failOnError: true)
         }
     }
 
@@ -157,8 +161,9 @@ class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.
                 "201410", "20001")
         assertNotNull existingSection
         existingSection.version = new Long(1)
+        existingSection = getNullSafeSectionMeetingTimeView(existingSection)
         shouldFail(InvalidDataAccessResourceUsageException) {
-            existingSection.save(flush: true, onError: true)
+            existingSection.save(flush: true, failOnError: true)
         }
     }
 
@@ -169,8 +174,20 @@ class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.
                 "201410", "20001")
         assertNotNull existingSection
         shouldFail(InvalidDataAccessResourceUsageException) {
-            existingSection.delete(flush: true, onError: true)
+            existingSection.delete(flush: true, failOnError: true)
         }
+    }
+
+    private static def getNullSafeSectionMeetingTimeView(SectionMeetingTimeView sectionMeetingTimeView) {
+        sectionMeetingTimeView.courseReferenceNumber = '99999'
+        sectionMeetingTimeView.campus = "Test"
+        sectionMeetingTimeView.room = "Test"
+        sectionMeetingTimeView.function = "Test"
+        sectionMeetingTimeView.building = "Test"
+        sectionMeetingTimeView.override = "Test"
+        sectionMeetingTimeView.xlstGroup = "Test"
+        sectionMeetingTimeView.dayNumber = 999
+        return sectionMeetingTimeView
     }
 
 }

@@ -125,8 +125,8 @@ class DirectProcessingCompositeServiceIntegrationTests extends BaseIntegrationTe
                               vendor_in         : depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor', 'string' ),
                               pay_trans_in      : depositProcessingPaymentCompositeService.getTransactionId()]
         def ret = depositProcessingPaymentCompositeService.getPaymentUrl( procedureParam )
-        assert ret.contains( 'https://test.com' );
-        assert ret.contains( '&TransactionAmount=200&TransactionDescription=Ellucian+University&MerchantID=0' );
+        assert ret.contains('https://test.com');
+        assert ret.contains('&TransactionAmount=200&TransactionDescription=null&MerchantID=0');
     }
 
 

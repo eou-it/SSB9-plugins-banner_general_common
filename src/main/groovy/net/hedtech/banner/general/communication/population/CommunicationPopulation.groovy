@@ -79,6 +79,14 @@ class CommunicationPopulation implements Serializable {
     String description
 
     /**
+     * Indicates if the population is a personal population. Personal populations are available
+     * only for use by the owner and are not available to other users.
+     */
+    @Type(type = "yes_no")
+    @Column(name = "GCBPOPL_PERSONAL")
+    Boolean personal = false
+
+    /**
      * Foreign key reference to the Folder under which this population is organized.
      */
     @ManyToOne(optional = false)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2019 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 
 package net.hedtech.banner.general.commonmatching
@@ -47,7 +47,7 @@ class CommonMatchingResultIntegrationTests extends BaseIntegrationTestCase {
         newGeneratedResult()
         def personList = CommonMatchingResult.findAll()
         assertEquals 1, personList.size()
-        personList[0].message = "test"
+        personList[0] = getNullSafeCommonMatchingResult(personList[0])
         shouldFail(InvalidDataAccessResourceUsageException) {
             personList[0].save(failOnError: true, flush: true)
         }
@@ -60,6 +60,7 @@ class CommonMatchingResultIntegrationTests extends BaseIntegrationTestCase {
         def personList = CommonMatchingResult.findAll()
         assertEquals 1, personList.size()
         assertNotNull personList[0].id
+        personList[0] = getNullSafeCommonMatchingResult(personList[0])
         shouldFail(InvalidDataAccessResourceUsageException) {
             personList[0].delete(failOnError: true, flush: true)
         }
@@ -96,12 +97,21 @@ class CommonMatchingResultIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    private def newValidCommonMatchingResult() {
+    private static def newValidCommonMatchingResult() {
         def result = new CommonMatchingResult(
                 id: "1",
                 pidm: 11111,
+                idRowid: "Text",
+                nameRowid: "Text",
+                addressRowid: "Text",
+                emailRowid: "Text",
+                additionalIdRowid: "Text",
+                telephoneRowid: "Text",
+                commonMatchingSource: "Text",
+                commonMatchingPriority: 999,
                 resultType: "M",
                 message: "Testing",
+                resultIndicator: "Text",
                 name: "Emily Jamison",
                 bannerId: "HOS000001"
         )
@@ -122,8 +132,7 @@ class CommonMatchingResultIntegrationTests extends BaseIntegrationTestCase {
 
         def result
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
-        try {
-            sql.call("""
+        sql.call("""
               declare
                 cmsc  varchar2(100) := 'HEDM_PERSON_MATCH' ;
                 lv_last_name varchar2(100) := ? ;
@@ -179,14 +188,9 @@ class CommonMatchingResultIntegrationTests extends BaseIntegrationTestCase {
                       p_match_pidm_out   => new_pidm);
 
                 end;
-             """, [person.lastName, person.firstName]){ output_info ->
-                result = output_info
-            }
+             """, [person.lastName, person.firstName]) { output_info ->
+            result = output_info
         }
-        finally {
-//            sql?.close()
-        }
-
     }
 
     private def newGeneratedLotsOfResults() {
@@ -202,8 +206,7 @@ class CommonMatchingResultIntegrationTests extends BaseIntegrationTestCase {
         assertTrue list1.cnt > 20
         assertNotNull list1.spriden_last_name
         def result
-        try {
-            sql.call("""
+        sql.call("""
               declare
                 cmsc  varchar2(100) := 'HEDM_LASTNAME_MATCH' ;
                 lv_last_name varchar2(100) := ? ;
@@ -259,12 +262,19 @@ class CommonMatchingResultIntegrationTests extends BaseIntegrationTestCase {
                       p_match_pidm_out   => new_pidm);
 
                 end;
-             """, [list1.spriden_last_name]){ output_info ->
-                result = output_info
-            }
+             """, [list1.spriden_last_name]) { output_info ->
+            result = output_info
         }
-        finally {
-//            sql?.close()
-        }
+    }
+
+    private static def getNullSafeCommonMatchingResult (CommonMatchingResult commonMatchingResult) {
+        commonMatchingResult.idRowid = "Test"
+        commonMatchingResult.nameRowid = "Test"
+        commonMatchingResult.addressRowid = "Test"
+        commonMatchingResult.emailRowid = "Test"
+        commonMatchingResult.additionalIdRowid = "Test"
+        commonMatchingResult.telephoneRowid = "Test"
+        commonMatchingResult.message = "Test"
+        return commonMatchingResult
     }
 }

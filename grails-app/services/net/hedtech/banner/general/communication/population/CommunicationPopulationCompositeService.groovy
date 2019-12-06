@@ -63,7 +63,7 @@ class CommunicationPopulationCompositeService {
         return CommunicationPopulationListView.findByNameWithPagingAndSortParams( filterData, pagingAndSortParams )
     }
 
-    public CommunicationPopulation createPopulation( CommunicationFolder folder, String name, String description = "" , boolean systemIndicator = false) {
+    public CommunicationPopulation createPopulation( CommunicationFolder folder, String name, String description = "" , Boolean personal, boolean systemIndicator = false) {
         log.trace( "createPopulation called" )
         CommunicationPopulation population = new CommunicationPopulation()
         population.folder = folder
@@ -71,6 +71,7 @@ class CommunicationPopulationCompositeService {
         population.description = description
         population.changesPending = true
         population.setSystemIndicator(systemIndicator)
+        population.personal = personal
 
         if (RequestContextHolder?.getRequestAttributes()?.request?.session) {
             def session = RequestContextHolder.currentRequestAttributes()?.request?.session
@@ -353,10 +354,10 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation createPopulationFromQuery( Long populationQueryId, String name, String description = "", Date scheduledDate = null ) {
+    public CommunicationPopulation createPopulationFromQuery( Long populationQueryId, String name, String description = "", Boolean personal, Date scheduledDate = null ) {
         log.trace( "createPopulationFromQuery called" )
         CommunicationPopulationQuery communicationPopulationQuery = CommunicationPopulationQuery.fetchById( populationQueryId )
-        return createPopulationFromQuery( communicationPopulationQuery, name, description, scheduledDate )
+        return createPopulationFromQuery( communicationPopulationQuery, name, description, personal, scheduledDate )
     }
 
 
@@ -365,13 +366,15 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation createPopulationFromQuery( CommunicationPopulationQuery populationQuery, String name, String description = "", Date scheduledDate = null ) {
+    public CommunicationPopulation createPopulationFromQuery( CommunicationPopulationQuery populationQuery, String name, String description = "", Boolean personal, Date scheduledDate = null ) {
         log.trace( "createPopulationFromQuery( populationQuery, name, description ) called" )
 
         CommunicationPopulation population = new CommunicationPopulation()
         population.name = name
         population.description = description
         population.folder = populationQuery.folder
+        population.personal = personal
+
         if(scheduledDate) {
             population.scheduledDate = scheduledDate
             population.status = CommunicationPopulationCalculationStatus.SCHEDULED
@@ -402,10 +405,10 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation createPopulationFromQueryVersion( Long queryVersionId, String name, String description, Date scheduledDate = null ) {
+    public CommunicationPopulation createPopulationFromQueryVersion( Long queryVersionId, String name, String description, Boolean personal, Date scheduledDate = null ) {
         log.trace( "createPopulationFromQueryVersion( queryVersionId, name, description ) called" )
         CommunicationPopulationQueryVersion queryVersion = CommunicationPopulationQueryVersion.fetchById( queryVersionId )
-        return createPopulationFromQueryVersion( queryVersion, name, description, scheduledDate )
+        return createPopulationFromQueryVersion( queryVersion, name, description, personal, scheduledDate )
     }
 
 
@@ -414,13 +417,14 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation createPopulationFromQueryVersion( CommunicationPopulationQueryVersion populationQueryVersion, String name, String description, Date scheduledDate ) {
+    public CommunicationPopulation createPopulationFromQueryVersion( CommunicationPopulationQueryVersion populationQueryVersion, String name, String description, Boolean personal, Date scheduledDate ) {
         log.trace( "createPopulationFromQueryVersion( populationVersion, name, description ) called" )
         assert(populationQueryVersion)
 
         CommunicationPopulation population = new CommunicationPopulation()
         population.name = name
         population.description = description
+        population.personal = personal
         population.folder = populationQueryVersion.query.folder
         if(scheduledDate) {
             population.scheduledDate = scheduledDate
@@ -546,6 +550,8 @@ class CommunicationPopulationCompositeService {
                 populationAsMap.id,
                 new NotFoundException(id: populationAsMap.id, entityClassName: CommunicationPopulation.class.simpleName)
             )
+        } else if(!population.personal && populationAsMap.get("personal")) {
+            throw new ApplicationException(CommunicationPopulation, "@@r1:noSharingAllowed@@")
         }
 
         return (CommunicationPopulation) communicationPopulationService.update( populationAsMap )
