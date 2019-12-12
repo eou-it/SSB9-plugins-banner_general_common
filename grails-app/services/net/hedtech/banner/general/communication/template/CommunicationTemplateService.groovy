@@ -10,6 +10,7 @@ import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.field.CommunicationField
+import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.general.communication.parameter.CommunicationTemplateFieldAssociation
 import net.hedtech.banner.service.ServiceBase
 
@@ -53,16 +54,24 @@ class CommunicationTemplateService extends ServiceBase {
             deleteFieldAssociations(template)
 
             List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template.id)
+            boolean hasArchivedField = false;
             if (fieldNameList) {
                 List<CommunicationTemplateFieldAssociation> templateFieldAssociations = new ArrayList<CommunicationTemplateFieldAssociation>()
                 fieldNameList.each { String fieldName ->
                     CommunicationField field = CommunicationField.fetchByName( fieldName )
+                    if(field.status.compareTo(CommunicationFieldStatus.DEPRECATED) == 0) {
+                        hasArchivedField = true;
+                        throw new ApplicationException( CommunicationTemplate, "@@r1:templateHasArchivedFields:" + field.name + "@@")
+                    } else {
                         CommunicationTemplateFieldAssociation templateFieldAssociation = new CommunicationTemplateFieldAssociation()
                         templateFieldAssociation.template = template
                         templateFieldAssociation.field = field
                         templateFieldAssociations.add(templateFieldAssociation)
+                    }
                 }
-                communicationTemplateFieldAssociationService.create(templateFieldAssociations)
+                if(!hasArchivedField) {
+                    communicationTemplateFieldAssociationService.create(templateFieldAssociations)
+                }
             }
         }
     }
@@ -111,17 +120,26 @@ class CommunicationTemplateService extends ServiceBase {
         //Insert the template field associations if the template is under test functionality and the association does not exist already
         deleteFieldAssociations(template)
 
+        boolean hasArchivedField = false;
+
         List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template.id)
         if (fieldNameList) {
             List<CommunicationTemplateFieldAssociation> templateFieldAssociations = new ArrayList<CommunicationTemplateFieldAssociation>()
             fieldNameList.each { String fieldName ->
                 CommunicationField field = CommunicationField.fetchByName( fieldName )
-                CommunicationTemplateFieldAssociation templateFieldAssociation = new CommunicationTemplateFieldAssociation()
-                templateFieldAssociation.template = template
-                templateFieldAssociation.field = field
-                templateFieldAssociations.add(templateFieldAssociation)
+                if(field.status.compareTo(CommunicationFieldStatus.DEPRECATED) == 0) {
+                    hasArchivedField = true;
+                    throw new ApplicationException( CommunicationTemplate, "@@r1:templateHasArchivedFields:" + field.name + "@@")
+                } else {
+                    CommunicationTemplateFieldAssociation templateFieldAssociation = new CommunicationTemplateFieldAssociation()
+                    templateFieldAssociation.template = template
+                    templateFieldAssociation.field = field
+                    templateFieldAssociations.add(templateFieldAssociation)
+                }
             }
-            communicationTemplateFieldAssociationService.create(templateFieldAssociations)
+            if(!hasArchivedField) {
+                communicationTemplateFieldAssociationService.create(templateFieldAssociations)
+            }
         }
     }
     /**
