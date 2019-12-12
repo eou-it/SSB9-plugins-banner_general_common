@@ -25,7 +25,11 @@ import javax.persistence.*
                             WHERE a.isInstitutionalDefault = true """),
         @NamedQuery(name = "FlexibleWorkWeekReadOnly.fetchBySystemRequired",
                 query = """ FROM FlexibleWorkWeekReadOnly a
-                            WHERE a.isSystemRequired = true """)
+                            WHERE a.isSystemRequired = true """),
+        @NamedQuery(name = 'FlexibleWorkWeekReadOnly.fetchByInstitutionDefaultAndSystemRequired',
+                query = """ FROM FlexibleWorkWeekReadOnly a
+                           WHERE a.isSystemRequired = true
+                           AND a.isInstitutionalDefault = true """),
 ])
 class FlexibleWorkWeekReadOnly implements Serializable {
 
@@ -150,6 +154,17 @@ class FlexibleWorkWeekReadOnly implements Serializable {
 
         FlexibleWorkWeekReadOnly.withSession { session ->
             flexibleWorkWeek = session.getNamedQuery('FlexibleWorkWeekReadOnly.fetchBySystemRequired')
+                    .list()[0]
+        }
+
+        return flexibleWorkWeek
+    }
+
+    def static fetchByInstitutionDefaultAndSystemRequired() {
+        def flexibleWorkWeek
+
+        FlexibleWorkWeekReadOnly.withSession { session ->
+            flexibleWorkWeek = session.getNamedQuery('FlexibleWorkWeekReadOnly.fetchByInstitutionDefaultAndSystemRequired')
                     .list()[0]
         }
 
