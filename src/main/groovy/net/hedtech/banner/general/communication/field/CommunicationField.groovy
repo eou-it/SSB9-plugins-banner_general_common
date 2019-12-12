@@ -227,7 +227,7 @@ class CommunicationField implements Serializable {
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
             createAlias("folder", "folder")
             ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
-            ne("status", CommunicationFieldStatus.DEPRECATED)
+//            ne("status", CommunicationFieldStatus.DEPRECATED)
             order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
         return results
@@ -274,6 +274,6 @@ class CommunicationField implements Serializable {
     }
 
     public boolean isPublished() {
-        return !CommunicationFieldStatus.DEVELOPMENT.equals( this.getStatus() )
+        return CommunicationFieldStatus.PRODUCTION.equals( this.getStatus() )
     }
 }
