@@ -59,6 +59,7 @@ class GeneralSqlJsonService {
             Clob json_clob = callableStatement?.getClob(size + 1)
             String json_string = json_clob?.characterStream?.text
             json_data = new JsonSlurper().parseText(json_string)
+            println('json_string - '+json_string)
             messages_data = populateMessagesFromJson(json_data)
             if (messages_data.size() > 0) {
                 json_data << [messages : messages_data]
@@ -114,7 +115,7 @@ class GeneralSqlJsonService {
                     END;
                     lv_json_out := gokjson.get_clob_output;
                     gokjson.free_output;
-                    gokjson.p_clear_user_context;
+                    goksels.p_clear_user_context;
                     ? := lv_json_out;
                 END;"""
         sql
