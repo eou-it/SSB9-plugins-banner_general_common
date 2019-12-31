@@ -92,6 +92,19 @@ class GeneralSqlJsonService {
             }
         }
         procedureStmt = "${procedureStmt})"
+
+        String debugProcedureStmt = "${procedureName}("
+        for (int i = 0; i < numberOfParams; i++) {
+            String type = inputParamsList[i].paramType.toLowerCase()
+
+            debugProcedureStmt = type.equals('string') ? "${debugProcedureStmt}${inputParamsList[i].paramName}=>'${inputParamsList[i].paramValue}'" : "${debugProcedureStmt}${inputParamsList[i].paramName}=>${inputParamsList[i].paramValue}"
+            if (i < numberOfParams - 1) {
+                debugProcedureStmt = "${debugProcedureStmt},"
+            }
+        }
+        debugProcedureStmt = "${debugProcedureStmt})"
+        println debugProcedureStmt
+
         procedureStmt
     }
 
@@ -143,6 +156,10 @@ class GeneralSqlJsonService {
                 case 'vc_arr':
                     String[] vcArray = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
                     callableStatement.setPlsqlIndexTable(i, vcArray, vcArray?.length, vcArray?.length, PlsqlDataType.VC_ARR.sqlType, PlsqlDataType.VC_ARR.maxLen)
+                    break
+                case 'vc_tab_type':
+                    String[] vcTabType = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
+                    callableStatement.setPlsqlIndexTable(i, vcTabType, vcTabType?.length, vcTabType?.length, PlsqlDataType.TAB_TYPE.sqlType, PlsqlDataType.TAB_TYPE.maxLen)
                     break
                 default:
                     log.error("Unsupported Type")
