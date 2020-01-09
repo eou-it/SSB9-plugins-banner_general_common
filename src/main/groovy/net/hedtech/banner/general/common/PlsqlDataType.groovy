@@ -9,7 +9,8 @@ enum PlsqlDataType {
 
     IDENT_ARR(OracleTypes.VARCHAR, 30),
     VC_ARR(OracleTypes.VARCHAR, 4000),
-    TAB_TYPE(OracleTypes.VARCHAR, 1000);
+    TAB_TYPE(OracleTypes.VARCHAR, 1000),
+    CHAR_ARR(OracleTypes.VARCHAR, 1)
 
     private int sqlType
     private int maxLen
