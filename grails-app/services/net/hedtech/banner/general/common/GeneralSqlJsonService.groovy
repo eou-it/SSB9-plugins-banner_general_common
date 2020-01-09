@@ -5,7 +5,6 @@ package net.hedtech.banner.general.common
 
 import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
-import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
@@ -147,6 +146,10 @@ class GeneralSqlJsonService {
                 case 'vc_tab_type':
                     String[] vcTabType = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
                     callableStatement.setPlsqlIndexTable(i, vcTabType, vcTabType?.length, vcTabType?.length, PlsqlDataType.TAB_TYPE.sqlType, PlsqlDataType.TAB_TYPE.maxLen)
+                    break
+                case 'char_arr':
+                    String[] char_arr = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
+                    callableStatement.setPlsqlIndexTable(i, char_arr, char_arr?.length, char_arr?.length, PlsqlDataType.CHAR_ARR.sqlType, PlsqlDataType.CHAR_ARR.maxLen)
                     break
                 default:
                     log.error("Unsupported Type")
