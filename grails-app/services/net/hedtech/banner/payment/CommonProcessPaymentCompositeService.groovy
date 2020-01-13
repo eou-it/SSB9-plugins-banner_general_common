@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat
  */
 abstract class CommonProcessPaymentCompositeService {
     def sessionFactory
-    def processCodeModule = [BWSKPAYG: 'WEBCCARGATEWAY', BWCKCPMT: 'WEBCCREGFEES']
+    def processCodeModule = [BWSKPAYG: 'WEBCCARGATEWAY', BWCKCPMT: 'WEBCCREGFEES', BWSKWTRR: 'WEBCCTRANSREQ', 'BWSKGRAD': 'WEBCCGRADAPP', 'BWSKRQST': 'WEBCCEPRTREQ']
     def private final DEFAULT_PROCESS_CODE = 'DEFAULTDESCRIPTION'
 
     /**
