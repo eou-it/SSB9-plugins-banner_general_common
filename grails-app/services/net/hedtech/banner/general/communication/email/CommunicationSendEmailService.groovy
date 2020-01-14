@@ -102,8 +102,6 @@ class CommunicationSendEmailService {
         CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendEmailMethod(emailMessage, organization);
         sendEmailMethod.execute();
 
-        //TODO FOR SURE - Go and complete the status in the SITM table
-
         //TODO - Do we need to track this communication on item tables, how about GURMAIL?? Should this be configurable?
         //TODO - If not, do we create a separate view for the SITM table to view only outside BCM communications?
 //        try {

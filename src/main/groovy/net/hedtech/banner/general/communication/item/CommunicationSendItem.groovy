@@ -25,6 +25,12 @@ import javax.persistence.*
                 query = """ FROM CommunicationSendItem sendItem
                     WHERE sendItem.status = :status_
                     ORDER BY sendItem.id ASC """
+        ),
+        @NamedQuery( name = "CommunicationSendItem.fetchPendingTextMessages",
+                query = """ FROM CommunicationSendItem sendItem
+                    WHERE sendItem.status = :status_
+                    AND sendItem.communicationChannel = 'TEXT_MESSAGE'
+                    ORDER BY sendItem.id ASC """
         )
 ])
 public abstract class CommunicationSendItem implements AsynchronousTask, Serializable {
@@ -182,4 +188,15 @@ public abstract class CommunicationSendItem implements AsynchronousTask, Seriali
         return results
     }
 
+    public static List fetchPendingTextMessages( Integer max = Integer.MAX_VALUE ) {
+        def results
+        CommunicationSendItem.withSession { session ->
+            results = session.getNamedQuery( 'CommunicationSendItem.fetchPendingTextMessages' )
+                    .setParameter( 'status_', CommunicationJobStatus.PENDING )
+                    .setFirstResult( 0 )
+                    .setMaxResults( max )
+                    .list()
+        }
+        return results
+    }
 }

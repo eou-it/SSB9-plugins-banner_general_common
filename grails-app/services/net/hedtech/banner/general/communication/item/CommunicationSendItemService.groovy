@@ -38,13 +38,13 @@ class CommunicationSendItemService extends ServiceBase {
         log.debug( "Attempting to acquire communication send item id = ${sendItemId}.")
         Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
         try {
-            int rows = sql.executeUpdate("update GCRSITM set GCRSITM_STATUS = ? where GCRSITM_SURROGATE_ID = ? and GCRSITM_STATUS = ? ",
+            int rows = sql.executeUpdate("update GCRSITM set GCRSITM_STATUS = ? where GCRSITM_SURROGATE_ID = ? and GCRSITM_STATUS = ? and GCRSITM_COMM_CHANNEL <> 'TEXT_MESSAGE'",
                     [CommunicationJobStatus.DISPATCHED.toString(), sendItemId, CommunicationJobStatus.PENDING.toString() ] )
             if (rows == 1) {
                 log.debug( "Communication send item withid = ${sendItemId} acquired" )
                 return true
             } else if (rows == 0) {
-                log.debug( "Communication send item withid = ${sendItemId} not available." )
+                log.debug( "Communication send item with id = ${sendItemId} not available." )
                 return false
             } else {
                 log.error( "CommunicationSendItemService.acquire found more than one record with send item id = ${sendItemId}." )
@@ -65,7 +65,7 @@ class CommunicationSendItemService extends ServiceBase {
         log.debug( "Attempting to mark communication send item id = ${sendItemId} as completed.")
         Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
         try {
-            int rows = sql.executeUpdate("update GCRSITM set GCRSITM_STATUS = ? where GCRSITM_SURROGATE_ID = ?",
+            int rows = sql.executeUpdate("update GCRSITM set GCRSITM_STATUS = ? where GCRSITM_SURROGATE_ID = ? and GCRSITM_COMM_CHANNEL <> 'TEXT_MESSAGE'",
                     [ CommunicationJobStatus.COMPLETED.toString(), sendItemId ] )
             if (rows == 0) {
                 log.debug( "No communication send item with id = ${sendItemId} to update.")
@@ -83,4 +83,9 @@ class CommunicationSendItemService extends ServiceBase {
         }
     }
 
+    public List fetchPendingTextMessages( Integer max = Integer.MAX_VALUE ) {
+        List found = CommunicationSendItem.fetchPendingTextMessages( max )
+        log.debug( "Found ${found.size()} pending communication send text message items." )
+        return found
+    }
 }
