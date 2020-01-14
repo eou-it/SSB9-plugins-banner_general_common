@@ -99,7 +99,8 @@ class CommunicationGroupSendCompositeService {
         validateTemplateAndParameters( groupSend )
 
         CommunicationPopulation population = communicationPopulationCompositeService.fetchPopulation( groupSend.populationId )
-        boolean hasQuery = (CommunicationPopulationQueryAssociation.countByPopulation( population ) > 0)
+        //shared population should be treated as not having a query, because  you don't need to recalculate the same
+        boolean hasQuery = (CommunicationPopulationQueryAssociation.countByPopulation( population ) > 0) && population.personal
 //                                        recalculate false || no scheduled date
         boolean useCurrentReplica
 
@@ -118,7 +119,10 @@ class CommunicationGroupSendCompositeService {
         } else if (groupSend.recalculateOnSend) { // scheduled with future replica of population
             groupSend.populationVersionId = null
             groupSend.populationCalculationId = null
-        } else { // sending now or scheduled with replica of current population
+        } else if(!population.personal) {
+            //Always use the calculation of the created user if it is a shared population
+            assignPopulationCalculation(groupSend, population.createdBy)
+        }else { // sending now or scheduled with replica of current population
             assert (useCurrentReplica == true)
             assignPopulationVersion( groupSend )
             if (hasQuery) {

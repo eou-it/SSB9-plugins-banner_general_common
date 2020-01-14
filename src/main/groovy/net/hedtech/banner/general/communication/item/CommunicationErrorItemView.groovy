@@ -163,9 +163,10 @@ class CommunicationErrorItemView implements Serializable {
             }
 
             results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-                eq("bannerId", bannerId)
-                between(errorDate, fromDate, toDate)
+                ilike("bannerId", bannerId)
+                between("errorDate", fromDate, toDate + 1)
                 or {
+                    ilike( "bannerId", subSearchString )
                     ilike( "firstName", subSearchString )
                     ilike( "middleName", subSearchString )
                     ilike( "lastName", subSearchString )
@@ -177,11 +178,9 @@ class CommunicationErrorItemView implements Serializable {
                 order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
             }
         } else {
-            Date today = new Date()
             results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-                eq("bannerId", bannerId)
-                //fetch for last 7 days
-                between(errorDate, today-7, today)
+                ilike("bannerId", bannerId)
+                between("errorDate", fromDate, toDate + 1)
                 order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
             }
         }
