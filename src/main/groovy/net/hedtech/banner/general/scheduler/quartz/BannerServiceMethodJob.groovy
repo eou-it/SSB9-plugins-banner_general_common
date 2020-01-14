@@ -9,10 +9,7 @@ import net.hedtech.banner.general.scheduler.SchedulerErrorContext
 import net.hedtech.banner.general.scheduler.SchedulerJobContext
 import net.hedtech.banner.general.scheduler.SchedulerJobService
 import net.hedtech.banner.general.scheduler.SchedulerServiceMethodHandle
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.quartz.Job
-import org.quartz.JobDetail
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
 
@@ -24,7 +21,6 @@ import static org.quartz.JobBuilder.newJob
  */
 @Slf4j
 class BannerServiceMethodJob implements Job {
-//    private Log log = LogFactory.getLog( this.getClass() )
 
     static triggers = {
     }

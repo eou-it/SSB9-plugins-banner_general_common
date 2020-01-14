@@ -1,15 +1,15 @@
 /*******************************************************************************
  Copyright 2014 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
-package net.hedtech.banner.general.asynchronous;
+package net.hedtech.banner.general.asynchronous
+
+import groovy.util.logging.Slf4j;
 
 //import com.sungardhe.framework.ApplicationException;
 //import com.sungardhe.framework.SystemException;
 //import com.sungardhe.framework.entitysupport.NotFoundException;
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Required;
 
@@ -21,10 +21,9 @@ import java.util.Map.Entry;
  *
  * @author charlie hardt
  */
+@Slf4j
 public class AsynchronousActionRegistryImpl implements AsynchronousActionRegistry, InitializingBean {
 
-
-    private Log log = LogFactory.getLog( AsynchronousActionRegistryImpl.class );
 
     /**
      * The map between uri's and actions, that is constructed by instantiating

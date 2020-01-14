@@ -69,11 +69,14 @@ there is no concept of an 'entity manager' within this project.
 
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationItem"/>
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationItemView"/>
+        <mapping class="net.hedtech.banner.general.communication.item.CommunicationSendItem"/>
         <mapping class="net.hedtech.banner.general.communication.email.CommunicationEmailItem"/>
+        <mapping class="net.hedtech.banner.general.communication.email.CommunicationSendEmailItem"/>
         <mapping class="net.hedtech.banner.general.communication.letter.CommunicationLetterItem"/>
         <mapping class="net.hedtech.banner.general.communication.letter.CommunicationLetterItemView"/>
         <mapping class="net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationItem"/>
         <mapping class="net.hedtech.banner.general.communication.textmessage.CommunicationTextMessageItem"/>
+        <mapping class="net.hedtech.banner.general.communication.textmessage.CommunicationSendTextMessageItem"/>
 
         <mapping class="net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly"/>
         <mapping class="net.hedtech.banner.general.communication.CommunicationErrorCode"/>

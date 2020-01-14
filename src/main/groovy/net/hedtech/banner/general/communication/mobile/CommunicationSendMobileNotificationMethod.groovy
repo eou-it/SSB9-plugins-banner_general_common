@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.mobile
 
 import groovy.time.DatumDependentDuration
+import groovy.util.logging.Slf4j
 import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.HttpResponseException
 import groovyx.net.http.ResponseParseException
@@ -14,8 +15,6 @@ import net.hedtech.banner.general.communication.organization.CommunicationOrgani
 import net.hedtech.banner.general.communication.template.CommunicationDurationUnit
 import net.sf.json.JSONArray
 import net.sf.json.util.JSONUtils
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.apache.http.conn.HttpHostConnectException
 import org.joda.time.format.ISODateTimeFormat
 
@@ -27,8 +26,8 @@ import static groovyx.net.http.Method.POST
 /**
  * Performs the details of assembling and sending out an Ellucian Go mobile notification.
  */
+@Slf4j
 class CommunicationSendMobileNotificationMethod {
-    private Log log = LogFactory.getLog(this.getClass())
     String serverResponse
     def communicationOrganizationService
 
