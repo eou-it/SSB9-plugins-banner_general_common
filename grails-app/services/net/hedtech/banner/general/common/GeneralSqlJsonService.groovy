@@ -11,6 +11,7 @@ import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.i18n.MessageHelper
 import oracle.jdbc.OracleCallableStatement
 import oracle.jdbc.OracleConnection
+import oracle.sql.NUMBER
 import org.grails.web.converters.exceptions.ConverterException
 import org.springframework.security.core.context.SecurityContextHolder
 
@@ -133,6 +134,11 @@ class GeneralSqlJsonService {
                 case 'int':
                     (inputParam.paramValue != null) ?
                             callableStatement.setInt(i, inputParam.paramValue as int) :
+                            callableStatement.setNull(i, Types.INTEGER)
+                    break
+                case 'number':
+                    (inputParam.paramValue != null) ?
+                            callableStatement.setNUMBER(i, new NUMBER(inputParam.paramValue)) :
                             callableStatement.setNull(i, Types.INTEGER)
                     break
                 case 'ident_arr':
