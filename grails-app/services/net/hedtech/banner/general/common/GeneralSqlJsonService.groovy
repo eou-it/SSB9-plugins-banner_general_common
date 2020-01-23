@@ -58,7 +58,6 @@ class GeneralSqlJsonService {
             callableStatement?.executeQuery()
             Clob json_clob = callableStatement?.getClob(size + 1)
             String json_string = json_clob?.characterStream?.text
-            println('json_string - '+json_string)
             json_data = new JsonSlurper().parseText(json_string)
             messages_data = populateMessagesFromJson(json_data)
             if (messages_data.size() > 0) {
@@ -93,16 +92,6 @@ class GeneralSqlJsonService {
             }
         }
         procedureStmt = "${procedureStmt})"
-        String debugProcedureStmt = "${procedureName}("
-        for (int i = 0; i < numberOfParams; i++) {
-            String type = inputParamsList[i].paramType.toLowerCase()
-            debugProcedureStmt = type.equals('string') ? "${debugProcedureStmt}${inputParamsList[i].paramName}=>'${inputParamsList[i].paramValue}'" : "${debugProcedureStmt}${inputParamsList[i].paramName}=>${inputParamsList[i].paramValue}"
-            if (i < numberOfParams - 1) {
-                debugProcedureStmt = "${debugProcedureStmt},"
-            }
-        }
-        debugProcedureStmt = "${debugProcedureStmt})"
-        println debugProcedureStmt
         procedureStmt
     }
 
@@ -164,15 +153,13 @@ class GeneralSqlJsonService {
                     String[] vcTabType = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
                     callableStatement.setPlsqlIndexTable(i, vcTabType, vcTabType?.length, vcTabType?.length, PlsqlDataType.TAB_TYPE.sqlType, PlsqlDataType.TAB_TYPE.maxLen)
                     break
-<<<<<<< Updated upstream
                 case 'char_arr':
                     String[] char_arr = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
                     callableStatement.setPlsqlIndexTable(i, char_arr, char_arr?.length, char_arr?.length, PlsqlDataType.CHAR_ARR.sqlType, PlsqlDataType.CHAR_ARR.maxLen)
-=======
+                    break
                 case 'vc_table_type':
                     String[] vcTableType = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
                     callableStatement.setPlsqlIndexTable(i, vcTableType, vcTableType?.length, vcTableType?.length, PlsqlDataType.TABLE_TYPE.sqlType, PlsqlDataType.TABLE_TYPE.maxLen)
->>>>>>> Stashed changes
                     break
                 default:
                     log.error("Unsupported Type")
