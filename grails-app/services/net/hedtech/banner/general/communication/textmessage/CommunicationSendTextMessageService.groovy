@@ -23,6 +23,8 @@ class CommunicationSendTextMessageService {
     def sessionFactory
     def asynchronousBannerAuthenticationSpoofer
     def communicationSendTextMessageItemService;
+    def communicationTextMessageItemService;
+
     /**
      * Sends an email message (single) based on the contents of EmailMessage passed.
      *
