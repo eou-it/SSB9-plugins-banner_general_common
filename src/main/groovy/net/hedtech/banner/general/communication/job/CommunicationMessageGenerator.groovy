@@ -109,9 +109,6 @@ class CommunicationMessageGenerator implements CommunicationTemplateVisitor {
 
         textMessage.toList = mergedTextMessageTemplate.toList
         textMessage.messageContent = mergedTextMessageTemplate.message
-        textMessage.footer = mergedTextMessageTemplate.footer
-        textMessage.destinationLabel = mergedTextMessageTemplate.destinationLabel
-        textMessage.destinationLink = mergedTextMessageTemplate.destinationLink
 
         message = textMessage
     }

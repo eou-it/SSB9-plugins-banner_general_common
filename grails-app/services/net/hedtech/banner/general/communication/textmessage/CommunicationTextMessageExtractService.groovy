@@ -42,26 +42,21 @@ class CommunicationTextMessageExtractService {
     private List<CommunicationTextMessage> getSMSDetails(Integer max) {
         List<CommunicationTextMessage> smscommunications = []
 
-        /*def folders = CommunicationFolder.fetchFoldersWithPublishedDatafields()
-        folders?.each { folder ->
-            String toList = folder.name
-            String content = folder.description
-            smscommunications << new CommunicationTextMessage(
-                    toList: toList,
-                    messageContent: content
-            )
-        }*/
-
         def textMessages = communicationSendItemService.fetchPendingTextMessages(max)
+        List textMessageSurrogateIds = new ArrayList();
+
         textMessages?.each { textMessage ->
-            String toList = textMessage.toList
-            String content = textMessage.content
             smscommunications << new CommunicationTextMessage(
-                    toList: toList,
-                    messageContent: content
+                    toList: textMessage.toList,
+                    messageContent: textMessage.content,
+                    referenceId: textMessage.referenceId
             )
+            textMessageSurrogateIds.add(textMessage.id)
         }
         log.debug("reponse: ${smscommunications}")
+
+        //Mark the status of all messages to completed.
+        communicationSendItemService.markCompleted(textMessageSurrogateIds);
 
         return smscommunications
     }

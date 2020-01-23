@@ -192,7 +192,7 @@ public abstract class CommunicationSendItem implements AsynchronousTask, Seriali
         def results
         CommunicationSendItem.withSession { session ->
             results = session.getNamedQuery( 'CommunicationSendItem.fetchPendingTextMessages' )
-                    .setParameter( 'status_', CommunicationJobStatus.PENDING )
+                    .setParameter( 'status_', CommunicationJobStatus.HOLD )
                     .setFirstResult( 0 )
                     .setMaxResults( max )
                     .list()
