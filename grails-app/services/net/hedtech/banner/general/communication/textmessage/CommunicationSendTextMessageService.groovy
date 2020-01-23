@@ -11,6 +11,7 @@ import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.item.CommunicationSendItem
 import net.hedtech.banner.general.communication.job.CommunicationJobStatus
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 
 /**
  * Provides a service for submitting a text message (SMS).
@@ -37,10 +38,13 @@ class CommunicationSendTextMessageService {
 //        asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode)
 //        CommunicationSendTextMessageMethod sendTextMessageMethod = new CommunicationSendTextMessageMethod(textMessage);
 
+        CommunicationOrganization senderOrganization = CommunicationOrganization.fetchById(recipientData.organizationId)
         try {
             //At this point just insert all the required attributes to the GCRSTTM table, so an API have access to them.
             CommunicationSendTextMessageItem sendTextMessage = createMessage(textMessage, recipientData);
             CommunicationSendItem sendItem = communicationSendTextMessageItemService.create(sendTextMessage);
+
+            track(senderOrganization, textMessage, recipientData, recipientData.pidm)
 
         } catch (Throwable e) {
             log.error( "SendTextMessageMethod.execute caught exception " + e, e );
@@ -231,9 +235,9 @@ class CommunicationSendTextMessageService {
     private static void checkValidEmail(CommunicationEmailAddress receiverAddress) {
         if (receiverAddress == null || receiverAddress.mailAddress == null || receiverAddress.mailAddress.length() == 0)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendTextMessageService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS.name())
-    }
+    }*/
 
-    private void trackEmailMessage(CommunicationOrganization organization, CommunicationTextMessage textMessage, CommunicationRecipientData recipientData, Long pidm) {
+    private void track(CommunicationOrganization organization, CommunicationTextMessage textMessage, CommunicationRecipientData recipientData, Long pidm) {
         log.debug("tracking text message sent")
         CommunicationTextMessageItem textMessageItem = new CommunicationTextMessageItem()
         textMessageItem.setOrganizationId(organization.id)
@@ -245,8 +249,14 @@ class CommunicationSendTextMessageService {
         textMessageItem.setCreatedBy(recipientData.ownerId)
         textMessageItem.setSentDate(new Date())
         textMessageItem = communicationTextMessageItemService.create(textMessageItem)
+
+        /*
+        if(Holders?.config.communication.bacsEnabled || Holders?.config.communication.bannerMailTrackingEnabled) {
+            communicationGurmailTrackingService.trackGURMAIL(recipientData, item, message)
+        }
+         */
         log.debug("recorded text item sent with item id = ${textMessageItem.id}.")
-    }*/
+    }
 
 }
 
