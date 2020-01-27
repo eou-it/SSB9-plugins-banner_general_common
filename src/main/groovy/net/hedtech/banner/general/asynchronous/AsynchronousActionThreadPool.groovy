@@ -5,7 +5,7 @@ package net.hedtech.banner.general.asynchronous
 
 import grails.core.GrailsApplication;
 import grails.core.support.GrailsApplicationAware
-
+import groovy.util.logging.Slf4j
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -14,8 +14,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.task.TaskExecutor;
 
 /**
@@ -27,10 +25,10 @@ import org.springframework.core.task.TaskExecutor;
  * @author Brian Goetz and Tim Peierls
  * @author charlie hardt
  */
+@Slf4j
 public class AsynchronousActionThreadPool extends ThreadPoolExecutor implements TaskExecutor, GrailsApplicationAware {
 
     GrailsApplication grailsApplication
-    private final Log log = LogFactory.getLog( "AsynchronousActionThreadPool" );
 
     private final ThreadLocal startTime = new ThreadLocal();
     private final AtomicLong numTasks = new AtomicLong();

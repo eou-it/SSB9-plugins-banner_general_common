@@ -5,19 +5,13 @@ package net.hedtech.banner.general.communication.textmessage
 
 import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
-import com.sun.mail.smtp.SMTPAddressFailedException
-import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
-import net.hedtech.banner.general.communication.email.CommunicationEmailAddress
-import net.hedtech.banner.general.communication.email.CommunicationSendEmailMethod
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
+import net.hedtech.banner.general.communication.item.CommunicationChannel
+import net.hedtech.banner.general.communication.item.CommunicationSendItem
+import net.hedtech.banner.general.communication.job.CommunicationJobStatus
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
-import sun.security.provider.certpath.SunCertPathBuilderException
-
-import javax.mail.AuthenticationFailedException
 
 /**
  * Provides a service for submitting a text message (SMS).
@@ -26,11 +20,10 @@ import javax.mail.AuthenticationFailedException
 @Transactional
 class CommunicationSendTextMessageService {
     
-    //private Log log = LogFactory.getLog(this.getClass())
-    def communicationTextMessageItemService
-    def communicationMailboxAccountService
     def sessionFactory
     def asynchronousBannerAuthenticationSpoofer
+    def communicationSendTextMessageItemService;
+    def communicationTextMessageItemService;
 
     /**
      * Sends an email message (single) based on the contents of EmailMessage passed.
@@ -41,31 +34,51 @@ class CommunicationSendTextMessageService {
      * @param recipientData the recipient data this email message belongs to
      * @param pidm the identifier for the constituent for whom the email is being sent
      */
-    public void send(Long organizationId, CommunicationTextMessage textMessage, CommunicationRecipientData recipientData, Long pidm) {
+    public void send(CommunicationTextMessage textMessage, CommunicationRecipientData recipientData) {
         log.debug("sending text message")
 
-        asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode)
-        CommunicationOrganization organization = CommunicationOrganization.fetchById(organizationId)
+//        asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode)
+//        CommunicationSendTextMessageMethod sendTextMessageMethod = new CommunicationSendTextMessageMethod(textMessage);
 
-        if(!organization?.senderMailboxAccount)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendTextMessageService.class, new RuntimeException("communication.error.message.invalidSenderMailbox"), CommunicationErrorCode.INVALID_SENDER_MAILBOX.name())
-
-        if (organization?.senderMailboxAccount?.encryptedPassword != null)
-            organization.senderMailboxAccount.clearTextPassword = communicationMailboxAccountService.decryptPassword( organization.senderMailboxAccount.encryptedPassword )
-
-        CommunicationSendTextMessageMethod sendTextMessageMethod = new CommunicationSendTextMessageMethod(textMessage, organization);
-        sendTextMessageMethod.execute();
-
+        CommunicationOrganization senderOrganization = CommunicationOrganization.fetchById(recipientData.organizationId)
         try {
-            trackEmailMessage(organization, textMessage, recipientData, pidm)
-        } catch (Throwable t) {
-            log.error(t)
-            throw t;
-        } finally {
+            //At this point just insert all the required attributes to the GCRSTTM table, so an API have access to them.
+            CommunicationSendTextMessageItem sendTextMessage = createMessage(textMessage, recipientData);
+            CommunicationSendItem sendItem = communicationSendTextMessageItemService.create(sendTextMessage);
+
+            track(senderOrganization, textMessage, recipientData, recipientData.pidm)
+
+        } catch (Throwable e) {
+            log.error( "SendTextMessageMethod.execute caught exception " + e, e );
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendTextMessageMethod.class, e, CommunicationErrorCode.UNKNOWN_ERROR.name())
         }
     }
 
-    public void sendTest(Long organizationId, String sendTo, Map messageData) {
+
+    /**
+     * Create a text message based on the parameters passed.
+     *
+     * @param message       the text message to be sent
+     * @return the created send text message item with the appropriate placeholders filled in
+     */
+    private CommunicationSendTextMessageItem createMessage(final CommunicationTextMessage message, CommunicationRecipientData recipientData ) {
+
+        CommunicationSendTextMessageItem sendTextMessage = new CommunicationSendTextMessageItem();
+        sendTextMessage.setCommunicationChannel(CommunicationChannel.TEXT_MESSAGE);
+        sendTextMessage.setStatus(CommunicationJobStatus.HOLD);
+        sendTextMessage.setContent(message.messageContent);
+        sendTextMessage.setToList(message.toList);
+        sendTextMessage.setMepCode(recipientData.mepCode);
+        sendTextMessage.setCreatedBy(recipientData.ownerId);
+        sendTextMessage.setSource("BCM");
+        sendTextMessage.setReferenceId(UUID.randomUUID().toString());
+        sendTextMessage.setLastModifiedBy(recipientData.ownerId);
+        sendTextMessage.setLastModified(new Date());
+
+        return sendTextMessage;
+    }
+
+    /*public void sendTest(Long organizationId, String sendTo, Map messageData) {
         if (sendTo == null || sendTo.length() == 0)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendTextMessageService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS .name())
         CommunicationEmailAddress receiverAddress
@@ -184,9 +197,9 @@ class CommunicationSendTextMessageService {
         }
     }
 
-    /*
+    *//*
      * Method to find root cause of exception and extract the message. Used to identify certification exceptions.
-     */
+     *//*
     Throwable getCause(Throwable e) {
         Throwable cause = null;
         Throwable result = e;
@@ -224,9 +237,9 @@ class CommunicationSendTextMessageService {
     private static void checkValidEmail(CommunicationEmailAddress receiverAddress) {
         if (receiverAddress == null || receiverAddress.mailAddress == null || receiverAddress.mailAddress.length() == 0)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendTextMessageService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS.name())
-    }
+    }*/
 
-    private void trackEmailMessage(CommunicationOrganization organization, CommunicationTextMessage textMessage, CommunicationRecipientData recipientData, Long pidm) {
+    private void track(CommunicationOrganization organization, CommunicationTextMessage textMessage, CommunicationRecipientData recipientData, Long pidm) {
         log.debug("tracking text message sent")
         CommunicationTextMessageItem textMessageItem = new CommunicationTextMessageItem()
         textMessageItem.setOrganizationId(organization.id)
@@ -238,6 +251,12 @@ class CommunicationSendTextMessageService {
         textMessageItem.setCreatedBy(recipientData.ownerId)
         textMessageItem.setSentDate(new Date())
         textMessageItem = communicationTextMessageItemService.create(textMessageItem)
+
+        /*
+        if(Holders?.config.communication.bacsEnabled || Holders?.config.communication.bannerMailTrackingEnabled) {
+            communicationGurmailTrackingService.trackGURMAIL(recipientData, item, message)
+        }
+         */
         log.debug("recorded text item sent with item id = ${textMessageItem.id}.")
     }
 

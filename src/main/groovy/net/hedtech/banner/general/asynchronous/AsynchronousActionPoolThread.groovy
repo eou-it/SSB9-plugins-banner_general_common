@@ -1,12 +1,12 @@
 /*******************************************************************************
  Copyright 2014 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
-package net.hedtech.banner.general.asynchronous;
+package net.hedtech.banner.general.asynchronous
+
+import groovy.util.logging.Slf4j;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * A thread for use within the JobSubmissionThreadpool.
@@ -16,9 +16,8 @@ import org.apache.commons.logging.LogFactory;
  * @author Brian Goetz and Tim Peierls
  * @author charlie hardt
  */
+@Slf4j
 public class AsynchronousActionPoolThread extends Thread {
-
-    private Log log = LogFactory.getLog( "PoolThread" );
 
     public static final String DEFAULT_NAME = "AsynchronousActionPoolThread";
 

@@ -3,9 +3,11 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.job
 
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.general.communication.email.CommunicationEmailMessage
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.email.CommunicationSendEmailService
+import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.letter.CommunicationGenerateLetterService
 import net.hedtech.banner.general.communication.letter.CommunicationLetterMessage
 import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
@@ -14,18 +16,17 @@ import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotifi
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
 import net.hedtech.banner.general.communication.mobile.CommunicationSendMobileNotificationService
 import net.hedtech.banner.general.communication.template.*
+import net.hedtech.banner.general.communication.textmessage.CommunicationSendTextMessageItem
 import net.hedtech.banner.general.communication.textmessage.CommunicationSendTextMessageService
 import net.hedtech.banner.general.communication.textmessage.CommunicationTextMessage
 import net.hedtech.banner.general.communication.textmessage.CommunicationTextMessageTemplate
-import org.apache.log4j.Logger
 
 /**
  * Communication Message Dispatcher evaluates a communication job's template and dispatches
  * work to the appropriate communication channel service.
  */
+@Slf4j
 class CommunicationMessageDispatcher implements CommunicationTemplateVisitor {
-
-    private static final log = Logger.getLogger(CommunicationMessageDispatcher.class)
 
     CommunicationSendEmailService communicationSendEmailService
     CommunicationSendMobileNotificationService communicationSendMobileNotificationService
@@ -66,6 +67,7 @@ class CommunicationMessageDispatcher implements CommunicationTemplateVisitor {
 
     @Override
     void visitTextMessage(CommunicationTextMessageTemplate template) {
-        communicationSendTextMessageService.send( recipientData.organizationId, message as CommunicationTextMessage, recipientData, recipientData.pidm )
+        communicationSendTextMessageService.send( message as CommunicationTextMessage, recipientData )
     }
+
 }

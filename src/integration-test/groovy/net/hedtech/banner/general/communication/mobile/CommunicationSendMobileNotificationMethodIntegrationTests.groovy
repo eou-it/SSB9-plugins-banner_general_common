@@ -11,7 +11,6 @@ import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationApplicationException
 import net.hedtech.banner.general.communication.organization.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.apache.commons.logging.LogFactory
 import org.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.grails.plugins.testing.GrailsMockHttpServletResponse
 import org.grails.web.servlet.mvc.GrailsWebRequest
@@ -28,7 +27,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 @Rollback
 class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseIntegrationTestCase {
 
-    def log = LogFactory.getLog(this.class)
     def selfServiceBannerAuthenticationProvider
     def communicationOrganizationCompositeService
     def communicationOrganizationService

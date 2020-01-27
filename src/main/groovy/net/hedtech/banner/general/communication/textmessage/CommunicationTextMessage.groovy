@@ -20,9 +20,5 @@ class CommunicationTextMessage extends CommunicationMessage {
 
     String messageContent
 
-    String footer
-
-    String destinationLink
-
-    String destinationLabel
+    String referenceId
 }

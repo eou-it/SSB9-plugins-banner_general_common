@@ -1,22 +1,20 @@
 /*******************************************************************************
  Copyright 2014 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
-package net.hedtech.banner.general.asynchronous;
+package net.hedtech.banner.general.asynchronous
+
+import groovy.util.logging.Slf4j;
 
 import java.util.concurrent.ThreadFactory;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * A factory for creating Thread objects for use within a thread pool.
  *
  * @author charlie hardt
  */
+@Slf4j
 public class AsynchronousActionPoolThreadFactory implements ThreadFactory {
 
-
-    private final Log log = LogFactory.getLog( "AsynchronousActionPoolThreadFactory" );
 
     private final String baseName;
 

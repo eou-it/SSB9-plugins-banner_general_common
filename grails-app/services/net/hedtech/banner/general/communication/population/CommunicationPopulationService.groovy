@@ -58,8 +58,11 @@ class CommunicationPopulationService extends ServiceBase {
             throw new ApplicationException(CommunicationPopulation, "@@r1:populationDoesNotExist@@")
 
         //check if user is authorized. user should be admin or author
-        if (!CommunicationCommonUtility.userCanUpdateDeletePopulation(oldpopulation.createdBy)) {
-            throw new ApplicationException(CommunicationPopulation, "@@r1:operation.not.authorized@@")
+        //Check only for personal not shared populations
+        if(oldpopulation.personal) {
+            if (!CommunicationCommonUtility.userCanUpdateDeletePopulation(oldpopulation.createdBy)) {
+                    throw new ApplicationException(CommunicationPopulation, "@@r1:operation.not.authorized@@")
+            }
         }
 
         if (population.name == null || population.name == "") {

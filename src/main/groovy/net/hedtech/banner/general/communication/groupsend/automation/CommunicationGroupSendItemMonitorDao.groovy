@@ -3,10 +3,9 @@
 ********************************************************************************/
 package net.hedtech.banner.general.communication.groupsend.automation
 
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskMonitorRecord
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 
 
 import java.sql.Connection
@@ -20,9 +19,8 @@ import java.sql.SQLException
  *
  * @author Michael Brzycki
  */
+@Slf4j
 public class CommunicationGroupSendItemMonitorDao  {
-
-    private final Log log = LogFactory.getLog(this.getClass());
 
     public static final String AGENT_ID = "AGENT_ID";
     public static final String JOB_ID = "GROUP_SEND_ITEM_KEY";
