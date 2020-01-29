@@ -198,7 +198,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
                         def String[] fromstring = ["&", "<", "\"", "'", ">"]
                         def String[] tostring = ["&amp;", "&lt;", "&quot;", "&apos;", "&gt;"]
                         Object attributeValue
-                        if (escapeFieldValue) {
+                        if (escapeFieldValue && column.value instanceof String) {
                             attributeValue = StringUtils.replaceEach(column.value, fromstring, tostring)
                         } else {
                             attributeValue = column.value

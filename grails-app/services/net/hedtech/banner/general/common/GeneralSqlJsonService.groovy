@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2019 Ellucian Company L.P. and its affiliates.
+ Copyright 2020 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.common
 
@@ -11,6 +11,7 @@ import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.i18n.MessageHelper
 import oracle.jdbc.OracleCallableStatement
 import oracle.jdbc.OracleConnection
+import oracle.sql.NUMBER
 import org.grails.web.converters.exceptions.ConverterException
 import org.springframework.security.core.context.SecurityContextHolder
 
@@ -135,6 +136,11 @@ class GeneralSqlJsonService {
                             callableStatement.setInt(i, inputParam.paramValue as int) :
                             callableStatement.setNull(i, Types.INTEGER)
                     break
+                case 'number':
+                    (inputParam.paramValue != null) ?
+                            callableStatement.setNUMBER(i, new NUMBER(inputParam.paramValue)) :
+                            callableStatement.setNull(i, Types.INTEGER)
+                    break
                 case 'ident_arr':
                     String[] identArray = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
                     callableStatement.setPlsqlIndexTable(i, identArray, identArray?.length, identArray?.length, PlsqlDataType.IDENT_ARR.sqlType, PlsqlDataType.IDENT_ARR.maxLen)
@@ -150,6 +156,10 @@ class GeneralSqlJsonService {
                 case 'char_arr':
                     String[] char_arr = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
                     callableStatement.setPlsqlIndexTable(i, char_arr, char_arr?.length, char_arr?.length, PlsqlDataType.CHAR_ARR.sqlType, PlsqlDataType.CHAR_ARR.maxLen)
+                    break
+                case 'vc_table_type':
+                    String[] vcTableType = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
+                    callableStatement.setPlsqlIndexTable(i, vcTableType, vcTableType?.length, vcTableType?.length, PlsqlDataType.TABLE_TYPE.sqlType, PlsqlDataType.TABLE_TYPE.maxLen)
                     break
                 default:
                     log.error("Unsupported Type")
