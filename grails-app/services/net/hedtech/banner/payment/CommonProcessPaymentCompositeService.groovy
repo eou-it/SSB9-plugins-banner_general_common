@@ -216,19 +216,18 @@ abstract class CommonProcessPaymentCompositeService {
 
     def getApplicationData(params) {
         String moduleName = params.moduleName?.toUpperCase()
-        String functionName
+        String functionSql
         if(moduleName == 'BWSKWTRR') {
-            functionName = 'f_get_shttran_values'
+            functionSql = "{? = call baninst1_ss9.bwskwccp.f_get_shttran_values(pidm =>?)}"
         } else if(moduleName == 'BWSKGRAD') {
-            functionName = 'f_get_shbgapp_values'
+            functionSql = "{? = call baninst1_ss9.bwskwccp.f_get_shbgapp_values(pidm =>?)}"
         } else if(moduleName == 'BWSKRQST') {
-            functionName = 'f_get_sfrenrl_values'
+            functionSql = "{? = call baninst1_ss9.bwskwccp.f_get_sfrenrl_values(pidm_in =>?)}"
         } else {
             return null
         }
-        String functionCallStr = "{? = call bwskwccp."+functionName+"(pidm =>?)}"
         def retValue
-        callFunction( functionCallStr, [Sql.VARCHAR, params.pidm_in], {ret ->
+        callFunction( functionSql, [Sql.VARCHAR, params.pidm_in], {ret ->
             retValue = ret
         } )
 
