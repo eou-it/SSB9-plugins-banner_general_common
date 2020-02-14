@@ -105,7 +105,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
 //        populationQuery.refresh()
 //        assertFalse( populationQuery.changesPending )
 
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testAllSpridenPopulationFromQuery" )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testAllSpridenPopulationFromQuery", true )
         assertNotNull( population.id )
         assertEquals( "testAllSpridenPopulationFromQuery", population.name )
 
@@ -150,7 +150,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         assertFalse( populationQuery.changesPending )
 
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription" )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription", true )
         assertNotNull( population.id )
         assertEquals( "testPopulation", population.name )
         assertEquals( "testPopulationDescription", population.description )
@@ -169,7 +169,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
     @Test
     void testPopulationWithOnlyIncludeList() {
         setUpData()
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( defaultFolder, "testPopulation", "testPopulation description" )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( defaultFolder, "testPopulation", "testPopulation description", true )
         List<String> persons = ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR']
 
         CommunicationPopulationSelectionListBulkResults results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
@@ -212,7 +212,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         assertFalse( populationQuery.changesPending )
 
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testQuery" )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testQuery", true )
         waitForPopulationCalculationToFinish( population, 'BCMADMIN' )
         assertEquals( 1, CommunicationPopulationVersion.countByPopulation( population ) )
         assertEquals( 1, CommunicationPopulationCalculation.count() )
@@ -256,7 +256,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         Calendar now = Calendar.getInstance()
         now.add(Calendar.SECOND, 10)
 
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testAllSpridenPopulationFromQuery", "", now.getTime() )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testAllSpridenPopulationFromQuery", "", true, now.getTime() )
         assertNotNull( population.id )
         assertEquals( "testAllSpridenPopulationFromQuery", population.name )
         assertEquals( CommunicationPopulationCalculationStatus.SCHEDULED, population.status)

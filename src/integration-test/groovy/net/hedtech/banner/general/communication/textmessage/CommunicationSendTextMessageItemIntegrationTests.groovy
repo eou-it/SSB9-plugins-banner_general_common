@@ -8,6 +8,7 @@ import net.hedtech.banner.general.communication.email.CommunicationEmailItem
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.item.CommunicationSendItem
+import net.hedtech.banner.general.communication.job.CommunicationJobStatus
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.grails.plugins.testing.GrailsMockHttpServletResponse
@@ -56,6 +57,7 @@ class CommunicationSendTextMessageItemIntegrationTests extends BaseIntegrationTe
         textMessageItem.toList = "bprakash";
         textMessageItem.content = "This is a sample text message";
         textMessageItem.source = "Banner";
+        textMessageItem.status = CommunicationJobStatus.HOLD;
         textMessageItem.createdBy = "BCMADMIN";
         textMessageItem.creationDateTime = new Date();
         textMessageItem.lastModified = new Date();
