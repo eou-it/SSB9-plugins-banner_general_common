@@ -64,7 +64,7 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
     @Test
     public void testCreateEmptyPopulation() {
         setUpData()
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description" )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description", true )
         assertNotNull population.id
         assertEquals( testFolder, population.folder )
         assertEquals( "testPopulation", population.name )
@@ -74,7 +74,7 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
 
     @Test void testAddPersonToIncludeList() {
         setUpData()
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description" )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description", true )
         System.err.println(population)
         population = communicationPopulationCompositeService.addPersonToIncludeList( population, 'BCMADMIN' )
         assertNotNull( population.includeList )
@@ -94,7 +94,7 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
 
     @Test void testAddPersonsToIncludeList() {
         setUpData()
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description" )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description", true )
         List<String> persons = ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR']
 
         CommunicationPopulationSelectionListBulkResults results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
@@ -152,7 +152,7 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
 
     @Test void testRemovePersonFromIncludeList() {
         setUpData()
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description" )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description", true )
         population = communicationPopulationCompositeService.addPersonToIncludeList( population, 'BCMADMIN' )
         population = communicationPopulationCompositeService.addPersonToIncludeList( population, 'BCMUSER' )
 
@@ -181,7 +181,7 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
 
     @Test void testRemoveAllPersonsFromIncludeList() {
         setUpData()
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description" )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description", true )
         population = communicationPopulationCompositeService.removeAllPersonsFromIncludeList( population )
         def entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
         assertEquals( 0, entryCount )
