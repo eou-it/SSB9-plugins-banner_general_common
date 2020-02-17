@@ -34,6 +34,7 @@ abstract class CommonProcessPaymentCompositeService {
         assignProcessCode( param )
         prepareDataToProcess( param )
         assignSubCode( param )
+        getApplicationData(param)
         processPayment( param, messageMap )
     }
 
@@ -211,8 +212,28 @@ abstract class CommonProcessPaymentCompositeService {
         if (retCount == 0) {
             throw new ApplicationException( CommonProcessPaymentCompositeService.class, messageMap['payment.process.goamred.record.not.found'] )
         }
+    }
 
+    def getApplicationData(params) {
+        String moduleName = params.moduleName?.toUpperCase()
+        String functionSql
+        if(moduleName == 'BWSKWTRR') {
+            functionSql = "{? = call baninst1_ss9.bwskwccp.f_get_shttran_values(pidm =>?)}"
+        } else if(moduleName == 'BWSKGRAD') {
+            functionSql = "{? = call baninst1_ss9.bwskwccp.f_get_shbgapp_values(pidm =>?)}"
+        } else if(moduleName == 'BWSKRQST') {
+            functionSql = "{? = call baninst1_ss9.bwskwccp.f_get_sfrenrl_values(pidm_in =>?)}"
+        } else {
+            return null
+        }
+        def retValue
+        callFunction( functionSql, [Sql.VARCHAR, params.pidm_in], {ret ->
+            retValue = ret
+        } )
 
+        if(retValue) {
+            params.user_extra_data_in = String.valueOf(retValue)
+        }
     }
 
     /**
