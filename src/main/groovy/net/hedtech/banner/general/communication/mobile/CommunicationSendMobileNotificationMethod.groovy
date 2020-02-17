@@ -143,7 +143,7 @@ class CommunicationSendMobileNotificationMethod {
                         break
                 }
 
-                log.debug( messageMap )
+                log.debug( messageMap.toString() )
                 body = messageMap
 
                 response.success = { theResponse, reader ->

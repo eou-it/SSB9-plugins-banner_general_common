@@ -111,8 +111,14 @@ class CommunicationOrganizationCompositeService {
                 newOrganization.senderMailboxAccount = null;
             }
             if (newOrganization?.senderMailboxAccount?.id != null) {
+                if(newOrganization.senderMailboxAccount.emailAddress == null) {
+                    throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.emailAddress.required@@")
+                }
                 newOrganization.senderMailboxAccount = communicationMailboxAccountService.update(newOrganization.senderMailboxAccount)
             } else  {
+                if(newOrganization.senderMailboxAccount.emailAddress == null) {
+                    throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.emailAddress.required@@")
+                }
                 newOrganization.senderMailboxAccount = communicationMailboxAccountService.create(newOrganization.senderMailboxAccount)
             }
         }
@@ -133,8 +139,14 @@ class CommunicationOrganizationCompositeService {
                 newOrganization.replyToMailboxAccount = null;
             }
             if (newOrganization.replyToMailboxAccount?.id != null) {
+                if(newOrganization.replyToMailboxAccount.emailAddress == null) {
+                    throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.emailAddress.required@@")
+                }
                 newOrganization.replyToMailboxAccount = communicationMailboxAccountService.update(newOrganization.replyToMailboxAccount)
             } else {
+                if(newOrganization.replyToMailboxAccount.emailAddress == null) {
+                    throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.emailAddress.required@@")
+                }
                 newOrganization.replyToMailboxAccount = communicationMailboxAccountService.create(newOrganization.replyToMailboxAccount)
             }
         }
