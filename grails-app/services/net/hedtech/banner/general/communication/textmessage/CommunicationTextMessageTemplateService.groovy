@@ -5,10 +5,11 @@ package net.hedtech.banner.general.communication.textmessage
 
 import grails.gorm.transactions.Transactional
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
+import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateMergeService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
@@ -20,8 +21,14 @@ class CommunicationTextMessageTemplateService extends CommunicationTemplateServi
     void validatePublished(CommunicationTemplate template ) {
         CommunicationTextMessageTemplate textMessageTemplate = (CommunicationTextMessageTemplate) template;
 
+        if (!textMessageTemplate.toList || textMessageTemplate.toList.trim().size() == 0 ) {
+            //TODO - new error messages
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationEmailTemplate.class, "toFieldRequiredToPublish" )
+        }
+
         if (isEmpty( textMessageTemplate.message )) {
-            throw CommunicationExceptionFactory.createApplicationException( CommunicationTextMessageTemplate.class, "testMessageFieldRequiredToPublish" )
+            //TODO - new error messages
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterTemplate.class, "contentRequiredToPublish" )
         }
 
         if (isEmpty( textMessageTemplate.destinationLink ) && !isEmpty( textMessageTemplate.destinationLabel )) {
