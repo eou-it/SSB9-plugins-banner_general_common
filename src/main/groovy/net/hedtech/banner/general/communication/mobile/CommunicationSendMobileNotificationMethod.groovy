@@ -16,9 +16,12 @@ import net.hedtech.banner.general.communication.template.CommunicationDurationUn
 import net.sf.json.JSONArray
 import net.sf.json.util.JSONUtils
 import org.apache.http.conn.HttpHostConnectException
-import org.joda.time.format.ISODateTimeFormat
 
 import javax.net.ssl.SSLPeerUnverifiedException
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 import static groovyx.net.http.ContentType.JSON
 import static groovyx.net.http.Method.POST
@@ -136,10 +139,17 @@ class CommunicationSendMobileNotificationMethod {
                         }
 
                         Date expirationDateTime = period + today
-                        messageMap.put( "expires", ISODateTimeFormat.dateTime().print( expirationDateTime.time ) )
+                        Instant current = expirationDateTime.toInstant();
+                        ZonedDateTime ldt = ZonedDateTime.ofInstant(current,
+                                ZoneId.systemDefault());
+                        messageMap.put( "expires", ldt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) )
                         break
                     case CommunicationMobileNotificationExpirationPolicy.DATE_TIME:
-                        messageMap.put( "expires", ISODateTimeFormat.dateTime().print( message.expirationDateTime.time ) )
+                        Instant current = message.expirationDateTime.toInstant();
+                        ZonedDateTime ldt = ZonedDateTime.ofInstant(current,
+                                ZoneId.systemDefault());
+                        messageMap.put( "expires", ldt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) )
+
                         break
                 }
 

@@ -92,10 +92,11 @@ dependencies {
     //Added for BannerXE For FileUtils and others
     compile 'commons-io:commons-io:2.6'
 
-    compile('org.grails:grails-docs:3.3.2') {
-        exclude group:"org.xhtmlrenderer", module:"core-renderer"
+//    compile('org.grails:grails-docs:3.3.2') {
+//        exclude group:"org.xhtmlrenderer", module:"core-renderer"
+//        exclude group:"org.asciidoctor", module:"asciidoctorj"
+//    }
 
-    }
     // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
     // runtime 'mysql:mysql-connector-java:5.1.5'
     compile 'org.xhtmlrenderer:flying-saucer-core:9.1.18'
@@ -108,6 +109,7 @@ dependencies {
         exclude group:"org.bouncycastle", module:"bcprov-jdk14"
         exclude group:"bouncycastle", module:"bcprov-jdk14"
     }
+
     compile 'org.antlr:ST4:4.0.8'
     compile "javax.mail:javax.mail-api:1.5.5"
     runtime "com.sun.mail:javax.mail:1.5.5"
