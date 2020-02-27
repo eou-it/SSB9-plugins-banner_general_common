@@ -95,15 +95,6 @@ class GeneralSqlJsonService {
             }
         }
         procedureStmt = "${procedureStmt})"
-        String debugProcedureStmt = "${procedureName}("
-        for (int i = 0; i < numberOfParams; i++) {
-            String type = inputParamsList[i].paramType.toLowerCase()
-            debugProcedureStmt = type.equals('string') ? "${debugProcedureStmt}${inputParamsList[i].paramName}=>'${inputParamsList[i].paramValue}'" : "${debugProcedureStmt}${inputParamsList[i].paramName}=>${inputParamsList[i].paramValue}"
-            if (i < numberOfParams - 1) {
-                debugProcedureStmt = "${debugProcedureStmt},"
-            }
-        }
-        debugProcedureStmt = "${debugProcedureStmt})"
         procedureStmt
     }
 
