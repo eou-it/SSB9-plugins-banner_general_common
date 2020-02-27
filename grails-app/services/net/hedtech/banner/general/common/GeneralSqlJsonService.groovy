@@ -50,9 +50,9 @@ class GeneralSqlJsonService {
      * Valid paramType values are - 'string', 'int', 'ident_arr', 'vc_arr'
      * @return Data as JSON
      */
-    def executeProcedure(String procedureName, def inputParamsList = null) {
+    def executeProcedure(String procedureName, def inputParamsList = null, boolean withAuthentication = true) {
         def json_data, messages_data
-        OracleCallableStatement callableStatement = getCallableStatement(procedureName, inputParamsList)
+        OracleCallableStatement callableStatement = getCallableStatement(procedureName, inputParamsList, withAuthentication)
         int size = inputParamsList ? inputParamsList.size() : 0
         try{
             callableStatement?.executeQuery()
@@ -71,13 +71,16 @@ class GeneralSqlJsonService {
         json_data
     }
 
-    private def getCallableStatement(String procedureName, def inputParamsList) {
+    private def getCallableStatement(String procedureName, def inputParamsList, boolean withAuthentication = true) {
         def connection = sessionFactory.currentSession.connection()
+        def loggedInUser
         DatabaseMetaData metadata = connection.getMetaData()
         def oraConnection = metadata.getConnection().unwrap(OracleConnection.class)
-        def loggedInUser = SecurityContextHolder?.context?.authentication?.principal?.pidm
+        if (withAuthentication) {
+            loggedInUser = SecurityContextHolder?.context?.authentication?.principal?.pidm
+        }
         String procedureStmt = getProcedureStatement(procedureName, inputParamsList)
-        String plSqlBlock = getJsonSqlString(procedureStmt, loggedInUser)
+        String plSqlBlock = withAuthentication ? getJsonSqlString(procedureStmt, loggedInUser) : getJsonSqlStringWithoutLogin(procedureStmt)
         OracleCallableStatement callableStatement = bindParameters(oraConnection, plSqlBlock, inputParamsList)
         callableStatement
     }
@@ -92,6 +95,15 @@ class GeneralSqlJsonService {
             }
         }
         procedureStmt = "${procedureStmt})"
+        String debugProcedureStmt = "${procedureName}("
+        for (int i = 0; i < numberOfParams; i++) {
+            String type = inputParamsList[i].paramType.toLowerCase()
+            debugProcedureStmt = type.equals('string') ? "${debugProcedureStmt}${inputParamsList[i].paramName}=>'${inputParamsList[i].paramValue}'" : "${debugProcedureStmt}${inputParamsList[i].paramName}=>${inputParamsList[i].paramValue}"
+            if (i < numberOfParams - 1) {
+                debugProcedureStmt = "${debugProcedureStmt},"
+            }
+        }
+        debugProcedureStmt = "${debugProcedureStmt})"
         procedureStmt
     }
 
@@ -115,6 +127,29 @@ class GeneralSqlJsonService {
                     lv_json_out := gokjson.get_clob_output;
                     gokjson.free_output;
                     goksels.p_clear_user_context;
+                    ? := lv_json_out;
+                END;"""
+        sql
+    }
+
+    private def getJsonSqlStringWithoutLogin(procedure) {
+        String sql = """
+                DECLARE
+                    lv_json_out clob;
+                BEGIN                    
+                    gokjson.initialize_clob_output;
+                    BEGIN
+                      gokjson.open_object(with_exception => true);
+                      ${procedure};
+                      gokjson.close_object;
+                    EXCEPTION
+                      WHEN OTHERS THEN
+                        gokjson.close_for_exception;
+                        gokjson.put_exception_info(sqlcode, SQLERRM);
+                        gokjson.close_object;
+                    END;
+                    lv_json_out := gokjson.get_clob_output;
+                    gokjson.free_output;                   
                     ? := lv_json_out;
                 END;"""
         sql
