@@ -584,7 +584,7 @@ class CommunicationGroupSendCompositeService {
         try {
             return groupSend.save(flush: true) //update( groupSend )
         } catch(Throwable t) {
-            log.error( t )
+            log.error( t.message )
         }
     }
 
@@ -605,7 +605,7 @@ class CommunicationGroupSendCompositeService {
                 log.debug( "Deleting ${rows} communication jobs referenced by group send id = ${groupSendId}.")
             }
         } catch (Exception e) {
-            log.error( e )
+            log.error( e.message )
             throw e
         } finally {
 //            sql?.close()
@@ -630,7 +630,7 @@ class CommunicationGroupSendCompositeService {
                 log.debug( "Deleting ${rows} recipient data referenced by group send id = ${groupSendId}.")
             }
         } catch (Exception e) {
-            log.error( e )
+            log.error( e.message )
             throw e
         } finally {
 //            sql?.close()
