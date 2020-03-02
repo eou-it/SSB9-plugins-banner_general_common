@@ -49,7 +49,7 @@ class CommunicationGenerateLetterService {
                 return response
             }
         } catch (Throwable t) {
-            log.error( t )
+            log.error( t.getMessage() )
             throw t;
         } finally {
         }
