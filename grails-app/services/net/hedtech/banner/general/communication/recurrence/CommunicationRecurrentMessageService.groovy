@@ -11,6 +11,12 @@ import net.hedtech.banner.service.ServiceBase
 import org.springframework.security.core.context.SecurityContextHolder
 
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @Transactional
 class CommunicationRecurrentMessageService extends ServiceBase {
@@ -22,23 +28,30 @@ class CommunicationRecurrentMessageService extends ServiceBase {
         }
 
         Date now = new Date()
+
+        ZoneId zoneId = ZoneId.of(recurrentMessage.cronTimezone);
+        LocalDate localDate = LocalDate.now(zoneId)
+        LocalTime localTime = LocalTime.of(0,0)
+        LocalDateTime ldt1 = new LocalDateTime(localDate, localTime)
+        ZonedDateTime today = ldt1.atZone(zoneId);
+
+        Instant current = recurrentMessage.startDate.toInstant();
+        ZonedDateTime startDate = ZonedDateTime.ofInstant(current, zoneId)
+
         if (recurrentMessage.getCreationDateTime() == null) {
             recurrentMessage.setCreationDateTime( now )
         }
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date today = sdf.parse(sdf.format(now));
-        if(today.compareTo(recurrentMessage.startDate) == 0) {
+        Date todayDate = sdf.parse(sdf.format(Date.from(today.toInstant())));
+        Date recurrentstartDate = sdf.parse(sdf.format(Date.from(startDate.toInstant())));
+        if(todayDate.compareTo(recurrentstartDate) == 0) {
             //Today's date
             recurrentMessage.setStartDate(now)
-        } else if(today.compareTo(recurrentMessage.startDate) < 0) {
+        } else if(todayDate.compareTo(recurrentstartDate) < 0) {
             //future date
             Calendar startDateCalendar = Calendar.getInstance()
-            startDateCalendar.setTime(recurrentMessage.startDate)
-            startDateCalendar.set(Calendar.HOUR_OF_DAY, 0)
-            startDateCalendar.set(Calendar.MINUTE, 0)
-            startDateCalendar.set(Calendar.SECOND, 0)
-            startDateCalendar.set(Calendar.MILLISECOND, 0)
+            startDateCalendar.setTime(Date.from(startDate.toInstant()))
             recurrentMessage.setStartDate(startDateCalendar.getTime())
         }
 
@@ -70,19 +83,25 @@ class CommunicationRecurrentMessageService extends ServiceBase {
         if(recurrentMessage.startDate.compareTo(oldRecurrentMessage.startDate) != 0) {
             Date now = new Date()
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date today = sdf.parse(sdf.format(now));
 
-            if (today.compareTo(recurrentMessage.startDate) == 0) {
+            ZoneId zoneId = ZoneId.of(recurrentMessage.cronTimezone);
+            LocalDate localDate = LocalDate.now(zoneId)
+            LocalTime localTime = LocalTime.of(0,0)
+            LocalDateTime ldt1 = new LocalDateTime(localDate, localTime)
+            ZonedDateTime today = ldt1.atZone(zoneId);
+
+            Instant current = recurrentMessage.startDate.toInstant();
+            ZonedDateTime startDate = ZonedDateTime.ofInstant(current, zoneId)
+
+            Date todayDate = sdf.parse(sdf.format(Date.from(today.toInstant())));
+            Date recurrentstartDate = sdf.parse(sdf.format(Date.from(startDate.toInstant())));
+            if (todayDate.compareTo(recurrentstartDate) == 0) {
                 //Today's date
                 recurrentMessage.setStartDate(now)
-            } else if (today.compareTo(recurrentMessage.startDate) < 0) {
+            } else if (todayDate.compareTo(recurrentstartDate) < 0) {
                 //future date
                 Calendar startDateCalendar = Calendar.getInstance()
-                startDateCalendar.setTime(recurrentMessage.startDate)
-                startDateCalendar.set(Calendar.HOUR_OF_DAY, 0)
-                startDateCalendar.set(Calendar.MINUTE, 0)
-                startDateCalendar.set(Calendar.SECOND, 0)
-                startDateCalendar.set(Calendar.MILLISECOND, 0)
+                startDateCalendar.setTime(Date.from(startDate.toInstant()))
                 recurrentMessage.setStartDate(startDateCalendar.getTime())
             }
         }
