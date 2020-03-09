@@ -44,8 +44,8 @@ class GeneralSqlJsonService {
     private static final String MESSAGE_TYPE = 'message_type'
     private static final String MESSAGES = 'messages'
     private static final String MESSAGE = 'message'
-    private static final int OUTPUT_CLOB_INDEX_WITH_AUTH = 5;
-    private static final int OUTPUT_CLOB_INDEX_WITHOUT_AUTH = 1;
+    private static final int OUTPUT_CLOB_INDEX_WITH_AUTH = 5
+    private static final int OUTPUT_CLOB_INDEX_WITHOUT_AUTH = 1
 
     /**
      * @param procedureName Name of the procedure
@@ -57,7 +57,7 @@ class GeneralSqlJsonService {
         def json_data, messages_data
         OracleCallableStatement callableStatement = getCallableStatement(procedureName, inputParamsList, withAuthentication)
         int size = inputParamsList ? inputParamsList.size() : 0
-        try{
+        try {
             callableStatement?.executeQuery()
             int outputIndex = withAuthentication ? OUTPUT_CLOB_INDEX_WITH_AUTH : OUTPUT_CLOB_INDEX_WITHOUT_AUTH
             Clob json_clob = callableStatement?.getClob(size + outputIndex)
@@ -65,9 +65,9 @@ class GeneralSqlJsonService {
             json_data = new JsonSlurper().parseText(json_string)
             messages_data = populateMessagesFromJson(json_data)
             if (messages_data.size() > 0) {
-                json_data << [messages : messages_data]
+                json_data << [messages: messages_data]
             }
-        }catch(SQLException | ConverterException e){
+        } catch (SQLException | ConverterException e) {
             log.error "Exception in GeneralSqlJsonService.executeProcedure ${e}"
             String message = MessageHelper.message('default.unknown.banner.api.exception')
             throw new ApplicationException(GeneralSqlJsonService, new BusinessLogicValidationException(message, []))
@@ -75,7 +75,7 @@ class GeneralSqlJsonService {
         json_data
     }
 
-    private def getCallableStatement(String procedureName, def inputParamsList , boolean withAuthentication = true) {
+    private def getCallableStatement(String procedureName, def inputParamsList, boolean withAuthentication = true) {
         def connection = sessionFactory.currentSession.connection()
         def loggedInUser
         DatabaseMetaData metadata = connection.getMetaData()
@@ -85,7 +85,7 @@ class GeneralSqlJsonService {
         }
         String procedureStmt = getProcedureStatement(procedureName, inputParamsList)
         String plSqlBlock = withAuthentication ? getJsonSqlString(procedureStmt) : getJsonSqlStringWithoutLogin(procedureStmt)
-        OracleCallableStatement callableStatement = bindParameters(oraConnection, plSqlBlock, inputParamsList, loggedInUser,withAuthentication)
+        OracleCallableStatement callableStatement = bindParameters(oraConnection, plSqlBlock, inputParamsList, loggedInUser, withAuthentication)
         callableStatement
     }
 
@@ -220,9 +220,9 @@ class GeneralSqlJsonService {
                     def key = k.toUpperCase()
                     if (key?.toLowerCase().startsWith(MESSAGE_TAGS)) {
                         def messageInfoObj = v
-                        def messageType =  messageInfoObj?."${MESSAGE_TYPE}"?.toLowerCase()
-                        def messages =  messageInfoObj?."${MESSAGES}"
-                        messages?.each{ messageObj ->
+                        def messageType = messageInfoObj?."${MESSAGE_TYPE}"?.toLowerCase()
+                        def messages = messageInfoObj?."${MESSAGES}"
+                        messages?.each { messageObj ->
                             def message = messageObj?."${MESSAGE}"
                             if (errors.containsKey(messageType)) {
                                 errors.get(messageType).add(message)
@@ -235,7 +235,7 @@ class GeneralSqlJsonService {
                 }
                 return errors
             case Collection:
-                tree.each { e-> populateMessagesFromJson(e, errors) }
+                tree.each { e -> populateMessagesFromJson(e, errors) }
                 return errors
             default:
                 return errors
