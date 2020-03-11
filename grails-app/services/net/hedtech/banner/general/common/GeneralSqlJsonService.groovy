@@ -39,10 +39,13 @@ class GeneralSqlJsonService {
     def springSecurityService
     private static final String PACKAGE_NAME = 'SS_ACC'
     private static final String CONTEXT_NAME = 'LOG_ID'
+    private static final String STATELESS_INDICATOR = 'N'
     private static final String MESSAGE_TAGS = 'message_info'
     private static final String MESSAGE_TYPE = 'message_type'
     private static final String MESSAGES = 'messages'
     private static final String MESSAGE = 'message'
+    private static final int OUTPUT_CLOB_INDEX_WITH_AUTH = 5
+    private static final int OUTPUT_CLOB_INDEX_WITHOUT_AUTH = 1
 
     /**
      * @param procedureName Name of the procedure
@@ -50,20 +53,21 @@ class GeneralSqlJsonService {
      * Valid paramType values are - 'string', 'int', 'ident_arr', 'vc_arr'
      * @return Data as JSON
      */
-    def executeProcedure(String procedureName, def inputParamsList = null) {
+    def executeProcedure(String procedureName, def inputParamsList = null, boolean withAuthentication = true) {
         def json_data, messages_data
-        OracleCallableStatement callableStatement = getCallableStatement(procedureName, inputParamsList)
+        OracleCallableStatement callableStatement = getCallableStatement(procedureName, inputParamsList, withAuthentication)
         int size = inputParamsList ? inputParamsList.size() : 0
-        try{
+        try {
             callableStatement?.executeQuery()
-            Clob json_clob = callableStatement?.getClob(size + 1)
+            int outputIndex = withAuthentication ? OUTPUT_CLOB_INDEX_WITH_AUTH : OUTPUT_CLOB_INDEX_WITHOUT_AUTH
+            Clob json_clob = callableStatement?.getClob(size + outputIndex)
             String json_string = json_clob?.characterStream?.text
             json_data = new JsonSlurper().parseText(json_string)
             messages_data = populateMessagesFromJson(json_data)
             if (messages_data.size() > 0) {
-                json_data << [messages : messages_data]
+                json_data << [messages: messages_data]
             }
-        }catch(SQLException | ConverterException e){
+        } catch (SQLException | ConverterException e) {
             log.error "Exception in GeneralSqlJsonService.executeProcedure ${e}"
             String message = MessageHelper.message('default.unknown.banner.api.exception')
             throw new ApplicationException(GeneralSqlJsonService, new BusinessLogicValidationException(message, []))
@@ -71,14 +75,17 @@ class GeneralSqlJsonService {
         json_data
     }
 
-    private def getCallableStatement(String procedureName, def inputParamsList) {
+    private def getCallableStatement(String procedureName, def inputParamsList, boolean withAuthentication = true) {
         def connection = sessionFactory.currentSession.connection()
+        def loggedInUser
         DatabaseMetaData metadata = connection.getMetaData()
         def oraConnection = metadata.getConnection().unwrap(OracleConnection.class)
-        def loggedInUser = SecurityContextHolder?.context?.authentication?.principal?.pidm
+        if (withAuthentication) {
+            loggedInUser = SecurityContextHolder?.context?.authentication?.principal?.pidm
+        }
         String procedureStmt = getProcedureStatement(procedureName, inputParamsList)
-        String plSqlBlock = getJsonSqlString(procedureStmt, loggedInUser)
-        OracleCallableStatement callableStatement = bindParameters(oraConnection, plSqlBlock, inputParamsList)
+        String plSqlBlock = withAuthentication ? getJsonSqlString(procedureStmt) : getJsonSqlStringWithoutLogin(procedureStmt)
+        OracleCallableStatement callableStatement = bindParameters(oraConnection, plSqlBlock, inputParamsList, loggedInUser, withAuthentication)
         callableStatement
     }
 
@@ -95,12 +102,12 @@ class GeneralSqlJsonService {
         procedureStmt
     }
 
-    private def getJsonSqlString(procedure, pidm) {
+    private def getJsonSqlString(procedure) {
         String sql = """
                 DECLARE
                     lv_json_out clob;
                 BEGIN
-                    gb_common.p_set_context('${PACKAGE_NAME}', '${CONTEXT_NAME}', ${pidm}, 'N');
+                    gb_common.p_set_context(?,?,?,?);
                     gokjson.initialize_clob_output;
                     BEGIN
                       gokjson.open_object(with_exception => true);
@@ -120,52 +127,88 @@ class GeneralSqlJsonService {
         sql
     }
 
-    private def bindParameters(def oraConnection, def plSqlBlock, def inputParamsList) {
+    private def getJsonSqlStringWithoutLogin(procedure) {
+        String sql = """
+                DECLARE
+                    lv_json_out clob;
+                BEGIN                    
+                    gokjson.initialize_clob_output;
+                    BEGIN
+                      gokjson.open_object(with_exception => true);
+                      ${procedure};
+                      gokjson.close_object;
+                    EXCEPTION
+                      WHEN OTHERS THEN
+                        gokjson.close_for_exception;
+                        gokjson.put_exception_info(sqlcode, SQLERRM);
+                        gokjson.close_object;
+                    END;
+                    lv_json_out := gokjson.get_clob_output;
+                    gokjson.free_output;                   
+                    ? := lv_json_out;
+                END;"""
+        sql
+    }
+
+    private def bindParameters(def oraConnection, def plSqlBlock, def inputParamsList, int pidm, boolean withAuth = true) {
         OracleCallableStatement callableStatement = (OracleCallableStatement) oraConnection.prepareCall(plSqlBlock)
         int size = inputParamsList ? inputParamsList.size() : 0
+        //For DB Context Params
+        int contextParamsIndex = 0
+        if (withAuth) {
+            callableStatement.setString(1, PACKAGE_NAME)
+            callableStatement.setString(2, CONTEXT_NAME)
+            callableStatement.setInt(3, pidm)
+            callableStatement.setString(4, STATELESS_INDICATOR)
+            contextParamsIndex = 4
+        }
+
         for (int i = 1; i <= size; i++) {
             def inputParam = inputParamsList[i - 1]
+            int inputParamsIndex = i + contextParamsIndex
+
             switch (inputParam?.paramType?.toLowerCase()) {
                 case 'string':
                     (inputParam.paramValue != null) ?
-                            callableStatement.setString(i, inputParam.paramValue) :
-                            callableStatement.setNull(i, Types.VARCHAR)
+                            callableStatement.setString(inputParamsIndex, inputParam.paramValue) :
+                            callableStatement.setNull(inputParamsIndex, Types.VARCHAR)
                     break
                 case 'int':
                     (inputParam.paramValue != null) ?
-                            callableStatement.setInt(i, inputParam.paramValue as int) :
-                            callableStatement.setNull(i, Types.INTEGER)
+                            callableStatement.setInt(inputParamsIndex, inputParam.paramValue as int) :
+                            callableStatement.setNull(inputParamsIndex, Types.INTEGER)
                     break
                 case 'number':
                     (inputParam.paramValue != null) ?
-                            callableStatement.setNUMBER(i, new NUMBER(inputParam.paramValue)) :
-                            callableStatement.setNull(i, Types.INTEGER)
+                            callableStatement.setNUMBER(inputParamsIndex, new NUMBER(inputParam.paramValue)) :
+                            callableStatement.setNull(inputParamsIndex, Types.INTEGER)
                     break
                 case 'ident_arr':
                     String[] identArray = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
-                    callableStatement.setPlsqlIndexTable(i, identArray, identArray?.length, identArray?.length, PlsqlDataType.IDENT_ARR.sqlType, PlsqlDataType.IDENT_ARR.maxLen)
+                    callableStatement.setPlsqlIndexTable(inputParamsIndex, identArray, identArray?.length, identArray?.length, PlsqlDataType.IDENT_ARR.sqlType, PlsqlDataType.IDENT_ARR.maxLen)
                     break
                 case 'vc_arr':
                     String[] vcArray = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
-                    callableStatement.setPlsqlIndexTable(i, vcArray, vcArray?.length, vcArray?.length, PlsqlDataType.VC_ARR.sqlType, PlsqlDataType.VC_ARR.maxLen)
+                    callableStatement.setPlsqlIndexTable(inputParamsIndex, vcArray, vcArray?.length, vcArray?.length, PlsqlDataType.VC_ARR.sqlType, PlsqlDataType.VC_ARR.maxLen)
                     break
                 case 'vc_tab_type':
                     String[] vcTabType = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
-                    callableStatement.setPlsqlIndexTable(i, vcTabType, vcTabType?.length, vcTabType?.length, PlsqlDataType.TAB_TYPE.sqlType, PlsqlDataType.TAB_TYPE.maxLen)
+                    callableStatement.setPlsqlIndexTable(inputParamsIndex, vcTabType, vcTabType?.length, vcTabType?.length, PlsqlDataType.TAB_TYPE.sqlType, PlsqlDataType.TAB_TYPE.maxLen)
                     break
                 case 'char_arr':
                     String[] char_arr = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
-                    callableStatement.setPlsqlIndexTable(i, char_arr, char_arr?.length, char_arr?.length, PlsqlDataType.CHAR_ARR.sqlType, PlsqlDataType.CHAR_ARR.maxLen)
+                    callableStatement.setPlsqlIndexTable(inputParamsIndex, char_arr, char_arr?.length, char_arr?.length, PlsqlDataType.CHAR_ARR.sqlType, PlsqlDataType.CHAR_ARR.maxLen)
                     break
                 case 'vc_table_type':
                     String[] vcTableType = inputParam.paramValue ? inputParam.paramValue.toArray(new String[0]) : new String[0]
-                    callableStatement.setPlsqlIndexTable(i, vcTableType, vcTableType?.length, vcTableType?.length, PlsqlDataType.TABLE_TYPE.sqlType, PlsqlDataType.TABLE_TYPE.maxLen)
+                    callableStatement.setPlsqlIndexTable(inputParamsIndex, vcTableType, vcTableType?.length, vcTableType?.length, PlsqlDataType.TABLE_TYPE.sqlType, PlsqlDataType.TABLE_TYPE.maxLen)
                     break
                 default:
                     log.error("Unsupported Type")
             }
         }
-        callableStatement.registerOutParameter(size + 1, java.sql.Types.CLOB)
+        int outputIndex = withAuth ? OUTPUT_CLOB_INDEX_WITH_AUTH : OUTPUT_CLOB_INDEX_WITHOUT_AUTH
+        callableStatement.registerOutParameter(size + outputIndex, java.sql.Types.CLOB)
         callableStatement
     }
 
@@ -177,9 +220,9 @@ class GeneralSqlJsonService {
                     def key = k.toUpperCase()
                     if (key?.toLowerCase().startsWith(MESSAGE_TAGS)) {
                         def messageInfoObj = v
-                        def messageType =  messageInfoObj?."${MESSAGE_TYPE}"?.toLowerCase()
-                        def messages =  messageInfoObj?."${MESSAGES}"
-                        messages?.each{ messageObj ->
+                        def messageType = messageInfoObj?."${MESSAGE_TYPE}"?.toLowerCase()
+                        def messages = messageInfoObj?."${MESSAGES}"
+                        messages?.each { messageObj ->
                             def message = messageObj?."${MESSAGE}"
                             if (errors.containsKey(messageType)) {
                                 errors.get(messageType).add(message)
@@ -192,7 +235,7 @@ class GeneralSqlJsonService {
                 }
                 return errors
             case Collection:
-                tree.each { e-> populateMessagesFromJson(e, errors) }
+                tree.each { e -> populateMessagesFromJson(e, errors) }
                 return errors
             default:
                 return errors
