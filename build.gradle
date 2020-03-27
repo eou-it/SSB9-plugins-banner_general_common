@@ -91,9 +91,12 @@ dependencies {
 
     //Added for BannerXE For FileUtils and others
     compile 'commons-io:commons-io:2.6'
+    compile 'org.asciidoctor:asciidoctorj:1.5.8'
 
     compile('org.grails:grails-docs:3.3.2') {
         exclude group:"org.xhtmlrenderer", module:"core-renderer"
+        exclude group:"org.jruby", module:"jruby-complete"
+        exclude group:"org.asciidoctor", module:"asciidoctorj"
 
     }
     // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
