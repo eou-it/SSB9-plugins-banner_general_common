@@ -14,6 +14,7 @@ import oracle.jdbc.OracleConnection
 import oracle.sql.NUMBER
 import org.grails.web.converters.exceptions.ConverterException
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.transaction.annotation.Propagation
 
 import java.sql.Clob
 import java.sql.DatabaseMetaData
@@ -32,7 +33,7 @@ import java.sql.Types
  * JDBC native CallableStatement or Connection classes do not support binding parameters of PL/SQL data types. *
  * These APIs are specific to Oracle and needs to be modified when the database is migrated to anything else.
  */
-@Transactional
+@Transactional(readOnly = false, propagation = Propagation.REQUIRED )
 @Slf4j
 class GeneralSqlJsonService {
     def sessionFactory
@@ -53,24 +54,33 @@ class GeneralSqlJsonService {
      * Valid paramType values are - 'string', 'int', 'ident_arr', 'vc_arr'
      * @return Data as JSON
      */
-    def executeProcedure(String procedureName, def inputParamsList = null, boolean withAuthentication = true) {
+    def executeProcedure(String procedureName, def inputParamsList = null, boolean withAuthentication = true, boolean populateMessages = true) {
         def json_data, messages_data
+        Clob json_clob
+        String json_string
         OracleCallableStatement callableStatement = getCallableStatement(procedureName, inputParamsList, withAuthentication)
         int size = inputParamsList ? inputParamsList.size() : 0
         try {
             callableStatement?.executeQuery()
             int outputIndex = withAuthentication ? OUTPUT_CLOB_INDEX_WITH_AUTH : OUTPUT_CLOB_INDEX_WITHOUT_AUTH
-            Clob json_clob = callableStatement?.getClob(size + outputIndex)
-            String json_string = json_clob?.characterStream?.text
+            json_clob = callableStatement?.getClob(size + outputIndex)
+            json_string = json_clob?.characterStream?.text
             json_data = new JsonSlurper().parseText(json_string)
-            messages_data = populateMessagesFromJson(json_data)
-            if (messages_data.size() > 0) {
-                json_data << [messages: messages_data]
+            if(populateMessages) {
+                messages_data = populateMessagesFromJson(json_data)
+                if (messages_data.size() > 0) {
+                    json_data << [messages: messages_data]
+                }
             }
         } catch (SQLException | ConverterException e) {
             log.error "Exception in GeneralSqlJsonService.executeProcedure ${e}"
             String message = MessageHelper.message('default.unknown.banner.api.exception')
             throw new ApplicationException(GeneralSqlJsonService, new BusinessLogicValidationException(message, []))
+        } finally {
+            json_clob?.truncate(json_string?.length())
+            json_clob?.free()
+            json_clob = null
+            callableStatement?.close()
         }
         json_data
     }
@@ -119,7 +129,13 @@ class GeneralSqlJsonService {
                         gokjson.put_exception_info(sqlcode, SQLERRM);
                         gokjson.close_object;
                     END;
-                    lv_json_out := gokjson.get_clob_output;
+                    BEGIN
+                      lv_json_out := gokjson.get_clob_output;
+                    EXCEPTION
+                       WHEN OTHERS THEN
+                         gokjson.free_output;
+                         goksels.p_clear_user_context;
+                    END;
                     gokjson.free_output;
                     goksels.p_clear_user_context;
                     ? := lv_json_out;
@@ -143,7 +159,12 @@ class GeneralSqlJsonService {
                         gokjson.put_exception_info(sqlcode, SQLERRM);
                         gokjson.close_object;
                     END;
+                    BEGIN
                     lv_json_out := gokjson.get_clob_output;
+                    EXCEPTION
+                       WHEN OTHERS THEN
+                        gokjson.free_output;
+                    END;    
                     gokjson.free_output;                   
                     ? := lv_json_out;
                 END;"""
