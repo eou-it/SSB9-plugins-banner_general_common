@@ -90,14 +90,18 @@ dependencies {
     compile 'org.grails.plugins:quartz:2.0.11'
 
     //Added for BannerXE For FileUtils and others
+    compile "joda-time:joda-time:1.6.2"
     compile 'commons-io:commons-io:2.6'
-    compile 'org.asciidoctor:asciidoctorj:1.5.8'
+    compile ('org.bouncycastle:bcprov-jdk15on:1.60')
+    compile ('org.asciidoctor:asciidoctorj:1.5.8'){
+        exclude group:"org.jruby", module:"jruby-complete"
+    }
 
     compile('org.grails:grails-docs:3.3.2') {
         exclude group:"org.xhtmlrenderer", module:"core-renderer"
         exclude group:"org.jruby", module:"jruby-complete"
         exclude group:"org.asciidoctor", module:"asciidoctorj"
-
+        exclude group:"bouncycastle", module:"bcprov-jdk14"
     }
     // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
     // runtime 'mysql:mysql-connector-java:5.1.5'
