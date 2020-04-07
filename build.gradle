@@ -119,7 +119,7 @@ dependencies {
     compile "javax.mail:javax.mail-api:1.5.5"
     runtime "com.sun.mail:javax.mail:1.5.5"
     compile 'com.icegreen:greenmail:1.5.0'
-    compile 'org.apache.commons:commons-email:1.4'
+    compile 'org.apache.commons:commons-email:1.5'
     compile 'org.quartz-scheduler:quartz:2.2.1'
 
     compile "org.grails.plugins:hibernate5"
