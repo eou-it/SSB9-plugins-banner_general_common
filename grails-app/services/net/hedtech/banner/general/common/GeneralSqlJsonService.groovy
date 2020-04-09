@@ -171,7 +171,7 @@ class GeneralSqlJsonService {
         sql
     }
 
-    private def bindParameters(def oraConnection, def plSqlBlock, def inputParamsList, int pidm, boolean withAuth = true) {
+    private def bindParameters(def oraConnection, def plSqlBlock, def inputParamsList, def pidm, boolean withAuth = true) {
         OracleCallableStatement callableStatement = (OracleCallableStatement) oraConnection.prepareCall(plSqlBlock)
         int size = inputParamsList ? inputParamsList.size() : 0
         //For DB Context Params
