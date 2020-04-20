@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
-        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:2.14.2"
+        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:2.15.1"
         classpath "net.saliman:gradle-cobertura-plugin:2.6.0"
     }
 }
@@ -80,7 +80,7 @@ dependencies {
     profile "org.grails.profiles:web-plugin"
     provided "org.grails:grails-plugin-services"
     provided "org.grails:grails-plugin-domain-class"
-    runtime "com.bertramlabs.plugins:asset-pipeline-grails:2.14.2"
+    runtime "com.bertramlabs.plugins:asset-pipeline-grails:3.0.6"
     testCompile "org.grails:grails-gorm-testing-support"
     testCompile "org.grails:grails-plugin-testing"
     testCompile "org.grails:grails-web-testing-support"
@@ -90,8 +90,19 @@ dependencies {
     compile 'org.grails.plugins:quartz:2.0.11'
 
     //Added for BannerXE For FileUtils and others
+    compile "joda-time:joda-time:1.6.2"
     compile 'commons-io:commons-io:2.6'
+    compile ('org.bouncycastle:bcprov-jdk15on:1.60')
+    compile ('org.asciidoctor:asciidoctorj:1.5.8'){
+        exclude group:"org.jruby", module:"jruby-complete"
+    }
 
+    compile('org.grails:grails-docs:3.3.2') {
+        exclude group:"org.xhtmlrenderer", module:"core-renderer"
+        exclude group:"org.jruby", module:"jruby-complete"
+        exclude group:"org.asciidoctor", module:"asciidoctorj"
+        exclude group:"bouncycastle", module:"bcprov-jdk14"
+    }
     // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
     // runtime 'mysql:mysql-connector-java:5.1.5'
     compile 'org.xhtmlrenderer:flying-saucer-core:9.1.18'
@@ -104,18 +115,22 @@ dependencies {
         exclude group:"org.bouncycastle", module:"bcprov-jdk14"
         exclude group:"bouncycastle", module:"bcprov-jdk14"
     }
-
     compile 'org.antlr:ST4:4.0.8'
     compile "javax.mail:javax.mail-api:1.5.5"
     runtime "com.sun.mail:javax.mail:1.5.5"
     compile 'com.icegreen:greenmail:1.5.0'
-    compile 'org.apache.commons:commons-email:1.4'
+    compile 'org.apache.commons:commons-email:1.5'
     compile 'org.quartz-scheduler:quartz:2.2.1'
 
     compile "org.grails.plugins:hibernate5"
-    compile "org.hibernate:hibernate-core:5.1.5.Final"
-    compile "org.hibernate:hibernate-ehcache:5.1.5.Final"
+    compile "org.hibernate:hibernate-core:5.1.17.Final"
+    compile "org.hibernate:hibernate-ehcache:5.1.17.Final"
 
+}
+
+configurations {
+    runtime.exclude group: "org.springframework.boot", module: "spring-boot-starter-actuator"
+    runtime.exclude group: "org.grails", module: "grails-gorm-testing-support"
 }
 
 bootRun {
