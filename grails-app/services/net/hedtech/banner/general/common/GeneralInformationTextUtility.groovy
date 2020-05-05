@@ -188,6 +188,35 @@ class GeneralInformationTextUtility {
         return informationTexts
     }
 
+    /**
+     * getMessage method returns information text message for the given pagename label and locale
+     * This will return the information text string for a page with specific label (infoTextKey).
+     * The page name would need to be decided by respective teams to enable them to access the necessary information texts.
+     * Example Implementation - def infoTexts = ["termSelect.bodyTitle": InformationTextUtility.getMessage("TERMSELECTION","termSelect.bodyTitle")]
+     * @param pageName
+     * @param label
+     * @param locale
+     * @return
+     */
+
+    public static String getMessage(String pageName, String label, Locale locale = LocaleContextHolder.getLocale()) {
+        String infoText = ""
+        List<String> localeList = getFallbackLocaleNames(locale)
+        List<InformationText> resultSet = InformationText.fetchInfoTextByRolesAndLabel(pageName,getQueryParamForRoles(),localeList,label)
+        resultSet = getResultSetPrioritzedForLocale(resultSet,localeList)
+        resultSet = getFilteredResultSetForLabel(resultSet)
+        if(resultSet.size() > 0) {
+            for(InformationText infoTextResultSet : resultSet) {
+                infoText += getInfoText(infoText, infoTextResultSet)
+            }
+
+            if (((infoText == null)||(infoText.trim().size()==0))) {
+                infoText = label
+            }
+        }
+        return infoText
+    }
+
     /***
      *
      * @param defaultRoleInfoTexts
