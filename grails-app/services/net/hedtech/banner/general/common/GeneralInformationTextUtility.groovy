@@ -210,7 +210,7 @@ class GeneralInformationTextUtility {
                 infoText += getInfoText(infoText, infoTextResultSet)
             }
 
-            if (((infoText == null)||(infoText.trim().size()==0))) {
+            if ((infoText == null)||(infoText.trim().size()==0)) {
                 infoText = label
             }
         }
