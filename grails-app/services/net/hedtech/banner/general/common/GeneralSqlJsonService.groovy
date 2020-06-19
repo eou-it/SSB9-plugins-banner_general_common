@@ -251,7 +251,7 @@ class GeneralSqlJsonService {
                             String message_key = messageObj?."${MESSAGE_KEY}", message = messageObj?."${MESSAGE}", default_message = message
                             def message_args = []
                             for (def argObj : messageObj?."${MESSAGE_ARGS}") {
-                                message_args << MessageHelper.message(argObj?."${ARGUMENT}" as String)
+                                message_args << MessageHelper.message((argObj?."${ARGUMENT}"?:'') as String)
                             }
 
                             if (message_key) {
