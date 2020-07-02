@@ -106,7 +106,11 @@ dependencies {
     // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
     // runtime 'mysql:mysql-connector-java:5.1.5'
     compile 'org.xhtmlrenderer:flying-saucer-core:9.1.18'
-    compile 'org.xhtmlrenderer:flying-saucer-pdf:9.1.18'
+    compile ('org.xhtmlrenderer:flying-saucer-pdf:9.1.18'){
+        exclude group:"org.bouncycastle", module:"bcprov-jdk14"
+        exclude group:"bouncycastle", module:"bcprov-jdk14"
+    }
+
 //    compile('org.xhtmlrenderer:flying-saucer-pdf:9.0.8') {
 //        excludes 'itext', 'itext-rtf'
 //    }
