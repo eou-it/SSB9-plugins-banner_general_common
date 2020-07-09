@@ -20,6 +20,7 @@ import java.sql.Clob
 import java.sql.DatabaseMetaData
 import java.sql.SQLException
 import java.sql.Types
+import java.text.MessageFormat
 
 /**
  * This is a common service to execute any 8x procedure that returns data as JSON.
@@ -45,6 +46,9 @@ class GeneralSqlJsonService {
     private static final String MESSAGE_TYPE = 'message_type'
     private static final String MESSAGES = 'messages'
     private static final String MESSAGE = 'message'
+    private static final String MESSAGE_KEY = 'message_key'
+    private static final String MESSAGE_ARGS = 'message_args'
+    private static final String ARGUMENT = 'argument'
     private static final int OUTPUT_CLOB_INDEX_WITH_AUTH = 5
     private static final int OUTPUT_CLOB_INDEX_WITHOUT_AUTH = 1
 
@@ -241,10 +245,23 @@ class GeneralSqlJsonService {
                     def key = k.toUpperCase()
                     if (key?.toLowerCase().startsWith(MESSAGE_TAGS)) {
                         def messageInfoObj = v
-                        def messageType = messageInfoObj?."${MESSAGE_TYPE}"?.toLowerCase()
+                        String messageType = messageInfoObj?."${MESSAGE_TYPE}"?.toLowerCase()
                         def messages = messageInfoObj?."${MESSAGES}"
                         messages?.each { messageObj ->
-                            def message = messageObj?."${MESSAGE}"
+                            String message_key = messageObj?."${MESSAGE_KEY}", message = messageObj?."${MESSAGE}", default_message = message
+                            def message_args = []
+                            for (def argObj : messageObj?."${MESSAGE_ARGS}") {
+                                message_args << MessageHelper.message((argObj?."${ARGUMENT}"?:'') as String)
+                            }
+
+                            if (message_key) {
+                                message = MessageHelper.message(message_key, message_args as Object[])
+                            }
+
+                            if ((message == message_key || !message_key) && message_args.size()) {
+                                message = MessageFormat.format(default_message, message_args as Object[])
+                            }
+
                             if (errors.containsKey(messageType)) {
                                 errors.get(messageType).add(message)
                             } else {
