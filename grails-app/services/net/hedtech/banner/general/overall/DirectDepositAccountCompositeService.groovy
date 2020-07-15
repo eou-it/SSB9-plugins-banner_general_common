@@ -480,7 +480,7 @@ class DirectDepositAccountCompositeService {
 
         //checking for mandatory values
         validateRoutingNumExistsInMap(itemBeingAdjusted)
-        validateBankRoutingInfo(itemBeingAdjusted.bankRoutingInfo.bankRoutingNum)
+        itemBeingAdjusted?.bankRoutingInfo = validateBankRoutingInfo(itemBeingAdjusted.bankRoutingInfo.bankRoutingNum)
 
         def accountList = directDepositAccountService.getActiveHrAccounts(itemBeingAdjusted?.pidm)
         accountList.sort { it.priority };
@@ -504,7 +504,7 @@ class DirectDepositAccountCompositeService {
 //        }
         use(InvokerHelper) {
             def bankRoutingInfo = itemBeingAdjusted.bankRoutingInfo
-            routingObject.setProperties(bankRoutingInfo)
+            routingObject.setProperties(bankRoutingInfo?.getProperties())
             itemBeingAdjusted.bankRoutingInfo = null
             domainObject.setProperties(itemBeingAdjusted)
             domainObject.bankRoutingInfo = routingObject
