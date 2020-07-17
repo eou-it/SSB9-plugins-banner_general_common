@@ -8,6 +8,7 @@ import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
+import net.hedtech.banner.i18n.DateConverterService
 import net.hedtech.banner.i18n.MessageHelper
 import oracle.jdbc.OracleCallableStatement
 import oracle.jdbc.OracleConnection
@@ -49,6 +50,7 @@ class GeneralSqlJsonService {
     private static final String MESSAGE_KEY = 'message_key'
     private static final String MESSAGE_ARGS = 'message_args'
     private static final String ARGUMENT = 'argument'
+    private static final String ARGUMENT_GREGORIAN = 'argument_GREGORIAN'
     private static final int OUTPUT_CLOB_INDEX_WITH_AUTH = 5
     private static final int OUTPUT_CLOB_INDEX_WITHOUT_AUTH = 1
 
@@ -251,7 +253,12 @@ class GeneralSqlJsonService {
                             String message_key = messageObj?."${MESSAGE_KEY}", message = messageObj?."${MESSAGE}", default_message = message
                             def message_args = []
                             for (def argObj : messageObj?."${MESSAGE_ARGS}") {
-                                message_args << MessageHelper.message((argObj?."${ARGUMENT}"?:'') as String)
+                                if(argObj?."${ARGUMENT_GREGORIAN}"){
+                                    message_args << MessageHelper.message((getLocalizedDate(argObj?."${ARGUMENT_GREGORIAN}")?:'') as String)
+                                }else{
+                                    message_args << MessageHelper.message((argObj?."${ARGUMENT}"?:'') as String)
+                                }
+
                             }
 
                             if (message_key) {
@@ -278,6 +285,19 @@ class GeneralSqlJsonService {
             default:
                 return errors
         }
+    }
+
+
+    private def getLocalizedDate(String format = 'yyyy-MM-dd HH:mm:ss', def dateValue) {
+        def result
+        if (dateValue) {
+            if (!(dateValue instanceof Date)) {
+                dateValue = Date.parse(format, dateValue)
+            }
+            DateConverterService dateConverterService = new DateConverterService()
+            result = dateConverterService.parseGregorianToDefaultCalendar(dateValue)
+        }
+        result
     }
 
 }
