@@ -66,10 +66,11 @@ class CommunicationTextMessageItemServiceIntegrationTests extends BaseIntegratio
         folder = (CommunicationFolder) communicationFolderService.create( folder )
 
         textMessageTemplate = new CommunicationTextMessageTemplate()
-        textMessageTemplate.name = "mobile notification template"
+        textMessageTemplate.name = "SMS template"
         textMessageTemplate.folder = folder
         textMessageTemplate.message = "test message"
         textMessageTemplate.footer = "footer"
+        textMessageTemplate.toList = "123456789"
         textMessageTemplate = (CommunicationTextMessageTemplate) communicationTextMessageTemplateService.create( textMessageTemplate )
         textMessageTemplate = (CommunicationTextMessageTemplate) communicationTextMessageTemplateService.publish( textMessageTemplate )
     }

@@ -49,5 +49,6 @@ class CommunicationSendDispatcher implements CommunicationSendItemVisitor {
     @Override
     void visitTextMessage(CommunicationSendTextMessageItem textMessageItem) {
         //DO NOTHING - Text message is honored via the RESTFUL API and hence not need to be processed as of now
+        return;
     }
 }
