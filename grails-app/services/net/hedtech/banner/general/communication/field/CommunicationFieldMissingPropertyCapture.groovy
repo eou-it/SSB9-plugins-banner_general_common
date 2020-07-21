@@ -18,13 +18,13 @@ public class CommunicationFieldMissingPropertyCapture implements STErrorListener
 
     @Override
     public void compileTimeError(STMessage stMessage) {
-        log.error(stMessage.cause)
+//        log.error(stMessage.cause)
         throw new ApplicationException( CommunicationField, "@@r1:compileErrorDuringParsing:${stripSurprise( stMessage.arg )}@@" );
     }
 
     @Override
     public void runTimeError(STMessage stMessage) {
-        log.error(stMessage.cause)
+//        log.error(stMessage.cause)
         if ( stMessage.error == ErrorType.NO_SUCH_ATTRIBUTE ) { // ignore these
             missingProperties.add(stMessage.arg);
         } else {
@@ -34,13 +34,13 @@ public class CommunicationFieldMissingPropertyCapture implements STErrorListener
 
     @Override
     public void IOError(STMessage stMessage) {
-        log.error(stMessage.cause)
+//        log.error(stMessage.cause)
         throw new ApplicationException( CommunicationField, "@@r1:ioErrorDuringParsing:${stMessage.arg}@@" );
     }
 
     @Override
     public void internalError(STMessage stMessage) {
-        log.error(stMessage.cause)
+//        log.error(stMessage.cause)
         throw new ApplicationException( CommunicationField, "@@r1:internalErrorDuringParsing:${stMessage.arg}@@" );
     }
 
