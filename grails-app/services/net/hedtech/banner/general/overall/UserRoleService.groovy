@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2018 Ellucian Company L.P. and its affiliates.
+ Copyright 2018-2020 Ellucian Company L.P. and its affiliates.
  *********************************************************************************/
 
 package net.hedtech.banner.general.overall
@@ -26,9 +26,10 @@ class UserRoleService {
 
     def getRoles() {
         [
-            isStudent: hasUserRole( "STUDENT" ),
-            isEmployee: hasUserRole( "EMPLOYEE" ),
-            isAipAdmin: hasUserRole( "ACTIONITEMADMIN" )
+                isStudent : hasUserRole("STUDENT"),
+                isEmployee: hasUserRole("EMPLOYEE"),
+                isAipAdmin: hasUserRole("ACTIONITEMADMIN"),
+                isFaculty : hasUserRole("FACULTY")
         ]
     }
 }

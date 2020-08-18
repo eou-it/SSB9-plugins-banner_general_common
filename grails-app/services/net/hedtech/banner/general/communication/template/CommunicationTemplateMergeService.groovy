@@ -400,6 +400,9 @@ class CommunicationTemplateMergeService {
 
         def templateVariables = new HashSet()
 
+        extractTemplateVariables( communicationTextMessageTemplate.toList ).each {
+            templateVariables << it
+        }
         extractTemplateVariables( communicationTextMessageTemplate.message ).each {
             templateVariables << it
         }
