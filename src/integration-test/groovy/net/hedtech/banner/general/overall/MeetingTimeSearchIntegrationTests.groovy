@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2019 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2020 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
@@ -289,6 +289,14 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
             assertNotNull meetingTime
             assertNotNull meetingTime.meetingType
         }
+    }
+
+    @Test
+    void testGetTotalHours() {
+        def existingMeeting = MeetingTimeSearch.getTotalHours("201410","20001")
+        assertNotNull existingMeeting
+        assertNotNull existingMeeting.meetingType
+        assertNull existingMeeting.totalHours
     }
 
     private static def makeMeetingTimeSearchNullSafe(MeetingTimeSearch meetingTimeSearch){
