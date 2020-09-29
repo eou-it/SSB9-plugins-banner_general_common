@@ -292,11 +292,10 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
     }
 
     @Test
-    void testGetTotalHours() {
-        def existingMeeting = MeetingTimeSearch.getTotalHours("201410","20001")
+    void testGetTotalHoursObjectList() {
+        def existingMeeting = MeetingTimeSearch.getTotalHoursObjectList("201410","20001")
         assertNotNull existingMeeting
         assertNotNull existingMeeting.meetingType
-        assertNull existingMeeting.totalHours
     }
 
     private static def makeMeetingTimeSearchNullSafe(MeetingTimeSearch meetingTimeSearch){
