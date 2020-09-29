@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2020 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general
@@ -111,4 +111,21 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
         assertTrue  statusFlag == GeneralCommonUtility.INVALID_PIN
        //TODO --Need to write test cases for Expired and Disable scenarios
     }
+
+    @Test
+    void testCheckUserRoleTrue(){
+        loginSSB('HOSS001', '111111')
+        def hasRole = GeneralCommonUtility.checkUserRole('STUDENT')
+        assertTrue hasRole
+        logout()
+    }
+
+    @Test
+    void testCheckUserRoleFalse(){
+        loginSSB('JABS-0001', '111111')
+        def hasRole = GeneralCommonUtility.checkUserRole('STUDENT')
+        assertFalse hasRole
+        logout()
+    }
+
 }

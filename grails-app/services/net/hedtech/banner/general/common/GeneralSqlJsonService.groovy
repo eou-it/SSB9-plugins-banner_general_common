@@ -197,7 +197,7 @@ class GeneralSqlJsonService {
             switch (inputParam?.paramType?.toLowerCase()) {
                 case 'string':
                     (inputParam.paramValue != null) ?
-                            callableStatement.setString(inputParamsIndex, inputParam.paramValue) :
+                            callableStatement.setString(inputParamsIndex, inputParam.paramValue as String) :
                             callableStatement.setNull(inputParamsIndex, Types.VARCHAR)
                     break
                 case 'int':
