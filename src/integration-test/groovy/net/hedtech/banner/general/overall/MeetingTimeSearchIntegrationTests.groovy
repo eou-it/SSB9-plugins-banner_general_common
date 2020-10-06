@@ -292,8 +292,8 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
     }
 
     @Test
-    void testGetTotalHoursObjectList() {
-        def existingMeeting = MeetingTimeSearch.getTotalHoursObjectList("201410","20001")
+    void testfetchTotalHoursListByTermAndCourseReferenceNumber() {
+        def existingMeeting = MeetingTimeSearch.fetchTotalHoursListByTermAndCourseReferenceNumber("201410","20001")
         assertNotNull existingMeeting
         assertNotNull existingMeeting.meetingType
     }

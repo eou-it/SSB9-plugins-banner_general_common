@@ -432,7 +432,7 @@ class MeetingTimeSearch {
         return meetingTimeResultList
     }
 
-    public static def getTotalHoursObjectList(String term, String crn){
+    public static def fetchTotalHoursListByTermAndCourseReferenceNumber(String term, String crn){
         def meetingTimeSearchList = MeetingTimeSearch.withSession { session ->
             session.getNamedQuery(
                     'MeetingTimeSearch.fetchTotalHoursByTermAndCourseReferenceNumber').setString('term', term).setString('crn', crn).list()
