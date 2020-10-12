@@ -63,17 +63,32 @@ class PersonIdentificationCompositeService {
             }
 
         }
-        if( buildSelectionList(identificationEntities,
-                'personidentificationname').size() > 0)
+
+        Integer sizeValue = buildSelectionList(identificationEntities,
+                'personidentificationname')?.size()
+
+        if( sizeValue > 0)
         identificationEntities = processResults(identificationEntities,
                                                 PersonIdentificationName.fetchBannerPersonList(buildSelectionList(identificationEntities,
                                                                                                                    'personidentificationname')))
+        sizeValue = buildSelectionList(identificationEntities,
+                'pidmandudcidmapping')?.size()
+
+        if( sizeValue > 0)
         identificationEntities = processResults(identificationEntities,
                                                 PidmAndUDCIdMapping.findAllByPidmInList(buildSelectionList(identificationEntities,
                                                                                                         'pidmandudcidmapping')))
+        sizeValue = buildSelectionList(identificationEntities,
+                'imssourcedidbase')?.size()
+
+        if( sizeValue > 0)
         identificationEntities = processResults(identificationEntities,
                                                 ImsSourcedIdBase.findAllByPidmInList(buildSelectionList(identificationEntities,
                                                                                                         'imssourcedidbase')))
+        sizeValue = buildSelectionList(identificationEntities,
+                'thirdpartyaccess')?.size()
+
+        if( sizeValue > 0)
         identificationEntities = processResults(identificationEntities,
                                                 ThirdPartyAccess.findAllByPidmInList(buildSelectionList(identificationEntities,
                                                                                                         'thirdpartyaccess')))
@@ -131,10 +146,12 @@ class PersonIdentificationCompositeService {
 
 
     def buildPersonGuids(List domainIds, Map identificationEntities) {
-        GlobalUniqueIdentifier.findAllByLdmNameAndDomainIdInList(ldmName, domainIds).each { guid ->
-            def currentRecord = identificationEntities.get(guid.domainKey.toInteger())
-            currentRecord.guid = guid.guid
-            identificationEntities.put(guid.domainKey.toInteger(), currentRecord)
+        if(domainIds?.size()> 0){
+            GlobalUniqueIdentifier.findAllByLdmNameAndDomainIdInList(ldmName, domainIds).each { guid ->
+                def currentRecord = identificationEntities.get(guid.domainKey.toInteger())
+                currentRecord.guid = guid.guid
+                identificationEntities.put(guid.domainKey.toInteger(), currentRecord)
+            }
         }
         identificationEntities
     }
