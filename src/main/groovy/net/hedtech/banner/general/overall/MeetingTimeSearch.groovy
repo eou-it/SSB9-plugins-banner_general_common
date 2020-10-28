@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2019 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2020 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -19,14 +19,18 @@ import javax.persistence.*
 @NamedQueries(value = [
 @NamedQuery(name = "MeetingTimeSearch.fetchByTermAndCourseReferenceNumber",
         query = """FROM  MeetingTimeSearch a
-           WHERE a.term = :term
-           and a.courseReferenceNumber = :crn
-           order by a.term, a.courseReferenceNumber, a.startDate, a.monday, a.tuesday, a.wednesday,
-            a.thursday, a.friday, a.saturday, a.sunday, a.beginTime """),
+        WHERE a.term = :term
+        and a.courseReferenceNumber = :crn
+        order by a.term, a.courseReferenceNumber, a.startDate, a.monday, a.tuesday, a.wednesday,
+        a.thursday, a.friday, a.saturday, a.sunday, a.beginTime """),
 @NamedQuery(name = "MeetingTimeSearch.fetchListMeetingTimeDetailByTermAndCourseReferenceNumber",
         query = """FROM  MeetingTimeSearch a
-	  	   WHERE a.term IN (:termCode)
-		   AND   a.courseReferenceNumber IN (:courseReferenceNumbers)""")
+        WHERE a.term IN (:termCode)
+        AND   a.courseReferenceNumber IN (:courseReferenceNumbers)"""),
+@NamedQuery(name = "MeetingTimeSearch.fetchTotalHoursByTermAndCourseReferenceNumber",
+        query = """FROM  MeetingTimeSearch a
+        WHERE a.term = :term
+        and a.courseReferenceNumber = :crn""")
 ])
 class MeetingTimeSearch {
 
@@ -214,6 +218,12 @@ class MeetingTimeSearch {
     @Column(name = "SSRMEET_MTYP_CODE")
     String meetingType
 
+    /**
+     * The total hours
+     */
+    @Column(name = "ssrmeet_hrs_total", precision = 7, scale = 2)
+    Double totalHours
+
     public String toString() {
         """MeetingTimeSearch[
                    id=$id,
@@ -245,7 +255,8 @@ class MeetingTimeSearch {
                    dayOfWeek=$dayOfWeek,
                    scheduleType=$scheduleType,
                    termCourseReferenceNumber=$termCourseReferenceNumber,
-                   meetingType=$meetingType
+                   meetingType=$meetingType,
+				   totalHours=$totalHours	
                    ]"""
     }
 
@@ -421,5 +432,12 @@ class MeetingTimeSearch {
         return meetingTimeResultList
     }
 
+    public static def fetchTotalHoursListByTermAndCourseReferenceNumber(String term, String crn){
+        def meetingTimeSearchList = MeetingTimeSearch.withSession { session ->
+            session.getNamedQuery(
+                    'MeetingTimeSearch.fetchTotalHoursByTermAndCourseReferenceNumber').setString('term', term).setString('crn', crn).list()
+        }
+        return meetingTimeSearchList
+    }
 
 }
