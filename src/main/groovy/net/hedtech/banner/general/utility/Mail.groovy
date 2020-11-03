@@ -346,7 +346,7 @@ class Mail implements Serializable {
     public static List fetchByPidmAndTermCode(Integer pidm, String termCode) {
         List result
         Mail.withSession { session ->
-            result = session.getNamedQuery(GRDSSqlConstants.GRADUATION_DEADLINE_PASS_BY_PIDM_TERM_AND_CEREMONY_QUERY_NAME)
+            result = session.getNamedQuery('Mail.fetchByPidmAndTermCode')
                     .setInteger('pidm', pidm).setString('termCode', termCode).list();
         }
         return result
