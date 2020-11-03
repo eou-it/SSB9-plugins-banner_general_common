@@ -3,10 +3,14 @@
  **********************************************************************************/
 package net.hedtech.banner.general.utility
 
+import org.hibernate.Criteria
+
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
+import javax.persistence.NamedQueries
+import javax.persistence.NamedQuery
 import javax.persistence.Table
 import javax.persistence.Version
 
@@ -48,6 +52,10 @@ import javax.persistence.TemporalType
  */
 @Entity
 @Table(name = "GURMAIL")
+@NamedQueries(value = [
+        @NamedQuery(name = "Mail.fetchByPidmAndTermCode",
+                query = "From Mail m where m.pidm=:pidm and m.term.code=:termCode and m.systemIndicator='S' and publishedGenerated='G'")
+])
 class Mail implements Serializable {
 
     /**
@@ -333,6 +341,15 @@ class Mail implements Serializable {
         letterProcessLetter(nullable: true)
         initials(nullable: true)
         communicationPlan(nullable: true)
+    }
+
+    public static List fetchByPidmAndTermCode(Integer pidm, String termCode) {
+        List result
+        Mail.withSession { session ->
+            result = session.getNamedQuery(GRDSSqlConstants.GRADUATION_DEADLINE_PASS_BY_PIDM_TERM_AND_CEREMONY_QUERY_NAME)
+                    .setInteger('pidm', pidm).setString('termCode', termCode).list();
+        }
+        return result
     }
 
 }

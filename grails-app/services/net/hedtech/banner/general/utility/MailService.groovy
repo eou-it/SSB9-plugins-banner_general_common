@@ -27,4 +27,9 @@ class MailService extends ServiceBase {
 
     }
 
+    def getMailDetails(Integer pidm, String termCode){
+        List mailDetails = Mail.fetchByPidmAndTermCode(pidm, termCode)
+        mailDetails
+    }
+
 }
