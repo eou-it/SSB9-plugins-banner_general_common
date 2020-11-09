@@ -54,7 +54,9 @@ import javax.persistence.TemporalType
 @Table(name = "GURMAIL")
 @NamedQueries(value = [
         @NamedQuery(name = "Mail.fetchByPidmAndTermCode",
-                query = "From Mail m where m.pidm=:pidm and m.term.code=:termCode and m.systemIndicator='S' and publishedGenerated='G'")
+                query = "From Mail m where m.pidm=:pidm and m.term.code=:termCode and m.systemIndicator='S' and publishedGenerated='G'"),
+        @NamedQuery(name = "Mail.fetchByPidmTermSystemIndAndLetterCode",
+                query = "From Mail m where m.pidm=:pidm and m.term.code=:termCode and m.systemIndicator=:systemIndicator and m.letterProcessLetter.code=:letterCode")
 ])
 class Mail implements Serializable {
 
@@ -348,6 +350,16 @@ class Mail implements Serializable {
         Mail.withSession { session ->
             result = session.getNamedQuery('Mail.fetchByPidmAndTermCode')
                     .setInteger('pidm', pidm).setString('termCode', termCode).list();
+        }
+        return result
+    }
+
+    public static def fetchByPidmTermSystemIndAndLetterCode(Integer pidm, String termCode, String systemInd, String letterCode) {
+        def result
+        Mail.withSession { session ->
+            result = session.getNamedQuery('Mail.fetchByPidmTermSystemIndAndLetterCode')
+                            .setInteger('pidm', pidm).setString('termCode', termCode).setString('systemIndicator', systemInd)
+                            .setString('letterCode', letterCode).uniqueResult();
         }
         return result
     }
