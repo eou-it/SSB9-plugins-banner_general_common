@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2019 Ellucian Company L.P. and its affiliates.
+ Copyright 2020 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 
 package net.hedtech.banner.general.utility
@@ -34,6 +34,11 @@ class MailService extends ServiceBase {
     List<Mail> getMaiDetailsByPidmTermSystemIndAndLettrCode(Integer pidm, String termCode, String systemIndicator, String letterCode) {
         List<Mail> mail = Mail.fetchByPidmTermCodeSystemIndAndLettrCode(pidm, termCode, systemIndicator, letterCode)
         mail
+    }
+
+    def getPrintTicketDetails(Integer pidm, String systemInd, String termCode, String moduleCode, String letterCode, String pubGen) {
+        def mailDetails = Mail.fetchByPidmTermSystemIndLtrModuleCodeAndPubGen(pidm, termCode, systemInd, letterCode, moduleCode, pubGen)
+        mailDetails
     }
 
 }
