@@ -54,9 +54,9 @@ import javax.persistence.TemporalType
 @Table(name = "GURMAIL")
 @NamedQueries(value = [
         @NamedQuery(name = "Mail.fetchByPidmAndTermCode",
-                query = "From Mail m where m.pidm=:pidm and m.term.code=:termCode and m.systemIndicator='S' and publishedGenerated='G'"),
-        @NamedQuery(name = "Mail.fetchByPidmTermSystemIndAndLetterCode",
-                query = "From Mail m where m.pidm=:pidm and m.term.code=:termCode and m.systemIndicator=:systemIndicator and m.letterProcessLetter.code=:letterCode")
+                query = "FROM Mail m WHERE m.pidm=:pidm AND m.term.code=:termCode AND m.systemIndicator='S' AND publishedGenerated='G'"),
+        @NamedQuery(name = "Mail.fetchByPidmTermCodeSystemIndAndLettrCode",
+                query = "FROM Mail m WHERE m.pidm=:pidm AND m.term.code=:termCode AND m.systemIndicator=:systemIndicator AND m.letterProcessLetter.code=:lettrCode")
 ])
 class Mail implements Serializable {
 
@@ -199,7 +199,7 @@ class Mail implements Serializable {
      */
     @ManyToOne
     @JoinColumns([
-    @JoinColumn(name = "GURMAIL_TERM_CODE", referencedColumnName = "STVTERM_CODE")
+            @JoinColumn(name = "GURMAIL_TERM_CODE", referencedColumnName = "STVTERM_CODE")
     ])
     Term term
 
@@ -208,7 +208,7 @@ class Mail implements Serializable {
      */
     @ManyToOne
     @JoinColumns([
-    @JoinColumn(name = "GURMAIL_LETR_CODE", referencedColumnName = "GTVLETR_CODE")
+            @JoinColumn(name = "GURMAIL_LETR_CODE", referencedColumnName = "GTVLETR_CODE")
     ])
     LetterProcessLetter letterProcessLetter
 
@@ -217,7 +217,7 @@ class Mail implements Serializable {
      */
     @ManyToOne
     @JoinColumns([
-    @JoinColumn(name = "GURMAIL_INIT_CODE", referencedColumnName = "STVINIT_CODE")
+            @JoinColumn(name = "GURMAIL_INIT_CODE", referencedColumnName = "STVINIT_CODE")
     ])
     Initials initials
 
@@ -354,14 +354,18 @@ class Mail implements Serializable {
         return result
     }
 
-    public static def fetchByPidmTermSystemIndAndLetterCode(Integer pidm, String termCode, String systemInd, String letterCode) {
-        def result
+    public static List<Mail> fetchByPidmTermCodeSystemIndAndLettrCode(Integer pidm, String termCode, String systemIndicator, String lettrCode) {
+        List result
         Mail.withSession { session ->
-            result = session.getNamedQuery('Mail.fetchByPidmTermSystemIndAndLetterCode')
-                            .setInteger('pidm', pidm).setString('termCode', termCode).setString('systemIndicator', systemInd)
-                            .setString('letterCode', letterCode).uniqueResult();
+            result = session.getNamedQuery('Mail.fetchByPidmTermCodeSystemIndAndLettrCode')
+                    .setInteger('pidm', pidm)
+                    .setString('termCode', termCode)
+                    .setString('systemIndicator', systemIndicator)
+                    .setString('lettrCode', lettrCode)
+                    .list();
         }
         return result
     }
+
 
 }
