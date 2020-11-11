@@ -5,6 +5,7 @@ package net.hedtech.banner.general.utility
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import net.hedtech.banner.general.person.PersonUtility
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -539,5 +540,26 @@ class MailIntegrationTests extends BaseIntegrationTestCase {
                 communicationPlan: i_failure_communicationPlan,
         )
         return mail
+    }
+
+    @Test
+    void testFetchByPidmAndTermCode() {
+        Integer pidm = PersonUtility.getPerson('A00050984').pidm
+        def result = Mail.fetchByPidmAndTermCode(pidm, '201901')
+        assertNotNull(result)
+    }
+
+    @Test
+    void testFetchByPidmTermSystemIndLtrModuleCodeAndPubGen() {
+        Integer pidm = PersonUtility.getPerson('A00050984').pidm
+        def result = Mail.fetchByPidmTermSystemIndLtrModuleCodeAndPubGen(pidm, '201901', 'S', 'GRDS_PRNT_TKT', 'H', 'G')
+        assertNotNull(result)
+    }
+
+    @Test
+    void testFetchByPidmTermCodeSystemIndAndLettrCode() {
+        Integer pidm = PersonUtility.getPerson('A00050984').pidm
+        def result = Mail.fetchByPidmTermCodeSystemIndAndLettrCode(pidm, '201901', 'S', 'GRDS_PRNT_TKT')
+        assertNotNull(result)
     }
 }
