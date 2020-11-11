@@ -1,3 +1,6 @@
+/*********************************************************************************
+ Copyright 2020 Ellucian Company L.P. and its affiliates.
+ **********************************************************************************/
 package net.hedtech.banner.general.utility
 
 import grails.gorm.transactions.Rollback
