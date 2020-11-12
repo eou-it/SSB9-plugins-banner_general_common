@@ -36,9 +36,4 @@ class MailService extends ServiceBase {
         mail
     }
 
-    def getPrintTicketDetails(Integer pidm, String systemInd, String termCode, String moduleCode, String letterCode, String pubGen) {
-        def mailDetails = Mail.fetchByPidmTermSystemIndLtrModuleCodeAndPubGen(pidm, termCode, systemInd, letterCode, moduleCode, pubGen)
-        mailDetails
-    }
-
 }

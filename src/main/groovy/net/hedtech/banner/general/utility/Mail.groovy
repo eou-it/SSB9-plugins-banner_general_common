@@ -56,9 +56,7 @@ import javax.persistence.TemporalType
         @NamedQuery(name = "Mail.fetchByPidmAndTermCode",
                 query = "FROM Mail m WHERE m.pidm=:pidm AND m.term.code=:termCode AND m.systemIndicator='S' AND publishedGenerated='G'"),
         @NamedQuery(name = "Mail.fetchByPidmTermCodeSystemIndAndLettrCode",
-                query = "FROM Mail m WHERE m.pidm=:pidm AND m.term.code=:termCode AND m.systemIndicator=:systemIndicator AND m.letterProcessLetter.code=:lettrCode"),
-        @NamedQuery(name = "Mail.fetchByPidmTermSystemIndLtrModuleCodeAndPubGen",
-                query = "FROM Mail m WHERE m.pidm=:pidm AND m.term.code=:termCode AND m.systemIndicator=:systemIndicator AND m.letterProcessLetter.code=:letterCode AND m.publishedGenerated=:pubGen AND m.module=:moduleCode")
+                query = "FROM Mail m WHERE m.pidm=:pidm AND m.term.code=:termCode AND m.systemIndicator=:systemIndicator AND m.letterProcessLetter.code=:lettrCode")
 ])
 class Mail implements Serializable {
 
@@ -365,16 +363,6 @@ class Mail implements Serializable {
                     .setString('systemIndicator', systemIndicator)
                     .setString('lettrCode', lettrCode)
                     .list();
-        }
-        return result
-    }
-
-    public static def fetchByPidmTermSystemIndLtrModuleCodeAndPubGen(Integer pidm, String termCode, String systemInd, String letterCode, String moduleCode, String pubGen) {
-        def result
-        Mail.withSession { session ->
-            result = session.getNamedQuery('Mail.fetchByPidmTermSystemIndLtrModuleCodeAndPubGen')
-                    .setInteger('pidm', pidm).setString('termCode', termCode).setString('systemIndicator', systemInd)
-                    .setString('letterCode', letterCode).setString('moduleCode', moduleCode).setString('pubGen', pubGen).uniqueResult();
         }
         return result
     }

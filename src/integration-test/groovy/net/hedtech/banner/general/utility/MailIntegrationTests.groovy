@@ -550,13 +550,6 @@ class MailIntegrationTests extends BaseIntegrationTestCase {
     }
 
     @Test
-    void testFetchByPidmTermSystemIndLtrModuleCodeAndPubGen() {
-        Integer pidm = PersonUtility.getPerson('A00050984').pidm
-        def result = Mail.fetchByPidmTermSystemIndLtrModuleCodeAndPubGen(pidm, '201901', 'S', 'GRDS_PRNT_TKT', 'H', 'G')
-        assertNotNull(result)
-    }
-
-    @Test
     void testFetchByPidmTermCodeSystemIndAndLettrCode() {
         Integer pidm = PersonUtility.getPerson('A00050984').pidm
         def result = Mail.fetchByPidmTermCodeSystemIndAndLettrCode(pidm, '201901', 'S', 'GRDS_PRNT_TKT')

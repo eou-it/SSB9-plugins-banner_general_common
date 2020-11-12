@@ -40,11 +40,4 @@ class MailServiceIntegrationTests extends BaseIntegrationTestCase {
         def result = mailService.getMaiDetailsByPidmTermSystemIndAndLettrCode(pidm, '201901', 'S', 'GRDS_PRNT_TKT')
         assertNotNull(result)
     }
-
-    @Test
-    public void testGetPrintTicketDetails() {
-        Integer pidm = PersonUtility.getPerson('A00050984').pidm
-        def result = mailService.getPrintTicketDetails(pidm, 'S', '201901', 'H', 'GRDS_PRNT_TKT', 'G')
-        assertNotNull(result)
-    }
 }
