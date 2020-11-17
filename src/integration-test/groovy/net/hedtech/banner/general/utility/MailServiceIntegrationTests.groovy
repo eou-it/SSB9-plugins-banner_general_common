@@ -35,9 +35,9 @@ class MailServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
     @Test
-    public void testGetMaiDetailsByPidmTermSystemIndAndLettrCode() {
+    public void testGetMailDetailsByPidmTermSystemIndAndLettrCode() {
         Integer pidm = PersonUtility.getPerson('A00050984').pidm
-        def result = mailService.getMaiDetailsByPidmTermSystemIndAndLettrCode(pidm, '201901', 'S', 'GRDS_PRNT_TKT')
+        def result = mailService.getMailDetailsByPidmTermSystemIndAndLettrCode(pidm, '201901', 'S', 'GRDS_PRNT_TKT')
         assertNotNull(result)
     }
 }

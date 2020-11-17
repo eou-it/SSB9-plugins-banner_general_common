@@ -31,7 +31,7 @@ class MailService extends ServiceBase {
         mailDetails
     }
 
-    List<Mail> getMaiDetailsByPidmTermSystemIndAndLettrCode(Integer pidm, String termCode, String systemIndicator, String letterCode) {
+    List<Mail> getMailDetailsByPidmTermSystemIndAndLettrCode(Integer pidm, String termCode, String systemIndicator, String letterCode) {
         List<Mail> mail = Mail.fetchByPidmTermCodeSystemIndAndLettrCode(pidm, termCode, systemIndicator, letterCode)
         mail
     }
