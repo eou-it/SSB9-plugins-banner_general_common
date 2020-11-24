@@ -1,9 +1,6 @@
 /*********************************************************************************
- Copyright 2010-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2020 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/** *****************************************************************************
- Copyright 2009-2015 Ellucian Company L.P. and its affiliates.
- ****************************************************************************** */
 
 package net.hedtech.banner.general
 
@@ -12,6 +9,7 @@ import grails.web.context.ServletContextHolder
 import grails.web.context.ServletContextHolder as SCH
 import groovy.sql.Sql
 import net.hedtech.banner.general.system.SdaCrosswalkConversion
+import net.hedtech.banner.security.BannerGrantedAuthorityService
 import net.hedtech.banner.service.ServiceBase
 
 import java.sql.CallableStatement
@@ -25,6 +23,7 @@ class GeneralCommonUtility {
     public static int INVALID_PIN = 1
     public static int DISABLED_PIN = 2
     public static int EXPIRED_PIN = 3
+    public static final String SELFSERVICE_USER_ROLE_PREFIX = 'SELFSERVICE-'
 
     /**
      * Store the gtvsdax values used by an App in a list that gets passed and stored in the app session
@@ -180,6 +179,13 @@ class GeneralCommonUtility {
         } finally {
             sql.close()
         }
+    }
+
+
+    public static Boolean checkUserRole(role) {
+        def userAuthorities = BannerGrantedAuthorityService.getAuthorities()?.objectName
+        String roleString = SELFSERVICE_USER_ROLE_PREFIX + role
+        return userAuthorities?.contains(roleString)
     }
 
 }
