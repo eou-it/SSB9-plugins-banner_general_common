@@ -1,12 +1,16 @@
 /*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2020 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.utility
+
+import org.hibernate.Criteria
 
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
+import javax.persistence.NamedQueries
+import javax.persistence.NamedQuery
 import javax.persistence.Table
 import javax.persistence.Version
 
@@ -48,6 +52,12 @@ import javax.persistence.TemporalType
  */
 @Entity
 @Table(name = "GURMAIL")
+@NamedQueries(value = [
+        @NamedQuery(name = "Mail.fetchByPidmAndTermCode",
+                query = "FROM Mail m WHERE m.pidm=:pidm AND m.term.code=:termCode AND m.systemIndicator='S' AND publishedGenerated='G'"),
+        @NamedQuery(name = "Mail.fetchByPidmTermCodeSystemIndAndLettrCode",
+                query = "FROM Mail m WHERE m.pidm=:pidm AND m.term.code=:termCode AND m.systemIndicator=:systemIndicator AND m.letterProcessLetter.code=:lettrCode")
+])
 class Mail implements Serializable {
 
     /**
@@ -189,7 +199,7 @@ class Mail implements Serializable {
      */
     @ManyToOne
     @JoinColumns([
-    @JoinColumn(name = "GURMAIL_TERM_CODE", referencedColumnName = "STVTERM_CODE")
+            @JoinColumn(name = "GURMAIL_TERM_CODE", referencedColumnName = "STVTERM_CODE")
     ])
     Term term
 
@@ -198,7 +208,7 @@ class Mail implements Serializable {
      */
     @ManyToOne
     @JoinColumns([
-    @JoinColumn(name = "GURMAIL_LETR_CODE", referencedColumnName = "GTVLETR_CODE")
+            @JoinColumn(name = "GURMAIL_LETR_CODE", referencedColumnName = "GTVLETR_CODE")
     ])
     LetterProcessLetter letterProcessLetter
 
@@ -207,7 +217,7 @@ class Mail implements Serializable {
      */
     @ManyToOne
     @JoinColumns([
-    @JoinColumn(name = "GURMAIL_INIT_CODE", referencedColumnName = "STVINIT_CODE")
+            @JoinColumn(name = "GURMAIL_INIT_CODE", referencedColumnName = "STVINIT_CODE")
     ])
     Initials initials
 
@@ -334,5 +344,28 @@ class Mail implements Serializable {
         initials(nullable: true)
         communicationPlan(nullable: true)
     }
+
+    public static List fetchByPidmAndTermCode(Integer pidm, String termCode) {
+        List result
+        Mail.withSession { session ->
+            result = session.getNamedQuery('Mail.fetchByPidmAndTermCode')
+                    .setInteger('pidm', pidm).setString('termCode', termCode).list();
+        }
+        return result
+    }
+
+    public static List<Mail> fetchByPidmTermCodeSystemIndAndLettrCode(Integer pidm, String termCode, String systemIndicator, String lettrCode) {
+        List result
+        Mail.withSession { session ->
+            result = session.getNamedQuery('Mail.fetchByPidmTermCodeSystemIndAndLettrCode')
+                    .setInteger('pidm', pidm)
+                    .setString('termCode', termCode)
+                    .setString('systemIndicator', systemIndicator)
+                    .setString('lettrCode', lettrCode)
+                    .list();
+        }
+        return result
+    }
+
 
 }
