@@ -55,6 +55,7 @@ class GeneralSqlJsonServiceIntegrationTests extends BaseIntegrationTestCase {
         inputParamsList.push(getParameterMap('OB_AP_FORM', 'string', 'p_par_objt_code'))
         inputParamsList.push(getParameterMap('LG-STUD-AID', 'string', 'p_par_objt_inst_id'))
         inputParamsList.push(getParameterMap(1001, 'number', 'p_disp_seq_no'))
+        inputParamsList.push(getParameterMap('LG-STUDENT-AID-APPLY', 'string', 'p_apfr_code'))
         def json_data = generalSqlJsonService.executeProcedure('baninst1_ss9.bwvkkapf.P_PreviewModulePage', inputParamsList, false)
         assertNotNull(json_data)
     }
