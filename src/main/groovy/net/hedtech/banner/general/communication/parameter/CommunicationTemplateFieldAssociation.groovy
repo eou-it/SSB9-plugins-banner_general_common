@@ -100,14 +100,6 @@ class CommunicationTemplateFieldAssociation implements Serializable {
         dataOrigin(nullable: true, maxSize: 30)
     }
 
-    public static List findAllByField( CommunicationField field ) {
-        def list
-        CommunicationTemplateFieldAssociation.withSession { session ->
-            list = session.getNamedQuery( 'CommunicationTemplateFieldAssociation.findAllByField' ).setParameter( 'field', field ).list()
-        }
-        return list
-    }
-
     public static List findAllByTemplate( CommunicationTemplate template ) {
         def list
         CommunicationTemplateFieldAssociation.withSession { session ->

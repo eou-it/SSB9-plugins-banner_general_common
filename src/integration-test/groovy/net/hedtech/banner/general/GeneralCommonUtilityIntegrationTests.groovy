@@ -114,7 +114,7 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testCheckUserRoleTrue(){
-        loginSSB('HOSS001', '111111')
+        loginSSB('ANSY-0003', '111111')
         def hasRole = GeneralCommonUtility.checkUserRole('STUDENT')
         assertTrue hasRole
         logout()
@@ -122,7 +122,7 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testCheckUserRoleFalse(){
-        loginSSB('JABS-0001', '111111')
+        loginSSB('ANSY-0001', '111111')
         def hasRole = GeneralCommonUtility.checkUserRole('STUDENT')
         assertFalse hasRole
         logout()

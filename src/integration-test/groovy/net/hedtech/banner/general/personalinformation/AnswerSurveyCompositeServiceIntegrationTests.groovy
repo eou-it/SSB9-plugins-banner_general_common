@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2020 Ellucian Company L.P. and its affiliates.
+ Copyright 2021 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.personalinformation
 
@@ -30,7 +30,7 @@ class AnswerSurveyCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testFetchSurveysSuccess() {
-        loginSSB('HOSS001', '111111')
+        loginSSB('ANSY-0003', '111111')
         def result = answerSurveyCompositeService.fetchSurveys()
         assertNotNull result
         assertTrue result?.success
@@ -43,7 +43,7 @@ class AnswerSurveyCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testFetchSurveysWithAnyRole() {
-        loginSSB('JABS-0011', '111111')
+        loginSSB('ANSY-0002', '111111')
         def result = answerSurveyCompositeService.fetchSurveys()
         assertNotNull result
         assertTrue result?.success
@@ -55,7 +55,7 @@ class AnswerSurveyCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testFetchSurveysNoSurveys() {
-        loginSSB('JABS-0001', '111111')
+        loginSSB('ANSY-0001', '111111')
         def result = answerSurveyCompositeService.fetchSurveys()
         assertNotNull result
         assertFalse result?.success
@@ -64,7 +64,7 @@ class AnswerSurveyCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testFetchQuestionAnswers() {
-        loginSSB('HOSS001', '111111')
+        loginSSB('ANSY-0003', '111111')
         def surveyParams = [
                 surveyName: 'REUNION',
                 nextDisp  : '1'
@@ -89,7 +89,7 @@ class AnswerSurveyCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testFetchQuestionAnswersWithComments() {
-        loginSSB('HOSS001', '111111')
+        loginSSB('ANSY-0003', '111111')
         def surveyParams = [
                 surveyName: 'AGE',
                 nextDisp  : '1'
@@ -115,7 +115,7 @@ class AnswerSurveyCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testFetchQuestionAnswersWithSavedResponse() {
-        loginSSB('HOSS001', '111111')
+        loginSSB('ANSY-0003', '111111')
         def surveyParams = [
                 surveyName: 'REUNION',
                 nextDisp  : '3'
@@ -143,7 +143,7 @@ class AnswerSurveyCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testSaveResponsePreviousAction() {
-        loginSSB('HOSS001', '111111')
+        loginSSB('ANSY-0003', '111111')
 
         def surveyParams = """{
                     "surveyName":"REUNION",
@@ -194,7 +194,7 @@ class AnswerSurveyCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testSaveResponseNextAction() {
-        loginSSB('HOSS001', '111111')
+        loginSSB('ANSY-0003', '111111')
 
         def surveyParams = """{
                     "surveyName":"REUNION",
@@ -236,7 +236,7 @@ class AnswerSurveyCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testSaveResponseReturnToBeginningAction() {
-        loginSSB('HOSS001', '111111')
+        loginSSB('ANSY-0003', '111111')
 
         def surveyParams = """{
                     "surveyName":"REUNION",
@@ -281,7 +281,7 @@ class AnswerSurveyCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testSaveResponseFinishLaterAction() {
-        loginSSB('HOSS001', '111111')
+        loginSSB('ANSY-0003', '111111')
 
         def surveyParams = """{
                     "surveyName":"REUNION",
@@ -315,7 +315,7 @@ class AnswerSurveyCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testSaveResponseSurveyCompleteAction() {
-        loginSSB('HOSS001', '111111')
+        loginSSB('ANSY-0003', '111111')
 
         def surveyParams = """{
                     "surveyName":"REUNION",
@@ -337,7 +337,7 @@ class AnswerSurveyCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testSaveResponseRemoveSurveyAction() {
-        loginSSB('HOSS001', '111111')
+        loginSSB('ANSY-0003', '111111')
 
         def surveyParams = """{
                     "surveyName":"REUNION",
